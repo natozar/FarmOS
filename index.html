@@ -54,8 +54,9 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 *{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-html{font-size:16px;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--dark);color:var(--text);overflow:hidden;height:100vh;height:100dvh;height:-webkit-fill-available;overscroll-behavior:none}
+html{font-size:16px;-webkit-text-size-adjust:100%;scroll-behavior:smooth;overflow-x:hidden;max-width:100vw}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--dark);color:var(--text);overflow:hidden;overflow-x:hidden;height:100vh;height:100dvh;height:-webkit-fill-available;overscroll-behavior:none;max-width:100vw}
+p,span,td,th,.fazenda-nome,.fazenda-local{word-wrap:break-word;overflow-wrap:break-word}
 h1,h2,h3,h4{font-family:'Playfair Display',Georgia,serif;font-weight:600;letter-spacing:-.01em}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -82,8 +83,8 @@ button{cursor:pointer}
 .btn-gestor:hover{background:rgba(201,168,76,.2)}
 
 /* MAIN */
-.main{margin-left:var(--sidebar-w);height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden;position:relative;-webkit-overflow-scrolling:touch}
-.tela{display:none;padding:24px 28px 100px;opacity:0;transform:translateY(12px);animation:none;max-width:1440px}
+.main{margin-left:var(--sidebar-w);height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden;position:relative;-webkit-overflow-scrolling:touch;max-width:100vw}
+.tela{display:none;padding:24px 28px 100px;opacity:0;transform:translateY(12px);animation:none;max-width:1440px;overflow-x:hidden}
 .tela.ativa{display:block;animation:fadeSlideIn .45s ease forwards}
 @keyframes fadeSlideIn{to{opacity:1;transform:translateY(0)}}
 
@@ -199,12 +200,32 @@ button{cursor:pointer}
 .btn-detalhe:hover{background:rgba(45,155,111,.25)}
 
 /* TABLE */
-.tabela-wrap{overflow-x:auto}
+.tabela-wrap{overflow-x:auto;max-width:100%}
 table{width:100%;border-collapse:collapse}
 thead th{text-align:left;padding:12px 16px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border);font-family:'DM Sans',sans-serif}
 tbody td{padding:12px 16px;font-size:.85rem;border-bottom:1px solid rgba(42,63,82,.3)}
 tbody tr{transition:background var(--transition)}
 tbody tr:hover{background:rgba(45,155,111,.05)}
+@media(max-width:767px){
+  .tabela-wrap table thead{display:none}
+  .tabela-wrap table tbody tr{display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;padding:14px 16px}
+  .tabela-wrap table tbody tr:hover{background:var(--surface)}
+  .tabela-wrap table tbody td{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(42,63,82,.15);font-size:.85rem}
+  .tabela-wrap table tbody td:last-child{border-bottom:none}
+  .tabela-wrap table tbody td::before{content:attr(data-label);font-weight:600;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+  .tabela-wrap table tbody td strong{font-size:.9rem}
+  .tabela-wrap table tbody tr:last-child{border-color:var(--green)}
+}
+
+/* MODE TOGGLE */
+.btn-modo-toggle{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;border:1.5px solid var(--green);color:var(--green);font-size:.78rem;font-weight:600;white-space:nowrap;transition:all .2s ease}
+.btn-modo-toggle:hover{background:var(--green);color:#fff}
+.btn-modo-toggle.gestor-ativo{border-color:var(--amber);color:var(--amber)}
+.btn-modo-toggle.gestor-ativo:hover{background:var(--amber);color:var(--dark)}
+.modo-badge{font-size:.7rem;padding:3px 10px;border-radius:12px;font-weight:600;display:none}
+.modo-badge.prop{background:rgba(45,155,111,.12);color:var(--green);border:1px solid rgba(45,155,111,.25)}
+.modo-badge.gest{background:rgba(232,160,32,.12);color:var(--amber);border:1px solid rgba(232,160,32,.25)}
+@media(min-width:769px){.modo-badge{display:inline-flex}}
 
 /* NDVI */
 .ndvi-bar{height:8px;border-radius:4px;background:var(--border);overflow:hidden;width:100%;max-width:120px;display:inline-block;vertical-align:middle;margin:0 8px}
@@ -410,7 +431,7 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
 @media(max-width:768px){
   .bottom-nav{display:block}.hamburger{display:none}.sidebar{display:none}
   .fab{display:flex}
-  .tela{padding:16px 16px calc(100px + var(--sab))}.grid-2{grid-template-columns:1fr}
+  .tela{padding:16px 12px calc(100px + var(--sab))}.grid-2{grid-template-columns:1fr}
   .kpi-row{grid-template-columns:1fr 1fr}.kpi-valor{font-size:1.4rem}
   .mapa-container{height:55vh;min-height:280px}
   .modal{padding:20px;margin:10px}.modal-grid{grid-template-columns:1fr}
@@ -419,14 +440,23 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
   .conexao-status{display:none}
   .pasto-grid{grid-template-columns:1fr}
   .top-bar h2{font-size:var(--text-xl)}
+  .top-bar{gap:8px}
   .card{padding:16px}
   .feed{max-height:260px}
   .counter-btn{width:56px;height:56px;font-size:1.6rem}
   .counter-valor{font-size:1.6rem;width:110px}
   .btn-enviar{padding:18px;position:sticky;bottom:calc(16px + var(--sab));z-index:10}
   .gestor-container{padding-bottom:calc(80px + var(--sab))}
+  .grid-3{grid-template-columns:1fr}
+  .relatorio-card{flex-direction:column;align-items:flex-start;gap:12px}
+  .btn-download{margin-left:0;width:100%}
 }
-@media(max-width:480px){.kpi-row{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}}
+@media(max-width:480px){
+  .kpi-row{grid-template-columns:1fr}
+  .top-bar-right{gap:8px}
+  .btn-modo-toggle{padding:6px 10px;font-size:.72rem}
+  .btn-demo{padding:10px 16px;font-size:.78rem}
+}
 </style>
 </head>
 <body>
@@ -462,6 +492,8 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
     <div class="top-bar">
       <h2>Mapa Geral</h2>
       <div class="top-bar-right">
+        <span class="modo-badge prop" id="modoBadge">👔 Proprietário</span>
+        <button class="btn-modo-toggle" id="btnModoToggle" onclick="alternarModo()"><span id="btnModoTexto">👷 Modo Gestor</span></button>
         <div class="conexao-status"><span class="conexao-dot"></span> Tempo real <span class="conexao-ping" id="pingDisplay">· 0ms</span></div>
         <div style="position:relative"><button class="notif-btn" id="notifBtn">🔔<span class="notif-badge" id="notifBadge">0</span></button><div class="notif-dropdown" id="notifDropdown"><div class="notif-header" id="notifHeader">Notificações</div><div id="notifLista"></div></div></div>
         <div class="atualizado"><span class="dot-live"></span> <span id="tempoAtualizado">Ao vivo</span></div>
@@ -541,7 +573,7 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
   <a class="bottom-nav-item" data-tela="propriedades" href="#propriedades"><span class="bnav-icon">🌾</span>Fazendas</a>
   <a class="bottom-nav-item" data-tela="rebanho" href="#rebanho"><span class="bnav-icon">🐄</span>Rebanho</a>
   <a class="bottom-nav-item" data-tela="central" href="#central"><span class="bnav-icon">📡</span>Ao Vivo</a>
-  <a class="bottom-nav-item" data-tela="relatorios" href="#relatorios"><span class="bnav-icon">📋</span>Mais</a>
+  <a class="bottom-nav-item" href="#" id="bnav-gestor" onclick="event.preventDefault();alternarModo()" style="color:var(--amber)"><span class="bnav-icon">👷</span>Gestor</a>
 </div></nav>
 
 <!-- MODAL -->
@@ -640,7 +672,7 @@ function fecharModal(){document.getElementById('modalOverlay').classList.remove(
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)fecharModal()});
 
 /* ========== REBANHO ========== */
-function renderizarTabelaRebanho(){var fg=fazendas.filter(function(f){return f.rebanho.total>0});var t=calcularTotais();document.getElementById('tabelaRebanho').innerHTML='<table><thead><tr><th>Fazenda</th><th>Cria</th><th>Recria</th><th>Confin.</th><th>Total</th><th>@</th></tr></thead><tbody>'+fg.map(function(f){return'<tr><td><strong>'+f.nome.replace('Fazenda ','')+'</strong><br><span style="font-size:.7rem;color:var(--muted)">'+f.municipio+'</span></td><td>'+formatarNumero(f.rebanho.cria)+'</td><td>'+formatarNumero(f.rebanho.recria)+'</td><td>'+formatarNumero(f.rebanho.confinamento)+'</td><td style="font-weight:700">'+formatarNumero(f.rebanho.total)+'</td><td style="color:var(--gold)">'+f.arroba.toFixed(1)+'@</td></tr>'}).join('')+'<tr style="border-top:2px solid var(--border);font-weight:700"><td>TOTAL</td><td>'+formatarNumero(t.cria)+'</td><td>'+formatarNumero(t.recria)+'</td><td>'+formatarNumero(t.confinamento)+'</td><td style="color:var(--green)">'+formatarNumero(t.rebanhoTotal)+'</td><td>—</td></tr></tbody></table>'}
+function renderizarTabelaRebanho(){var fg=fazendas.filter(function(f){return f.rebanho.total>0});var t=calcularTotais();document.getElementById('tabelaRebanho').innerHTML='<table><thead><tr><th>Fazenda</th><th>Cria</th><th>Recria</th><th>Confin.</th><th>Total</th><th>@</th></tr></thead><tbody>'+fg.map(function(f){return'<tr><td data-label="Fazenda"><strong>'+f.nome.replace('Fazenda ','')+'</strong><br><span style="font-size:.7rem;color:var(--muted)">'+f.municipio+'</span></td><td data-label="Cria">'+formatarNumero(f.rebanho.cria)+'</td><td data-label="Recria">'+formatarNumero(f.rebanho.recria)+'</td><td data-label="Confinamento">'+formatarNumero(f.rebanho.confinamento)+'</td><td data-label="Total" style="font-weight:700">'+formatarNumero(f.rebanho.total)+'</td><td data-label="Arroba" style="color:var(--gold)">'+f.arroba.toFixed(1)+'@</td></tr>'}).join('')+'<tr style="border-top:2px solid var(--border);font-weight:700"><td data-label="Fazenda">TOTAL</td><td data-label="Cria">'+formatarNumero(t.cria)+'</td><td data-label="Recria">'+formatarNumero(t.recria)+'</td><td data-label="Confinamento">'+formatarNumero(t.confinamento)+'</td><td data-label="Total" style="color:var(--green)">'+formatarNumero(t.rebanhoTotal)+'</td><td data-label="Arroba">—</td></tr></tbody></table>'}
 
 /* ========== CULTURAS ========== */
 function renderizarCulturas(){var t=calcularTotais();var fA=fazendas.filter(function(f){return f.culturas.includes('angus')});var fCo=fazendas.filter(function(f){return f.culturas.includes('coco')});var fCi=fazendas.filter(function(f){return f.culturas.includes('citrus')});var fCe=fazendas.filter(function(f){return f.culturas.includes('soja')||f.culturas.includes('milho')});document.getElementById('listaCulturas').innerHTML='<div class="cultura-card"><h3>🐄 Pecuária Angus</h3><div class="cultura-stat"><span>Rebanho total</span><span class="val">'+formatarNumero(t.rebanhoTotal)+' cabeças</span></div><div class="cultura-stat"><span>Propriedades</span><span class="val">'+fA.length+'</span></div><div class="cultura-stat"><span>Aprovação certificação</span><span class="val">98.3%</span></div><div class="cultura-stat"><span>Previsão abate/ano</span><span class="val">50.000 animais</span></div></div><div class="cultura-card"><h3>🥥 Coco</h3><div class="cultura-stat"><span>Área em produção</span><span class="val">3.200 ha</span></div><div class="cultura-stat"><span>Propriedades</span><span class="val">'+fCo.map(function(f){return f.nome.replace('Fazenda ','')}).join(', ')+'</span></div><div class="cultura-stat"><span>Status irrigação</span><span class="val" style="color:var(--green)">✅ Normal</span></div><div class="cultura-stat"><span>NDVI médio</span><span class="val">'+(fCo.reduce(function(s,f){return s+f.ndvi},0)/fCo.length).toFixed(2)+'</span></div></div><div class="cultura-card"><h3>🍊 Citrus</h3><div class="cultura-stat"><span>Área total</span><span class="val">4.100 ha</span></div><div class="cultura-stat"><span>Propriedades</span><span class="val">'+fCi.map(function(f){return f.nome.replace('Fazenda ','')}).join(', ')+'</span></div><div class="cultura-stat"><span>Previsão colheita</span><span class="val" style="color:var(--amber)">⚠️ 18 dias</span></div><div class="cultura-stat"><span>Status</span><span class="val" style="color:var(--amber)">Monitorar clima</span></div></div><div class="cultura-card"><h3>🌾 Cereais (Soja/Milho)</h3><div class="cultura-stat"><span>Área total</span><span class="val">2.800 ha</span></div><div class="cultura-stat"><span>Propriedades</span><span class="val">'+fCe.map(function(f){return f.nome.replace('Fazenda ','')}).join(', ')+'</span></div><div class="cultura-stat"><span>Integração</span><span class="val">Rotação com pastagem</span></div><div class="cultura-stat"><span>Safra 2025/26</span><span class="val" style="color:var(--green)">Em desenvolvimento</span></div></div>'}
@@ -675,7 +707,7 @@ function dispararEventosAuto(){eventosAuto.forEach(function(ev){setTimeout(funct
 
 /* ========== GESTOR — WIZARD 5 PASSOS ========== */
 function ativarModoGestor(){AppState.gestorPasso=1;var f=fazendas[0];AppState.gestorDados={cria:f.rebanho.cria,recria:f.rebanho.recria,confinamento:f.rebanho.confinamento,pasto:'Pasto Norte',temOcorrencia:false,tipoOcorrencia:[],descOcorrencia:'',fotoTirada:false};renderizarGestor();document.getElementById('gestorOverlay').classList.add('aberto')}
-function fecharGestor(){document.getElementById('gestorOverlay').classList.remove('aberto')}
+function fecharGestor(){document.getElementById('gestorOverlay').classList.remove('aberto');var btn=document.getElementById('btnModoToggle');if(btn){btn.classList.remove('gestor-ativo');document.getElementById('btnModoTexto').textContent='👷 Modo Gestor';var badge=document.getElementById('modoBadge');badge.textContent='👔 Proprietário';badge.className='modo-badge prop';var bnav=document.getElementById('bnav-gestor');if(bnav)bnav.style.color='var(--amber)'}}
 function renderizarGestor(){var f=fazendas[0];var p=AppState.gestorPasso;var d=AppState.gestorDados;var total=d.cria+d.recria+d.confinamento;var passoLabels=['Rebanho','Pasto','Foto','Ocorrência','Enviar'];var progressHTML='<div class="progress-bar">';for(var i=1;i<=5;i++){var cls=i<p?'feito':i===p?'ativo':'';progressHTML+='<div class="progress-step '+cls+'">'+(i<p?'✓':i)+'</div>';if(i<5)progressHTML+='<div class="progress-line'+(i<p?' feito':'')+'"></div>'}progressHTML+='<div class="progress-texto">Passo '+p+' de 5 — '+passoLabels[p-1]+'</div></div>';
 var headerHTML='<div class="gestor-top"><h2>👷 FarmOS Gestor</h2><button class="btn-voltar" style="width:auto;padding:8px 16px;margin:0" onclick="fecharGestor()">← Voltar</button></div><div class="gestor-info"><div class="gestor-info-nome">'+f.gestor+'</div><div class="gestor-info-detalhe">📍 '+f.nome+' — '+f.municipio+'/'+f.estado+'<br>⏰ Hoje: '+obterDataCurta()+' | Último check-in: '+(f.checkin||'—')+'</div></div>';
 var stepHTML='';
@@ -704,6 +736,9 @@ function fecharSidebar(){document.getElementById('sidebar').classList.remove('ab
 function simularDadosTempoReal(){fazendas.forEach(function(f){if(f.rebanho.total>0){var v=Math.floor((Math.random()-.5)*10);f.rebanho.cria=Math.max(0,f.rebanho.cria+Math.floor(v/3));f.rebanho.recria=Math.max(0,f.rebanho.recria+Math.floor(v/3));f.rebanho.confinamento=Math.max(0,f.rebanho.confinamento+(v-2*Math.floor(v/3)));f.rebanho.total=f.rebanho.cria+f.rebanho.recria+f.rebanho.confinamento}f.ndvi=+(f.ndvi+(Math.random()-.5)*.01).toFixed(2);f.ndvi=Math.max(.4,Math.min(.95,f.ndvi))});AppState.ultimaAtualizacao=new Date();if(AppState.telaAtual==='dashboard')renderizarKPIsDash();if(AppState.telaAtual==='mapa')renderizarKPIsMapa();if(AppState.telaAtual==='rebanho'){renderizarKPIsRebanho();renderizarTabelaRebanho()}}
 function atualizarTempo(){var seg=Math.floor((new Date()-AppState.ultimaAtualizacao)/1000);var t=seg<5?'Ao vivo':'Atualizado há '+seg+'s';document.querySelectorAll('#tempoAtualizado,#tempoAtualizado2').forEach(function(el){el.textContent=t})}
 function atualizarPing(){var ping=Math.floor(Math.random()*200)+180;document.querySelectorAll('#pingDisplay,#pingDisplay2').forEach(function(el){el.textContent=ping+'ms'})}
+
+/* ========== MODO TOGGLE ========== */
+function alternarModo(){if(document.getElementById('gestorOverlay').classList.contains('aberto')){fecharGestor();var btn=document.getElementById('btnModoToggle');var badge=document.getElementById('modoBadge');btn.classList.remove('gestor-ativo');document.getElementById('btnModoTexto').textContent='👷 Modo Gestor';badge.textContent='👔 Proprietário';badge.className='modo-badge prop';var bnav=document.getElementById('bnav-gestor');if(bnav)bnav.style.color='var(--amber)';mostrarToast('👔 Painel do Proprietário','sucesso');navegarPara('dashboard')}else{var btn=document.getElementById('btnModoToggle');var badge=document.getElementById('modoBadge');btn.classList.add('gestor-ativo');document.getElementById('btnModoTexto').textContent='👔 Voltar ao Painel';badge.textContent='👷 Gestor de Campo';badge.className='modo-badge gest';var bnav=document.getElementById('bnav-gestor');if(bnav)bnav.style.color='var(--green)';ativarModoGestor();mostrarToast('👷 Modo Gestor ativado','alerta')}}
 
 /* ========== HAPTIC ========== */
 function vibrar(pattern){try{if(navigator.vibrate)navigator.vibrate(pattern)}catch(e){}}
