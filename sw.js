@@ -1,4 +1,4 @@
-const CACHE_NAME = 'farmos-v2';
+const CACHE_NAME = 'farmos-v3';
 const ASSETS = [
   './',
   './index.html',
