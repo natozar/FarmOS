@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0D1B2A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FarmOS">
+<meta name="description" content="FarmOS — Inteligência Operacional Rural">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D1B2A'/%3E%3Ctext x='16' y='24' font-size='20' font-weight='bold' font-family='serif' fill='%232D9B6F' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E">
+<title>FarmOS — Inteligência Operacional Rural</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root {
+  --dark: #0D1B2A;
+  --surface: #1A2B3C;
+  --border: #2A3F52;
+  --green: #2D9B6F;
+  --amber: #E8A020;
+  --red: #E84040;
+  --gold: #C9A84C;
+  --text: #E8EDF2;
+  --muted: #7A8FA0;
+  --white: #FFFFFF;
+  --sidebar-w: 260px;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,.35);
+  --glass: rgba(26,43,60,.65);
+  --transition: .3s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--dark);color:var(--text);overflow:hidden;height:100vh;height:100dvh}
+h1,h2,h3,h4{font-family:'Playfair Display',Georgia,serif;font-weight:600;letter-spacing:-.01em}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+input,select,textarea,button{font-family:inherit;font-size:inherit;color:inherit;border:none;outline:none;background:none}
+button{cursor:pointer}
+
+/* ===== SIDEBAR ===== */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform var(--transition)}
+.sidebar-logo{padding:28px 24px 24px;border-bottom:1px solid var(--border)}
+.sidebar-logo h1{font-size:1.5rem;color:var(--text);display:flex;align-items:center;gap:10px}
+.sidebar-logo h1 span{color:var(--green)}
+.sidebar-logo p{font-size:.7rem;color:var(--muted);margin-top:4px;letter-spacing:.08em;text-transform:uppercase;font-family:'DM Sans',sans-serif}
+.sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--radius-sm);color:var(--muted);font-size:.9rem;font-weight:500;transition:all var(--transition);text-decoration:none}
+.nav-item:hover{background:rgba(45,155,111,.08);color:var(--text)}
+.nav-item.ativo{background:rgba(45,155,111,.15);color:var(--green);font-weight:600}
+.nav-item .nav-icon{font-size:1.15rem;width:24px;text-align:center}
+.nav-spacer{flex:1}
+.sidebar-footer{padding:16px 12px;border-top:1px solid var(--border)}
+.btn-gestor{width:100%;padding:10px;border-radius:var(--radius-sm);background:rgba(201,168,76,.1);color:var(--gold);font-size:.8rem;font-weight:600;transition:all var(--transition);display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-gestor:hover{background:rgba(201,168,76,.2)}
+
+/* ===== MAIN CONTENT ===== */
+.main{margin-left:var(--sidebar-w);height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden;position:relative}
+.tela{display:none;padding:24px 28px 100px;opacity:0;transform:translateY(12px);animation:none}
+.tela.ativa{display:block;animation:fadeSlideIn .45s ease forwards}
+@keyframes fadeSlideIn{to{opacity:1;transform:translateY(0)}}
+
+/* ===== TOP BAR ===== */
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.top-bar h2{font-size:1.6rem}
+.top-bar .atualizado{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.top-bar .atualizado .dot-live{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulsar 2s infinite}
+
+/* ===== KPI CARDS ===== */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:transform var(--transition),box-shadow var(--transition)}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+.kpi-card.verde::before{background:var(--green)}
+.kpi-card.ouro::before{background:var(--gold)}
+.kpi-card.ambar::before{background:var(--amber)}
+.kpi-card.vermelho::before{background:var(--red)}
+.kpi-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:600}
+.kpi-valor{font-size:1.9rem;font-weight:700;font-family:'Playfair Display',serif}
+.kpi-sub{font-size:.78rem;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:4px}
+
+/* ===== CARDS GENÉRICOS ===== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:transform var(--transition),box-shadow var(--transition)}
+.card:hover{box-shadow:var(--shadow)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:1.1rem;font-weight:600}
+
+/* ===== GRID LAYOUTS ===== */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+
+/* ===== STATUS BADGE ===== */
+.status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+.status-dot.ok{background:var(--green);box-shadow:0 0 8px rgba(45,155,111,.5);animation:pulsar 2s infinite}
+.status-dot.alerta{background:var(--amber);box-shadow:0 0 8px rgba(232,160,32,.5);animation:pulsar 1.5s infinite}
+.status-dot.critico{background:var(--red);box-shadow:0 0 8px rgba(232,64,64,.5);animation:pulsar 1s infinite}
+@keyframes pulsar{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.2)}}
+
+/* ===== CULTURE TAGS ===== */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(45,155,111,.12);color:var(--green)}
+.tag.citrus{background:rgba(232,160,32,.12);color:var(--amber)}
+.tag.coco{background:rgba(201,168,76,.12);color:var(--gold)}
+.tag.soja,.tag.milho,.tag.cereais{background:rgba(74,144,217,.12);color:#4A90D9}
+
+/* ===== MAP ===== */
+.mapa-container{border-radius:var(--radius);overflow:hidden;height:calc(100vh - 220px);min-height:400px;border:1px solid var(--gold);box-shadow:0 0 0 1px rgba(201,168,76,.08),0 8px 32px rgba(0,0,0,.4)}
+.mapa-container .leaflet-container{height:100%;width:100%;background:#f2efe9}
+.leaflet-popup-content-wrapper{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:var(--radius)!important;box-shadow:0 8px 32px rgba(0,0,0,.45)!important;backdrop-filter:blur(12px)!important}
+.leaflet-popup-tip{background:var(--surface)!important;border:1px solid var(--border)!important}
+.leaflet-popup-content{font-family:'DM Sans',sans-serif!important;font-size:.85rem!important;line-height:1.6!important;margin:14px 18px!important}
+.leaflet-popup-content h4{font-family:'Playfair Display',serif;margin-bottom:8px;font-size:1.05rem;color:var(--white)}
+.leaflet-popup-content .popup-status{display:flex;align-items:center;gap:6px;margin:6px 0}
+.leaflet-popup-close-button{color:var(--muted)!important;font-size:20px!important}
+.leaflet-control-zoom a{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important;border-radius:6px!important;width:34px!important;height:34px!important;line-height:34px!important;font-size:16px!important;box-shadow:0 2px 8px rgba(0,0,0,.3)!important}
+.leaflet-control-zoom{border:none!important;border-radius:8px!important;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.3)!important}
+.leaflet-control-attribution{background:rgba(242,239,233,.85)!important;color:#888!important;font-size:.6rem!important;backdrop-filter:blur(4px)!important}
+.leaflet-control-attribution a{color:#666!important}
+.farm-marker{border-radius:50%;border:3px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.1);transition:transform .2s ease,box-shadow .2s ease;cursor:pointer}
+.farm-marker:hover{transform:scale(1.2);box-shadow:0 4px 20px rgba(0,0,0,.45),0 0 0 2px rgba(255,255,255,.3)}
+.farm-marker-inner{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;font-family:'DM Sans',sans-serif;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.farm-marker.ok{background:var(--green);box-shadow:0 2px 12px rgba(45,155,111,.4),0 0 0 1px rgba(0,0,0,.1)}
+.farm-marker.alerta{background:var(--amber);box-shadow:0 2px 12px rgba(232,160,32,.4),0 0 0 1px rgba(0,0,0,.1)}
+.farm-marker.critico{background:var(--red);animation:markerPulse 2s infinite;box-shadow:0 2px 12px rgba(232,64,64,.4),0 0 0 1px rgba(0,0,0,.1)}
+@keyframes markerPulse{0%,100%{box-shadow:0 2px 12px rgba(232,64,64,.4),0 0 0 1px rgba(0,0,0,.1)}50%{box-shadow:0 2px 20px rgba(232,64,64,.7),0 0 0 4px rgba(232,64,64,.15)}}
+
+/* ===== CHART CONTAINERS ===== */
+.chart-wrap{position:relative;height:280px}
+.chart-wrap canvas{width:100%!important;height:100%!important}
+
+/* ===== FEED ===== */
+.feed{max-height:340px;overflow-y:auto;padding-right:4px}
+.feed-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid rgba(42,63,82,.4)}
+.feed-item:last-child{border-bottom:none}
+.feed-hora{font-size:.75rem;color:var(--muted);min-width:44px;font-weight:600;padding-top:2px}
+.feed-icon{font-size:1rem;padding-top:1px}
+.feed-texto{font-size:.83rem;color:var(--text);line-height:1.4}
+.feed-texto strong{color:var(--white)}
+.feed-texto.pendente{color:var(--red)}
+
+/* ===== PROPRIEDADE CARD ===== */
+.fazenda-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all var(--transition)}
+.fazenda-card:hover{box-shadow:var(--shadow);border-color:var(--green)}
+.fazenda-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.fazenda-nome{font-size:1.05rem;font-weight:600;font-family:'Playfair Display',serif}
+.fazenda-local{font-size:.78rem;color:var(--muted)}
+.fazenda-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.fazenda-info-item{font-size:.8rem;color:var(--muted)}
+.fazenda-info-item span{color:var(--text);font-weight:600}
+.fazenda-tags{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.btn-detalhe{width:100%;padding:10px;border-radius:var(--radius-sm);background:rgba(45,155,111,.12);color:var(--green);font-weight:600;font-size:.82rem;transition:all var(--transition)}
+.btn-detalhe:hover{background:rgba(45,155,111,.25)}
+
+/* ===== TABLE ===== */
+.tabela-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:12px 16px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border);font-family:'DM Sans',sans-serif}
+tbody td{padding:12px 16px;font-size:.85rem;border-bottom:1px solid rgba(42,63,82,.3)}
+tbody tr{transition:background var(--transition)}
+tbody tr:hover{background:rgba(45,155,111,.05)}
+
+/* ===== NDVI BAR ===== */
+.ndvi-bar{height:8px;border-radius:4px;background:var(--border);overflow:hidden;width:100%;max-width:120px;display:inline-block;vertical-align:middle;margin:0 8px}
+.ndvi-fill{height:100%;border-radius:4px;transition:width .6s ease}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-overlay.aberto{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:680px;max-height:90vh;overflow-y:auto;padding:28px;animation:modalIn .3s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-close{float:right;font-size:1.5rem;color:var(--muted);background:none;border:none;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--text)}
+.modal h3{font-size:1.3rem;margin-bottom:16px}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.modal-stat{padding:12px;background:rgba(13,27,42,.5);border-radius:var(--radius-sm)}
+.modal-stat .label{font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px;font-weight:600}
+.modal-stat .valor{font-size:1.2rem;font-weight:700}
+.mini-mapa{height:200px;border-radius:var(--radius-sm);overflow:hidden;margin-top:16px;border:1px solid var(--border)}
+.foto-placeholder{height:140px;border-radius:var(--radius-sm);background:linear-gradient(135deg,#1a3a2a 0%,#2D9B6F 40%,#1a4a2a 70%,#0D1B2A 100%);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--muted);margin:12px 0}
+.historico-lista{margin-top:12px}
+.historico-dia{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(42,63,82,.3);font-size:.8rem}
+
+/* ===== CULTURA CARD ===== */
+.cultura-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.cultura-card h3{font-size:1.15rem;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.cultura-stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(42,63,82,.2);font-size:.85rem}
+.cultura-stat:last-child{border-bottom:none}
+.cultura-stat .val{color:var(--green);font-weight:600}
+
+/* ===== RELATÓRIO ===== */
+.relatorio-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:flex;align-items:center;gap:20px;transition:all var(--transition)}
+.relatorio-card:hover{border-color:var(--green);box-shadow:var(--shadow)}
+.relatorio-icon{font-size:2rem;width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:rgba(45,155,111,.1);border-radius:var(--radius-sm);flex-shrink:0}
+.relatorio-info h4{font-size:.95rem;margin-bottom:4px}
+.relatorio-info p{font-size:.78rem;color:var(--muted)}
+.btn-download{padding:8px 20px;border-radius:var(--radius-sm);background:var(--green);color:var(--white);font-weight:600;font-size:.8rem;margin-left:auto;transition:all var(--transition);flex-shrink:0}
+.btn-download:hover{background:#24845d}
+
+/* ===== GESTOR MODE ===== */
+.gestor-overlay{position:fixed;inset:0;background:var(--dark);z-index:300;display:none;overflow-y:auto}
+.gestor-overlay.aberto{display:block}
+.gestor-container{max-width:520px;margin:0 auto;padding:24px 20px 60px}
+.gestor-header{text-align:center;padding:28px 0;border-bottom:1px solid var(--border);margin-bottom:24px}
+.gestor-header h2{font-size:1.4rem;margin-bottom:4px}
+.gestor-header p{font-size:.82rem;color:var(--muted)}
+.form-section{margin-bottom:24px}
+.form-section h4{font-size:.9rem;display:flex;align-items:center;gap:8px;margin-bottom:12px;color:var(--text)}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:6px;font-weight:500}
+.form-input{width:100%;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.9rem;transition:border-color var(--transition)}
+.form-input:focus{border-color:var(--green)}
+.form-radio-group{display:flex;flex-wrap:wrap;gap:8px}
+.form-radio{padding:10px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);font-size:.82rem;cursor:pointer;transition:all var(--transition)}
+.form-radio:hover{border-color:var(--green)}
+.form-radio.selecionado{background:rgba(45,155,111,.15);border-color:var(--green);color:var(--green)}
+.form-textarea{width:100%;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.85rem;resize:vertical;min-height:80px;transition:border-color var(--transition)}
+.form-textarea:focus{border-color:var(--green)}
+.btn-enviar{width:100%;padding:16px;border-radius:var(--radius);background:var(--green);color:var(--white);font-size:1rem;font-weight:700;letter-spacing:.02em;transition:all var(--transition);margin-top:8px}
+.btn-enviar:hover{background:#24845d;transform:translateY(-1px)}
+.btn-enviar:active{transform:translateY(0)}
+.btn-voltar{width:100%;padding:12px;border-radius:var(--radius-sm);background:none;border:1px solid var(--border);color:var(--muted);font-size:.82rem;margin-top:12px;transition:all var(--transition)}
+.btn-voltar:hover{border-color:var(--text);color:var(--text)}
+.sucesso-overlay{position:fixed;inset:0;background:rgba(13,27,42,.95);z-index:310;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:20px}
+.sucesso-overlay.aberto{display:flex}
+.sucesso-check{width:80px;height:80px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:20px;animation:sucessoIn .5s ease}
+@keyframes sucessoIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.sucesso-texto{font-size:1.1rem;margin-bottom:8px}
+.sucesso-sub{font-size:.85rem;color:var(--muted)}
+
+/* ===== TOAST ===== */
+.toast-container{position:fixed;top:20px;right:20px;z-index:400;display:flex;flex-direction:column;gap:8px}
+.toast{padding:14px 20px;border-radius:var(--radius-sm);font-size:.82rem;font-weight:500;transform:translateX(120%);transition:transform .3s ease;box-shadow:var(--shadow)}
+.toast.visivel{transform:translateX(0)}
+.toast-sucesso{background:var(--green);color:var(--white)}
+.toast-alerta{background:var(--amber);color:var(--dark)}
+.toast-erro{background:var(--red);color:var(--white)}
+
+/* ===== BOTTOM NAV (MOBILE) ===== */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:100;padding:4px 0;padding-bottom:env(safe-area-inset-bottom)}
+.bottom-nav-inner{display:flex;justify-content:space-around}
+.bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;font-size:.62rem;color:var(--muted);transition:color var(--transition);text-decoration:none;flex:1}
+.bottom-nav-item .bnav-icon{font-size:1.2rem}
+.bottom-nav-item.ativo{color:var(--green)}
+
+/* ===== HAMBURGER ===== */
+.hamburger{display:none;position:fixed;top:16px;left:16px;z-index:110;width:40px;height:40px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border);align-items:center;justify-content:center;font-size:1.2rem;color:var(--text)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.aberta{transform:translateX(0)}
+  .hamburger{display:flex}
+  .main{margin-left:0}
+  .sidebar-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;display:none}
+  .sidebar-backdrop.aberta{display:block}
+}
+@media(max-width:768px){
+  .bottom-nav{display:block}
+  .hamburger{display:none}
+  .sidebar{display:none}
+  .tela{padding:16px 16px 100px}
+  .grid-2{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .kpi-valor{font-size:1.4rem}
+  .mapa-container{height:calc(100vh - 260px);min-height:300px}
+  .modal{padding:20px;margin:10px}
+  .modal-grid{grid-template-columns:1fr}
+  .chart-wrap{height:220px}
+}
+@media(max-width:480px){
+  .kpi-row{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR BACKDROP -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<!-- HAMBURGER -->
+<button class="hamburger" id="btnHamburger">☰</button>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <h1><span>🌿</span> FarmOS</h1>
+    <p>Inteligência Operacional Rural</p>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-item ativo" data-tela="mapa" href="#mapa">
+      <span class="nav-icon">📍</span> Mapa Geral
+    </a>
+    <a class="nav-item" data-tela="dashboard" href="#dashboard">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a class="nav-item" data-tela="propriedades" href="#propriedades">
+      <span class="nav-icon">🌾</span> Propriedades
+    </a>
+    <a class="nav-item" data-tela="rebanho" href="#rebanho">
+      <span class="nav-icon">🐄</span> Rebanho
+    </a>
+    <a class="nav-item" data-tela="culturas" href="#culturas">
+      <span class="nav-icon">🌱</span> Culturas
+    </a>
+    <a class="nav-item" data-tela="relatorios" href="#relatorios">
+      <span class="nav-icon">📋</span> Relatórios
+    </a>
+    <div class="nav-spacer"></div>
+    <a class="nav-item" data-tela="config" href="#" style="opacity:.5;pointer-events:none">
+      <span class="nav-icon">⚙️</span> Configurações
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="btn-gestor" id="btnGestor">
+      <span>👷</span> Acessar como Gestor
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="main">
+
+  <!-- ===== TELA: MAPA ===== -->
+  <section class="tela ativa" id="tela-mapa">
+    <div class="top-bar">
+      <h2>Mapa Geral</h2>
+      <div class="atualizado"><span class="dot-live"></span> <span id="tempoAtualizado">Ao vivo</span></div>
+    </div>
+    <div class="kpi-row" id="kpiMapa"></div>
+    <div class="mapa-container">
+      <div id="mapaLeaflet"></div>
+    </div>
+  </section>
+
+  <!-- ===== TELA: DASHBOARD ===== -->
+  <section class="tela" id="tela-dashboard">
+    <div class="top-bar">
+      <h2 id="saudacao">Bom dia, Dr. João.</h2>
+      <div class="atualizado"><span class="dot-live"></span> <span id="tempoAtualizado2">Ao vivo</span></div>
+    </div>
+    <div class="kpi-row" id="kpiDash"></div>
+    <div class="grid-2" style="margin-bottom:24px">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Evolução do Rebanho — 6 meses</span></div>
+        <div class="chart-wrap"><canvas id="chartRebanho"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">NDVI — Saúde do Pasto</span></div>
+        <div class="chart-wrap"><canvas id="chartNDVI"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Atividade Recente</span></div>
+      <div class="feed" id="feedAtividade"></div>
+    </div>
+  </section>
+
+  <!-- ===== TELA: PROPRIEDADES ===== -->
+  <section class="tela" id="tela-propriedades">
+    <div class="top-bar">
+      <h2>Propriedades</h2>
+      <div class="atualizado"><span style="color:var(--muted);font-size:.85rem" id="totalPropriedades"></span></div>
+    </div>
+    <div class="grid-3" id="listaFazendas"></div>
+  </section>
+
+  <!-- ===== TELA: REBANHO ===== -->
+  <section class="tela" id="tela-rebanho">
+    <div class="top-bar">
+      <h2>Rebanho</h2>
+      <div class="atualizado"><span class="dot-live"></span> <span>Dados em tempo real</span></div>
+    </div>
+    <div class="kpi-row" id="kpiRebanho"></div>
+    <div class="grid-2" style="margin-bottom:24px">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Breakdown por Fazenda</span></div>
+        <div class="tabela-wrap" id="tabelaRebanho"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Distribuição do Rebanho</span></div>
+        <div class="chart-wrap"><canvas id="chartPizza"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TELA: CULTURAS ===== -->
+  <section class="tela" id="tela-culturas">
+    <div class="top-bar">
+      <h2>Culturas</h2>
+    </div>
+    <div class="grid-2" style="margin-bottom:24px" id="listaCulturas"></div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Área por Tipo de Cultura</span></div>
+      <div class="chart-wrap"><canvas id="chartArea"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ===== TELA: RELATÓRIOS ===== -->
+  <section class="tela" id="tela-relatorios">
+    <div class="top-bar">
+      <h2>Relatórios</h2>
+    </div>
+    <div style="display:grid;gap:16px;max-width:720px" id="listaRelatorios"></div>
+  </section>
+
+</main>
+
+<!-- BOTTOM NAV (MOBILE) -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a class="bottom-nav-item ativo" data-tela="mapa" href="#mapa">
+      <span class="bnav-icon">📍</span>Mapa
+    </a>
+    <a class="bottom-nav-item" data-tela="dashboard" href="#dashboard">
+      <span class="bnav-icon">📊</span>Dashboard
+    </a>
+    <a class="bottom-nav-item" data-tela="propriedades" href="#propriedades">
+      <span class="bnav-icon">🌾</span>Fazendas
+    </a>
+    <a class="bottom-nav-item" data-tela="rebanho" href="#rebanho">
+      <span class="bnav-icon">🐄</span>Rebanho
+    </a>
+    <a class="bottom-nav-item" data-tela="culturas" href="#culturas">
+      <span class="bnav-icon">🌱</span>Culturas
+    </a>
+    <a class="bottom-nav-item" data-tela="relatorios" href="#relatorios">
+      <span class="bnav-icon">📋</span>Mais
+    </a>
+  </div>
+</nav>
+
+<!-- MODAL DETALHES FAZENDA -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalConteudo"></div>
+</div>
+
+<!-- GESTOR MODE -->
+<div class="gestor-overlay" id="gestorOverlay">
+  <div class="gestor-container" id="gestorConteudo"></div>
+</div>
+
+<!-- SUCESSO CHECKIN -->
+<div class="sucesso-overlay" id="sucessoOverlay">
+  <div class="sucesso-check">✓</div>
+  <div class="sucesso-texto">Check-in registrado com sucesso!</div>
+  <div class="sucesso-sub" id="sucessoHora"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- SCRIPTS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+/* =========================================================
+   FARMOS — JAVASCRIPT COMPLETO
+   ========================================================= */
+
+/* ===== DADOS DAS 9 FAZENDAS ===== */
+const fazendas = [
+  {
+    id:1, nome:"Fazenda Barreiro Grande", municipio:"Matão", estado:"SP",
+    coords:[-21.6,-48.3], area:2840, gestor:"Roberto Ferreira",
+    telefone:"(16) 99821-4430", status:"ok", checkin:"07:32",
+    culturas:["angus","soja"],
+    rebanho:{cria:480,recria:620,confinamento:740,total:1840},
+    ndvi:0.76, pasto_atual:"Pasto Norte — Brachiaria brizantha",
+    ocorrencias:0, ocorrencia_desc:null, arroba:16.2
+  },
+  {
+    id:2, nome:"Fazenda Cerradão", municipio:"Araraquara", estado:"SP",
+    coords:[-21.8,-48.0], area:3200, gestor:"Carlos Eduardo Lima",
+    telefone:"(16) 99734-2218", status:"ok", checkin:"06:45",
+    culturas:["angus","milho"],
+    rebanho:{cria:700,recria:800,confinamento:600,total:2100},
+    ndvi:0.81, pasto_atual:"Setor A — Rotação em curso",
+    ocorrencias:0, ocorrencia_desc:null, arroba:15.8
+  },
+  {
+    id:3, nome:"Fazenda Laranjeiras", municipio:"Motuca", estado:"SP",
+    coords:[-21.5,-48.1], area:1920, gestor:"Marcos Vinícius Costa",
+    telefone:"(16) 99612-8834", status:"ok", checkin:"07:15",
+    culturas:["angus","citrus"],
+    rebanho:{cria:280,recria:320,confinamento:320,total:920},
+    ndvi:0.69, pasto_atual:"Setor B — Pastagem reformada",
+    ocorrencias:0, ocorrencia_desc:null, arroba:16.5
+  },
+  {
+    id:4, nome:"Fazenda Carneirinho", municipio:"Carneirinho", estado:"MG",
+    coords:[-19.7,-50.5], area:2100, gestor:"José Antônio Ramos",
+    telefone:"(34) 99821-3391", status:"alerta", checkin:"06:58",
+    culturas:["coco","angus"],
+    rebanho:{cria:320,recria:410,confinamento:280,total:1010},
+    ndvi:0.74, pasto_atual:"Pasto Sul — Irrigação normal",
+    ocorrencias:1, ocorrencia_desc:"Cerca setor 3 danificada — aguardando reparo", arroba:15.3
+  },
+  {
+    id:5, nome:"Fazenda Boa Vista", municipio:"Frutal", estado:"MG",
+    coords:[-20.0,-49.0], area:1650, gestor:"Carlos Mendes",
+    telefone:"(34) 99445-7721", status:"critico", checkin:null,
+    culturas:["angus"],
+    rebanho:{cria:210,recria:290,confinamento:180,total:680},
+    ndvi:0.61, pasto_atual:"Dados do dia anterior",
+    ocorrencias:0, ocorrencia_desc:null, arroba:14.9
+  },
+  {
+    id:6, nome:"Fazenda Matão Sul", municipio:"Matão", estado:"SP",
+    coords:[-21.7,-48.4], area:1480, gestor:"Marcos Oliveira",
+    telefone:"(16) 99334-5512", status:"critico", checkin:null,
+    culturas:["citrus","soja"],
+    rebanho:{cria:0,recria:0,confinamento:0,total:0},
+    ndvi:0.55, pasto_atual:"Dados do dia anterior",
+    ocorrencias:0, ocorrencia_desc:null, arroba:0
+  },
+  {
+    id:7, nome:"Fazenda Serra Verde", municipio:"Uberaba", estado:"MG",
+    coords:[-19.7,-47.9], area:2200, gestor:"Paulo Rodrigues",
+    telefone:"(34) 99821-0034", status:"ok", checkin:"07:50",
+    culturas:["angus","milho"],
+    rebanho:{cria:520,recria:640,confinamento:490,total:1650},
+    ndvi:0.79, pasto_atual:"Pasto Leste — Brachiaria decumbens",
+    ocorrencias:0, ocorrencia_desc:null, arroba:16.0
+  },
+  {
+    id:8, nome:"Fazenda Recanto Angus", municipio:"Bebedouro", estado:"SP",
+    coords:[-20.9,-48.5], area:1800, gestor:"Fernando Lopes",
+    telefone:"(17) 99234-8821", status:"ok", checkin:"07:05",
+    culturas:["angus"],
+    rebanho:{cria:390,recria:480,confinamento:500,total:1370},
+    ndvi:0.83, pasto_atual:"Pasto Central — Em rotação",
+    ocorrencias:0, ocorrencia_desc:null, arroba:16.8
+  },
+  {
+    id:9, nome:"Fazenda Primavera", municipio:"Prata", estado:"MG",
+    coords:[-19.3,-48.9], area:1230, gestor:"Antônio Souza",
+    telefone:"(34) 99112-6634", status:"ok", checkin:"08:10",
+    culturas:["citrus","coco"],
+    rebanho:{cria:180,recria:240,confinamento:150,total:570},
+    ndvi:0.71, pasto_atual:"Setor Único — Pastagem nativa",
+    ocorrencias:0, ocorrencia_desc:null, arroba:15.1
+  }
+];
+
+/* ===== HISTÓRICO 6 MESES POR FAZENDA ===== */
+function gerarHistorico6Meses(total) {
+  if (total === 0) return [0,0,0,0,0,0];
+  const h = [];
+  let v = Math.round(total * 0.88);
+  for (let i = 0; i < 6; i++) {
+    h.push(v);
+    v = Math.round(v + total * (0.015 + Math.random() * 0.025));
+  }
+  h[5] = total;
+  return h;
+}
+
+/* ===== APP STATE ===== */
+const AppState = {
+  telaAtual: 'mapa',
+  mapaIniciado: false,
+  graficosIniciados: {},
+  ultimaAtualizacao: new Date(),
+  modoGestor: false,
+  miniMapas: {}
+};
+
+/* ===== UTILIDADES ===== */
+function formatarNumero(n) {
+  return n.toLocaleString('pt-BR');
+}
+function obterSaudacao() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Bom dia';
+  if (h < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+function obterDataFormatada() {
+  return new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+}
+function corNDVI(v) {
+  if (v >= 0.75) return 'var(--green)';
+  if (v >= 0.65) return 'var(--amber)';
+  return 'var(--red)';
+}
+function corStatus(s) {
+  if (s === 'ok') return 'var(--green)';
+  if (s === 'alerta') return 'var(--amber)';
+  return 'var(--red)';
+}
+function textoStatus(s) {
+  if (s === 'ok') return 'Operação normal';
+  if (s === 'alerta') return 'Ocorrência registrada';
+  return 'Check-in pendente';
+}
+function nomesCulturas(arr) {
+  const map = { angus:'🐄 Angus', soja:'🌾 Soja', milho:'🌾 Milho', citrus:'🍊 Citrus', coco:'🥥 Coco' };
+  return arr.map(c => map[c] || c);
+}
+function classeCultura(c) {
+  if (c === 'citrus') return 'citrus';
+  if (c === 'coco') return 'coco';
+  if (c === 'soja' || c === 'milho') return 'soja';
+  return '';
+}
+
+/* ===== CÁLCULOS ===== */
+function calcularTotais() {
+  const t = { propriedades: fazendas.length, area: 0, rebanhoTotal: 0, checkins: 0, pendentes: 0, ocorrencias: 0, criticas: 0, cria: 0, recria: 0, confinamento: 0 };
+  fazendas.forEach(f => {
+    t.area += f.area;
+    t.rebanhoTotal += f.rebanho.total;
+    t.cria += f.rebanho.cria;
+    t.recria += f.rebanho.recria;
+    t.confinamento += f.rebanho.confinamento;
+    if (f.checkin) t.checkins++;
+    else t.pendentes++;
+    t.ocorrencias += f.ocorrencias;
+    if (f.status === 'critico') t.criticas++;
+  });
+  return t;
+}
+
+/* ===== TOAST ===== */
+function mostrarToast(msg, tipo) {
+  tipo = tipo || 'sucesso';
+  const el = document.createElement('div');
+  el.className = 'toast toast-' + tipo;
+  el.textContent = msg;
+  document.getElementById('toastContainer').appendChild(el);
+  requestAnimationFrame(() => el.classList.add('visivel'));
+  setTimeout(() => {
+    el.classList.remove('visivel');
+    setTimeout(() => el.remove(), 300);
+  }, 3500);
+}
+
+/* ===== COUNT UP ===== */
+function contarAte(el, alvo, duracao) {
+  duracao = duracao || 1400;
+  const inicio = performance.now();
+  function tick(now) {
+    const p = Math.min((now - inicio) / duracao, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = formatarNumero(Math.floor(ease * alvo));
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ===== RENDERIZAR KPIs ===== */
+function renderizarKPIsMapa() {
+  const t = calcularTotais();
+  document.getElementById('kpiMapa').innerHTML =
+    '<div class="kpi-card verde"><div class="kpi-label">Propriedades</div><div class="kpi-valor" data-count="' + t.propriedades + '">0</div><div class="kpi-sub">Monitoradas em tempo real</div></div>' +
+    '<div class="kpi-card ouro"><div class="kpi-label">Área Total</div><div class="kpi-valor" data-count="' + t.area + '">0</div><div class="kpi-sub">hectares produtivos</div></div>' +
+    '<div class="kpi-card ' + (t.pendentes > 0 ? 'vermelho' : 'verde') + '"><div class="kpi-label">Alertas</div><div class="kpi-valor" data-count="' + t.pendentes + '">0</div><div class="kpi-sub">check-ins pendentes</div></div>' +
+    '<div class="kpi-card verde"><div class="kpi-label">Check-ins OK</div><div class="kpi-valor" data-count="' + t.checkins + '">0</div><div class="kpi-sub">de ' + t.propriedades + ' propriedades</div></div>';
+  animarKPIs(document.getElementById('kpiMapa'));
+}
+
+function renderizarKPIsDash() {
+  const t = calcularTotais();
+  document.getElementById('saudacao').textContent = obterSaudacao() + ', Dr. João. Hoje é ' + obterDataFormatada() + '.';
+  document.getElementById('kpiDash').innerHTML =
+    '<div class="kpi-card verde"><div class="kpi-label">Rebanho Total</div><div class="kpi-valor" data-count="' + t.rebanhoTotal + '">0</div><div class="kpi-sub">↑ 340 este mês</div></div>' +
+    '<div class="kpi-card ouro"><div class="kpi-label">Área Monitorada</div><div class="kpi-valor" data-count="' + t.area + '">0</div><div class="kpi-sub">' + t.propriedades + ' propriedades</div></div>' +
+    '<div class="kpi-card ' + (t.pendentes > 0 ? 'ambar' : 'verde') + '"><div class="kpi-label">Check-ins Hoje</div><div class="kpi-valor">' + t.checkins + ' / ' + t.propriedades + ' ✓</div><div class="kpi-sub">' + (t.pendentes > 0 ? '⚠️ ' + t.pendentes + ' pendentes' : '✅ Todos realizados') + '</div></div>' +
+    '<div class="kpi-card ' + (t.ocorrencias > 0 ? 'vermelho' : 'verde') + '"><div class="kpi-label">Ocorrências</div><div class="kpi-valor" data-count="' + t.ocorrencias + '">0</div><div class="kpi-sub">' + (t.ocorrencias > 0 ? t.ocorrencias + ' aberta(s)' : 'Nenhuma aberta') + '</div></div>';
+  animarKPIs(document.getElementById('kpiDash'));
+}
+
+function renderizarKPIsRebanho() {
+  const t = calcularTotais();
+  document.getElementById('kpiRebanho').innerHTML =
+    '<div class="kpi-card verde"><div class="kpi-label">Rebanho Total</div><div class="kpi-valor" data-count="' + t.rebanhoTotal + '">0</div></div>' +
+    '<div class="kpi-card ouro"><div class="kpi-label">Cria</div><div class="kpi-valor" data-count="' + t.cria + '">0</div></div>' +
+    '<div class="kpi-card ouro"><div class="kpi-label">Recria</div><div class="kpi-valor" data-count="' + t.recria + '">0</div></div>' +
+    '<div class="kpi-card verde"><div class="kpi-label">Confinamento</div><div class="kpi-valor" data-count="' + t.confinamento + '">0</div></div>';
+  animarKPIs(document.getElementById('kpiRebanho'));
+}
+
+function animarKPIs(container) {
+  container.querySelectorAll('[data-count]').forEach(el => {
+    contarAte(el, parseInt(el.dataset.count));
+  });
+}
+
+/* ===== FEED DE ATIVIDADE ===== */
+function renderizarFeed() {
+  const feed = document.getElementById('feedAtividade');
+  const items = [];
+  fazendas.forEach(f => {
+    if (f.checkin) {
+      items.push({ hora: f.checkin, icon: '✅', texto: '<strong>' + f.nome + '</strong> — Check-in realizado — ' + formatarNumero(f.rebanho.total) + ' cabeças — ' + f.pasto_atual.split(' — ')[0], pendente: false, ordem: f.checkin });
+      if (f.ocorrencias > 0) {
+        items.push({ hora: f.checkin, icon: '⚠️', texto: '<strong>' + f.nome + '</strong> — Ocorrência registrada — ' + f.ocorrencia_desc, pendente: false, ordem: f.checkin });
+      }
+    } else {
+      items.push({ hora: '—', icon: '🔴', texto: '<strong>' + f.nome + '</strong> — Check-in <strong>PENDENTE</strong> — Responsável: ' + f.gestor, pendente: true, ordem: '99:99' });
+    }
+  });
+  items.sort((a, b) => b.ordem.localeCompare(a.ordem));
+  const pendentes = items.filter(i => i.pendente);
+  const feitos = items.filter(i => !i.pendente);
+  const ordenados = feitos.concat(pendentes);
+  feed.innerHTML = ordenados.map(i =>
+    '<div class="feed-item"><span class="feed-hora">' + i.hora + '</span><span class="feed-icon">' + i.icon + '</span><span class="feed-texto' + (i.pendente ? ' pendente' : '') + '">' + i.texto + '</span></div>'
+  ).join('');
+}
+
+/* ===== PROPRIEDADES ===== */
+function renderizarPropriedades() {
+  document.getElementById('totalPropriedades').textContent = fazendas.length + ' propriedades cadastradas';
+  document.getElementById('listaFazendas').innerHTML = fazendas.map(f =>
+    '<div class="fazenda-card">' +
+    '<div class="fazenda-header"><span class="status-dot ' + f.status + '"></span><div><div class="fazenda-nome">' + f.nome + '</div><div class="fazenda-local">' + f.municipio + ', ' + f.estado + '</div></div></div>' +
+    '<div class="fazenda-info"><div class="fazenda-info-item">Área: <span>' + formatarNumero(f.area) + ' ha</span></div><div class="fazenda-info-item">Gestor: <span>' + f.gestor + '</span></div><div class="fazenda-info-item">Rebanho: <span>' + formatarNumero(f.rebanho.total) + ' cab</span></div><div class="fazenda-info-item">NDVI: <span style="color:' + corNDVI(f.ndvi) + '">' + f.ndvi.toFixed(2) + '</span></div></div>' +
+    '<div class="fazenda-tags">' + f.culturas.map(c => '<span class="tag ' + classeCultura(c) + '">' + nomesCulturas([c])[0] + '</span>').join('') + '</div>' +
+    '<button class="btn-detalhe" onclick="abrirDetalhe(' + f.id + ')">Ver detalhes</button>' +
+    '</div>'
+  ).join('');
+}
+
+/* ===== MODAL DETALHES ===== */
+function abrirDetalhe(id) {
+  const f = fazendas.find(x => x.id === id);
+  if (!f) return;
+  const hist = gerarHistorico7Dias(f);
+  document.getElementById('modalConteudo').innerHTML =
+    '<button class="modal-close" onclick="fecharModal()">×</button>' +
+    '<h3>' + f.nome + '</h3>' +
+    '<p style="color:var(--muted);font-size:.85rem;margin-bottom:16px">' + f.municipio + ', ' + f.estado + ' — ' + formatarNumero(f.area) + ' ha</p>' +
+    '<div class="modal-grid">' +
+    '<div class="modal-stat"><div class="label">Gestor</div><div class="valor" style="font-size:.95rem">' + f.gestor + '</div><div style="font-size:.75rem;color:var(--muted)">' + f.telefone + '</div></div>' +
+    '<div class="modal-stat"><div class="label">Status</div><div class="valor" style="font-size:.95rem;color:' + corStatus(f.status) + '">' + textoStatus(f.status) + '</div><div style="font-size:.75rem;color:var(--muted)">Check-in: ' + (f.checkin || 'Pendente') + '</div></div>' +
+    '<div class="modal-stat"><div class="label">Rebanho</div><div class="valor">' + formatarNumero(f.rebanho.total) + ' <span style="font-size:.8rem;color:var(--muted)">cab</span></div></div>' +
+    '<div class="modal-stat"><div class="label">NDVI</div><div class="valor" style="color:' + corNDVI(f.ndvi) + '">' + f.ndvi.toFixed(2) + '</div><div class="ndvi-bar"><div class="ndvi-fill" style="width:' + (f.ndvi * 100) + '%;background:' + corNDVI(f.ndvi) + '"></div></div></div>' +
+    '</div>' +
+    '<div class="foto-placeholder">📸 ' + f.pasto_atual + '</div>' +
+    '<h4 style="font-size:.9rem;margin:16px 0 8px">Histórico — últimos 7 dias</h4>' +
+    '<div class="historico-lista">' + hist.map(d =>
+      '<div class="historico-dia"><span>' + d.data + '</span><span>' + formatarNumero(d.rebanho) + ' cab</span><span style="color:' + corNDVI(d.ndvi) + '">NDVI ' + d.ndvi.toFixed(2) + '</span><span style="color:var(--muted)">' + d.checkin + '</span></div>'
+    ).join('') + '</div>' +
+    '<div id="miniMapa' + f.id + '" class="mini-mapa"></div>';
+  document.getElementById('modalOverlay').classList.add('aberto');
+  setTimeout(() => {
+    if (AppState.miniMapas[f.id]) { AppState.miniMapas[f.id].remove(); }
+    const mm = L.map('miniMapa' + f.id, { zoomControl: false, attributionControl: false }).setView(f.coords, 12);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18, subdomains: 'abcd' }).addTo(mm);
+    var corHex = f.status === 'ok' ? '#2D9B6F' : f.status === 'alerta' ? '#E8A020' : '#E84040';
+    L.circleMarker(f.coords, { radius: 12, fillColor: corHex, fillOpacity: 0.9, color: '#fff', weight: 3 }).addTo(mm);
+    AppState.miniMapas[f.id] = mm;
+  }, 200);
+}
+
+function gerarHistorico7Dias(f) {
+  const dias = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    dias.push({
+      data: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+      rebanho: f.rebanho.total + Math.floor((Math.random() - 0.5) * 30),
+      ndvi: +(f.ndvi + (Math.random() - 0.5) * 0.06).toFixed(2),
+      checkin: i === 0 ? (f.checkin || '—') : ('0' + (6 + Math.floor(Math.random() * 3)) + ':' + String(Math.floor(Math.random() * 60)).padStart(2, '0'))
+    });
+  }
+  return dias;
+}
+
+function fecharModal() {
+  document.getElementById('modalOverlay').classList.remove('aberto');
+  Object.keys(AppState.miniMapas).forEach(k => { AppState.miniMapas[k].remove(); delete AppState.miniMapas[k]; });
+}
+document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) fecharModal(); });
+
+/* ===== REBANHO TABLE ===== */
+function renderizarTabelaRebanho() {
+  const fazendasComGado = fazendas.filter(f => f.rebanho.total > 0);
+  const t = calcularTotais();
+  document.getElementById('tabelaRebanho').innerHTML =
+    '<table><thead><tr><th>Fazenda</th><th>Cria</th><th>Recria</th><th>Confin.</th><th>Total</th><th>@</th></tr></thead><tbody>' +
+    fazendasComGado.map(f =>
+      '<tr><td><strong>' + f.nome.replace('Fazenda ', '') + '</strong><br><span style="font-size:.7rem;color:var(--muted)">' + f.municipio + '</span></td>' +
+      '<td>' + formatarNumero(f.rebanho.cria) + '</td>' +
+      '<td>' + formatarNumero(f.rebanho.recria) + '</td>' +
+      '<td>' + formatarNumero(f.rebanho.confinamento) + '</td>' +
+      '<td style="font-weight:700">' + formatarNumero(f.rebanho.total) + '</td>' +
+      '<td style="color:var(--gold)">' + f.arroba.toFixed(1) + '@</td></tr>'
+    ).join('') +
+    '<tr style="border-top:2px solid var(--border);font-weight:700"><td>TOTAL</td><td>' + formatarNumero(t.cria) + '</td><td>' + formatarNumero(t.recria) + '</td><td>' + formatarNumero(t.confinamento) + '</td><td style="color:var(--green)">' + formatarNumero(t.rebanhoTotal) + '</td><td>—</td></tr>' +
+    '</tbody></table>';
+}
+
+/* ===== CULTURAS ===== */
+function renderizarCulturas() {
+  const t = calcularTotais();
+  const fazendasAngus = fazendas.filter(f => f.culturas.includes('angus'));
+  const fazendasCoco = fazendas.filter(f => f.culturas.includes('coco'));
+  const fazendasCitrus = fazendas.filter(f => f.culturas.includes('citrus'));
+  const fazendasCereais = fazendas.filter(f => f.culturas.includes('soja') || f.culturas.includes('milho'));
+  document.getElementById('listaCulturas').innerHTML =
+    '<div class="cultura-card"><h3>🐄 Pecuária Angus</h3>' +
+    '<div class="cultura-stat"><span>Rebanho total</span><span class="val">' + formatarNumero(t.rebanhoTotal) + ' cabeças</span></div>' +
+    '<div class="cultura-stat"><span>Propriedades</span><span class="val">' + fazendasAngus.length + '</span></div>' +
+    '<div class="cultura-stat"><span>Aprovação certificação</span><span class="val">98.3%</span></div>' +
+    '<div class="cultura-stat"><span>Previsão abate/ano</span><span class="val">50.000 animais</span></div></div>' +
+
+    '<div class="cultura-card"><h3>🥥 Coco</h3>' +
+    '<div class="cultura-stat"><span>Área em produção</span><span class="val">3.200 ha</span></div>' +
+    '<div class="cultura-stat"><span>Propriedades</span><span class="val">' + fazendasCoco.map(f => f.nome.replace('Fazenda ', '')).join(', ') + '</span></div>' +
+    '<div class="cultura-stat"><span>Status irrigação</span><span class="val" style="color:var(--green)">✅ Normal</span></div>' +
+    '<div class="cultura-stat"><span>NDVI médio</span><span class="val">' + (fazendasCoco.reduce((s, f) => s + f.ndvi, 0) / fazendasCoco.length).toFixed(2) + '</span></div></div>' +
+
+    '<div class="cultura-card"><h3>🍊 Citrus</h3>' +
+    '<div class="cultura-stat"><span>Área total</span><span class="val">4.100 ha</span></div>' +
+    '<div class="cultura-stat"><span>Propriedades</span><span class="val">' + fazendasCitrus.map(f => f.nome.replace('Fazenda ', '')).join(', ') + '</span></div>' +
+    '<div class="cultura-stat"><span>Previsão colheita</span><span class="val" style="color:var(--amber)">⚠️ 18 dias</span></div>' +
+    '<div class="cultura-stat"><span>Status</span><span class="val" style="color:var(--amber)">Monitorar clima</span></div></div>' +
+
+    '<div class="cultura-card"><h3>🌾 Cereais (Soja/Milho)</h3>' +
+    '<div class="cultura-stat"><span>Área total</span><span class="val">2.800 ha</span></div>' +
+    '<div class="cultura-stat"><span>Propriedades</span><span class="val">' + fazendasCereais.map(f => f.nome.replace('Fazenda ', '')).join(', ') + '</span></div>' +
+    '<div class="cultura-stat"><span>Integração</span><span class="val">Rotação com pastagem</span></div>' +
+    '<div class="cultura-stat"><span>Safra 2025/26</span><span class="val" style="color:var(--green)">Em desenvolvimento</span></div></div>';
+}
+
+/* ===== RELATÓRIOS ===== */
+function renderizarRelatorios() {
+  const rels = [
+    { icon: '📊', titulo: 'Relatório Executivo Mensal', desc: 'Visão consolidada de todas as propriedades — Abril 2026' },
+    { icon: '🏠', titulo: 'Performance por Fazenda', desc: 'Comparativo de KPIs entre as 9 propriedades' },
+    { icon: '🐄', titulo: 'Histórico do Rebanho', desc: 'Evolução do plantel nos últimos 12 meses' },
+    { icon: '🌱', titulo: 'Análise NDVI — Saúde dos Pastos', desc: 'Mapeamento de vegetação via satélite' }
+  ];
+  document.getElementById('listaRelatorios').innerHTML = rels.map(r =>
+    '<div class="relatorio-card">' +
+    '<div class="relatorio-icon">' + r.icon + '</div>' +
+    '<div class="relatorio-info"><h4>' + r.titulo + '</h4><p>' + r.desc + '</p></div>' +
+    '<button class="btn-download" onclick="mostrarToast(\'Relatório em preparação...\', \'alerta\')">Download PDF</button>' +
+    '</div>'
+  ).join('') +
+  '<div class="card" style="margin-top:20px">' +
+  '<div class="card-header"><span class="card-title">Preview — Relatório Executivo</span></div>' +
+  '<div style="padding:4px 0">' +
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+  '<div class="modal-stat"><div class="label">Período</div><div class="valor" style="font-size:.9rem">Abril 2026</div></div>' +
+  '<div class="modal-stat"><div class="label">Rebanho</div><div class="valor" style="font-size:.9rem">' + formatarNumero(calcularTotais().rebanhoTotal) + ' cab</div></div>' +
+  '<div class="modal-stat"><div class="label">Área produtiva</div><div class="valor" style="font-size:.9rem">' + formatarNumero(calcularTotais().area) + ' ha</div></div>' +
+  '<div class="modal-stat"><div class="label">NDVI médio</div><div class="valor" style="font-size:.9rem;color:' + corNDVI(fazendas.reduce((s, f) => s + f.ndvi, 0) / fazendas.length) + '">' + (fazendas.reduce((s, f) => s + f.ndvi, 0) / fazendas.length).toFixed(2) + '</div></div>' +
+  '</div></div></div>';
+}
+
+/* ===== MAPA LEAFLET ===== */
+let mapa = null;
+function inicializarMapa() {
+  if (AppState.mapaIniciado) { mapa.invalidateSize(); return; }
+  mapa = L.map('mapaLeaflet', { zoomControl: true, zoomAnimation: true }).setView([-20.5, -48.8], 7);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© CartoDB © OpenStreetMap', maxZoom: 18, subdomains: 'abcd'
+  }).addTo(mapa);
+  fazendas.forEach(f => {
+    var size = f.rebanho.total > 1500 ? 36 : f.rebanho.total > 800 ? 30 : 24;
+    var icon = L.divIcon({
+      className: '',
+      iconSize: [size, size],
+      iconAnchor: [size/2, size/2],
+      popupAnchor: [0, -size/2 - 4],
+      html: '<div class="farm-marker ' + f.status + '" style="width:' + size + 'px;height:' + size + 'px"><div class="farm-marker-inner">' + f.id + '</div></div>'
+    });
+    var m = L.marker(f.coords, { icon: icon }).addTo(mapa);
+    m.bindPopup(
+      '<h4>' + f.nome + '</h4>' +
+      '<div class="popup-status"><span class="status-dot ' + f.status + '" style="width:8px;height:8px"></span> ' + textoStatus(f.status) + '</div>' +
+      '<div style="margin-top:8px;font-size:.82rem;color:var(--muted);line-height:1.7">' +
+      '<span style="color:var(--text)">' + f.municipio + ', ' + f.estado + '</span><br>' +
+      formatarNumero(f.area) + ' ha — <strong style="color:var(--text)">' + formatarNumero(f.rebanho.total) + '</strong> cabeças<br>' +
+      'Gestor: <span style="color:var(--text)">' + f.gestor + '</span><br>' +
+      (f.checkin ? '<span style="color:var(--green)">✅ Check-in às ' + f.checkin + '</span>' : '<span style="color:var(--red)">⚠ Check-in pendente</span>') +
+      '</div>', { maxWidth: 280, className: 'farmos-popup' }
+    );
+  });
+  AppState.mapaIniciado = true;
+}
+
+/* ===== GRÁFICOS CHART.JS ===== */
+const coresGraficos = ['#2D9B6F','#C9A84C','#E8A020','#4A90D9','#9B6F2D','#6F9B2D','#E84040','#7A8FA0','#2D6F9B'];
+const configBase = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#7A8FA0', font: { family: "'DM Sans'", size: 11 }, boxWidth: 12, padding: 12 } } },
+  scales: {
+    x: { ticks: { color: '#7A8FA0', font: { family: "'DM Sans'", size: 11 } }, grid: { color: 'rgba(42,63,82,.3)' }, border: { color: '#2A3F52' } },
+    y: { ticks: { color: '#7A8FA0', font: { family: "'DM Sans'", size: 11 } }, grid: { color: 'rgba(42,63,82,.3)' }, border: { color: '#2A3F52' } }
+  }
+};
+function mergeConfig(extra) {
+  return JSON.parse(JSON.stringify(Object.assign({}, configBase, extra)));
+}
+
+function inicializarGraficosDashboard() {
+  if (AppState.graficosIniciados.dashboard) return;
+  const meses = ['Nov','Dez','Jan','Fev','Mar','Abr'];
+  const fazendasComGado = fazendas.filter(f => f.rebanho.total > 0);
+  const datasetsLine = fazendasComGado.map((f, i) => ({
+    label: f.nome.replace('Fazenda ', ''),
+    data: gerarHistorico6Meses(f.rebanho.total),
+    borderColor: coresGraficos[i % coresGraficos.length],
+    backgroundColor: coresGraficos[i % coresGraficos.length] + '20',
+    borderWidth: 2, tension: 0.3, pointRadius: 3, pointHoverRadius: 6, fill: false
+  }));
+  new Chart(document.getElementById('chartRebanho'), {
+    type: 'line',
+    data: { labels: meses, datasets: datasetsLine },
+    options: mergeConfig({ plugins: { legend: { position: 'bottom', labels: { color: '#7A8FA0', font: { family: "'DM Sans'", size: 10 }, boxWidth: 10, padding: 8 } } }, animation: { duration: 1200, easing: 'easeOutQuart' } })
+  });
+  const ndviCores = fazendas.map(f => f.ndvi >= 0.75 ? '#2D9B6F' : f.ndvi >= 0.65 ? '#E8A020' : '#E84040');
+  new Chart(document.getElementById('chartNDVI'), {
+    type: 'bar',
+    data: {
+      labels: fazendas.map(f => f.nome.replace('Fazenda ', '')),
+      datasets: [{ label: 'NDVI', data: fazendas.map(f => f.ndvi), backgroundColor: ndviCores, borderRadius: 6, barThickness: 24 }]
+    },
+    options: mergeConfig({ plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 1, ticks: { color: '#7A8FA0', stepSize: 0.2, font: { family: "'DM Sans'" } }, grid: { color: 'rgba(42,63,82,.3)' }, border: { color: '#2A3F52' } }, x: { ticks: { color: '#7A8FA0', font: { family: "'DM Sans'", size: 9 }, maxRotation: 45 }, grid: { display: false }, border: { color: '#2A3F52' } } }, animation: { duration: 1000, easing: 'easeOutQuart' } })
+  });
+  AppState.graficosIniciados.dashboard = true;
+}
+
+function inicializarGraficosRebanho() {
+  if (AppState.graficosIniciados.rebanho) return;
+  const fazendasComGado = fazendas.filter(f => f.rebanho.total > 0);
+  new Chart(document.getElementById('chartPizza'), {
+    type: 'doughnut',
+    data: {
+      labels: fazendasComGado.map(f => f.nome.replace('Fazenda ', '')),
+      datasets: [{ data: fazendasComGado.map(f => f.rebanho.total), backgroundColor: coresGraficos.slice(0, fazendasComGado.length), borderColor: '#1A2B3C', borderWidth: 2, hoverOffset: 8 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#7A8FA0', font: { family: "'DM Sans'", size: 11 }, boxWidth: 12, padding: 10 } } }, animation: { duration: 1200, easing: 'easeOutQuart' } }
+  });
+  AppState.graficosIniciados.rebanho = true;
+}
+
+function inicializarGraficosCulturas() {
+  if (AppState.graficosIniciados.culturas) return;
+  new Chart(document.getElementById('chartArea'), {
+    type: 'bar',
+    data: {
+      labels: ['Pecuária', 'Coco', 'Citrus', 'Cereais'],
+      datasets: [{
+        label: 'Área (ha)',
+        data: [8500, 3200, 4100, 2800],
+        backgroundColor: ['#2D9B6F80', '#C9A84C80', '#E8A02080', '#4A90D980'],
+        borderColor: ['#2D9B6F', '#C9A84C', '#E8A020', '#4A90D9'],
+        borderWidth: 2, borderRadius: 8, barThickness: 48
+      }]
+    },
+    options: mergeConfig({ plugins: { legend: { display: false } }, animation: { duration: 1000, easing: 'easeOutQuart' } })
+  });
+  AppState.graficosIniciados.culturas = true;
+}
+
+/* ===== ROUTER ===== */
+function navegarPara(tela) {
+  document.querySelectorAll('.tela').forEach(el => { el.classList.remove('ativa'); });
+  const alvo = document.getElementById('tela-' + tela);
+  if (!alvo) return;
+  void alvo.offsetWidth;
+  alvo.classList.add('ativa');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('ativo', n.dataset.tela === tela));
+  document.querySelectorAll('.bottom-nav-item').forEach(n => n.classList.toggle('ativo', n.dataset.tela === tela));
+  AppState.telaAtual = tela;
+  if (tela === 'mapa') setTimeout(inicializarMapa, 50);
+  if (tela === 'dashboard') { renderizarKPIsDash(); renderizarFeed(); setTimeout(inicializarGraficosDashboard, 100); }
+  if (tela === 'propriedades') renderizarPropriedades();
+  if (tela === 'rebanho') { renderizarKPIsRebanho(); renderizarTabelaRebanho(); setTimeout(inicializarGraficosRebanho, 100); }
+  if (tela === 'culturas') { renderizarCulturas(); setTimeout(inicializarGraficosCulturas, 100); }
+  if (tela === 'relatorios') renderizarRelatorios();
+  fecharSidebar();
+}
+
+/* ===== SIDEBAR MOBILE ===== */
+function abrirSidebar() {
+  document.getElementById('sidebar').classList.add('aberta');
+  document.getElementById('sidebarBackdrop').classList.add('aberta');
+}
+function fecharSidebar() {
+  document.getElementById('sidebar').classList.remove('aberta');
+  document.getElementById('sidebarBackdrop').classList.remove('aberta');
+}
+
+/* ===== MODO GESTOR ===== */
+function ativarModoGestor() {
+  const f = fazendas[0];
+  const agora = new Date();
+  document.getElementById('gestorConteudo').innerHTML =
+    '<div class="gestor-header"><h2>CHECK-IN DIÁRIO — FarmOS</h2><p>' + f.nome + '<br>Responsável: ' + f.gestor + '<br>' + agora.toLocaleDateString('pt-BR') + ' | ' + agora.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) + '</p></div>' +
+    '<div class="form-section"><h4>🐄 Contagem do rebanho</h4>' +
+    '<div class="form-group"><label>Lote A (Cria)</label><input class="form-input" type="number" id="inputCria" value="' + f.rebanho.cria + '" placeholder="Cabeças"></div>' +
+    '<div class="form-group"><label>Lote B (Recria)</label><input class="form-input" type="number" id="inputRecria" value="' + f.rebanho.recria + '" placeholder="Cabeças"></div>' +
+    '<div class="form-group"><label>Confinamento</label><input class="form-input" type="number" id="inputConfinamento" value="' + f.rebanho.confinamento + '" placeholder="Cabeças"></div></div>' +
+    '<div class="form-section"><h4>🌿 Pasto em uso hoje</h4>' +
+    '<div class="form-radio-group">' +
+    '<button class="form-radio selecionado" onclick="selecionarPasto(this)">Pasto Norte</button>' +
+    '<button class="form-radio" onclick="selecionarPasto(this)">Pasto Sul</button>' +
+    '<button class="form-radio" onclick="selecionarPasto(this)">Pasto Leste</button>' +
+    '<button class="form-radio" onclick="selecionarPasto(this)">Setor Confinamento</button>' +
+    '</div></div>' +
+    '<div class="form-section"><h4>📸 Foto do pasto</h4>' +
+    '<div class="foto-placeholder" style="height:100px;cursor:pointer" onclick="mostrarToast(\'Câmera não disponível na demo\', \'alerta\')">📷 Toque para capturar foto</div></div>' +
+    '<div class="form-section"><h4>⚠️ Ocorrência hoje?</h4>' +
+    '<div class="form-radio-group" style="margin-bottom:12px">' +
+    '<button class="form-radio selecionado" id="radioSemOcorrencia" onclick="toggleOcorrencia(false)">Não, tudo normal</button>' +
+    '<button class="form-radio" id="radioComOcorrencia" onclick="toggleOcorrencia(true)">Sim, registrar</button></div>' +
+    '<textarea class="form-textarea" id="textaOcorrencia" placeholder="Descreva a ocorrência..." style="display:none"></textarea></div>' +
+    '<div class="form-section"><h4>🌡️ Clima local</h4><p style="font-size:.9rem">28°C ☀️ <span style="color:var(--muted)">(dados automáticos)</span></p></div>' +
+    '<button class="btn-enviar" onclick="enviarCheckin()">ENVIAR CHECK-IN</button>' +
+    '<button class="btn-voltar" onclick="fecharGestor()">← Voltar ao modo Proprietário</button>';
+  document.getElementById('gestorOverlay').classList.add('aberto');
+}
+
+function selecionarPasto(el) {
+  el.parentElement.querySelectorAll('.form-radio').forEach(b => b.classList.remove('selecionado'));
+  el.classList.add('selecionado');
+}
+
+function toggleOcorrencia(mostrar) {
+  document.getElementById('radioSemOcorrencia').classList.toggle('selecionado', !mostrar);
+  document.getElementById('radioComOcorrencia').classList.toggle('selecionado', mostrar);
+  document.getElementById('textaOcorrencia').style.display = mostrar ? 'block' : 'none';
+}
+
+function enviarCheckin() {
+  const agora = new Date();
+  const hora = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('sucessoHora').textContent = 'Registrado às ' + hora + ' — Proprietário notificado.';
+  document.getElementById('sucessoOverlay').classList.add('aberto');
+  setTimeout(() => {
+    document.getElementById('sucessoOverlay').classList.remove('aberto');
+    fecharGestor();
+    mostrarToast('Check-in de ' + fazendas[0].nome + ' recebido', 'sucesso');
+  }, 2500);
+}
+
+function fecharGestor() {
+  document.getElementById('gestorOverlay').classList.remove('aberto');
+}
+
+/* ===== SIMULAÇÃO TEMPO REAL ===== */
+function simularDadosTempoReal() {
+  fazendas.forEach(f => {
+    if (f.rebanho.total > 0) {
+      const variacao = Math.floor((Math.random() - 0.5) * 10);
+      f.rebanho.cria = Math.max(0, f.rebanho.cria + Math.floor(variacao / 3));
+      f.rebanho.recria = Math.max(0, f.rebanho.recria + Math.floor(variacao / 3));
+      f.rebanho.confinamento = Math.max(0, f.rebanho.confinamento + (variacao - 2 * Math.floor(variacao / 3)));
+      f.rebanho.total = f.rebanho.cria + f.rebanho.recria + f.rebanho.confinamento;
+    }
+    f.ndvi = +(f.ndvi + (Math.random() - 0.5) * 0.01).toFixed(2);
+    f.ndvi = Math.max(0.4, Math.min(0.95, f.ndvi));
+  });
+  AppState.ultimaAtualizacao = new Date();
+  if (AppState.telaAtual === 'dashboard') { renderizarKPIsDash(); }
+  if (AppState.telaAtual === 'mapa') { renderizarKPIsMapa(); }
+  if (AppState.telaAtual === 'rebanho') { renderizarKPIsRebanho(); renderizarTabelaRebanho(); }
+}
+
+function atualizarTempo() {
+  const seg = Math.floor((new Date() - AppState.ultimaAtualizacao) / 1000);
+  const texto = seg < 5 ? 'Ao vivo' : 'Atualizado há ' + seg + 's';
+  document.querySelectorAll('#tempoAtualizado, #tempoAtualizado2').forEach(el => { el.textContent = texto; });
+}
+
+/* ===== INICIALIZAÇÃO ===== */
+function iniciar() {
+  document.querySelectorAll('.nav-item[data-tela]').forEach(item => {
+    item.addEventListener('click', function(e) { e.preventDefault(); navegarPara(this.dataset.tela); });
+  });
+  document.querySelectorAll('.bottom-nav-item[data-tela]').forEach(item => {
+    item.addEventListener('click', function(e) { e.preventDefault(); navegarPara(this.dataset.tela); });
+  });
+  document.getElementById('btnHamburger').addEventListener('click', abrirSidebar);
+  document.getElementById('sidebarBackdrop').addEventListener('click', fecharSidebar);
+  document.getElementById('btnGestor').addEventListener('click', ativarModoGestor);
+  var hash = window.location.hash.replace('#', '') || 'mapa';
+  if (!document.getElementById('tela-' + hash)) hash = 'mapa';
+  renderizarKPIsMapa();
+  navegarPara(hash);
+  setInterval(simularDadosTempoReal, 30000);
+  setInterval(atualizarTempo, 1000);
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(function() {});
+  }
+}
+
+document.addEventListener('DOMContentLoaded', iniciar);
+</script>
+</body>
+</html>
