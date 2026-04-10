@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 189" width="340" height="189">
+  <defs>
+    <!-- Fundo principal -->
+    <linearGradient id="bgFront" x1="0" y1="0" x2="340" y2="189" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1A2E1A"/>
+      <stop offset="60%" stop-color="#0F1F0F"/>
+      <stop offset="100%" stop-color="#162816"/>
+    </linearGradient>
+    <!-- Textura radiante ouro -->
+    <radialGradient id="glowOuro" cx="80%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#C5A572" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#C5A572" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Textura radiante azul -->
+    <radialGradient id="glowAzul" cx="20%" cy="80%" r="50%">
+      <stop offset="0%" stop-color="#4A90A4" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#4A90A4" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Linha de ouro topo -->
+    <linearGradient id="linhaOuroTopo" x1="36" y1="0" x2="170" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#C5A572"/>
+      <stop offset="70%" stop-color="#B8945A"/>
+      <stop offset="100%" stop-color="#C5A572" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Linha inferior -->
+    <linearGradient id="linhaBottom" x1="0" y1="0" x2="340" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#C5A572" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#C5A572" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#C5A572" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="cardClip">
+      <rect width="340" height="189" rx="8"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#cardClip)">
+    <!-- Fundo -->
+    <rect width="340" height="189" fill="url(#bgFront)"/>
+    <!-- Texturas sutis -->
+    <rect width="340" height="189" fill="url(#glowOuro)"/>
+    <rect width="340" height="189" fill="url(#glowAzul)"/>
+
+    <!-- Linha de ouro no topo -->
+    <rect x="36" y="0" width="100" height="2" fill="url(#linhaOuroTopo)"/>
+
+    <!-- Ponto de satélite (azul água) -->
+    <circle cx="304" cy="28" r="3" fill="#4A90A4"/>
+    <circle cx="304" cy="28" r="7" fill="none" stroke="#4A90A4" stroke-opacity="0.3" stroke-width="1"/>
+    <circle cx="304" cy="28" r="12" fill="none" stroke="#4A90A4" stroke-opacity="0.12" stroke-width="1"/>
+
+    <!-- Logo AgrUAI -->
+    <text x="36" y="102" font-family="'Space Grotesk', sans-serif" font-size="32" font-weight="700" letter-spacing="-0.64">
+      <tspan fill="#F5F0E8">Agr</tspan><tspan fill="#C5A572">UAI</tspan>
+    </text>
+
+    <!-- Tagline -->
+    <text x="36" y="126" font-family="'Inter', sans-serif" font-size="9.5" font-weight="400" fill="#C5A572" letter-spacing="1.8">
+      <tspan text-transform="uppercase">VOCÊ NÃO ADMINISTRA FAZENDAS.</tspan>
+    </text>
+    <text x="36" y="141" font-family="'Inter', sans-serif" font-size="9.5" font-weight="400" fill="#C5A572" letter-spacing="1.8">
+      <tspan>ADMINISTRA UM IMPÉRIO.</tspan>
+    </text>
+
+    <!-- Linha inferior decorativa -->
+    <rect x="0" y="188" width="340" height="1" fill="url(#linhaBottom)"/>
+  </g>
+</svg>

@@ -1,9 +1,34 @@
-/* ============================================
-   AgrUAI — Sistema de Design Tokens
-   Paleta inspirada na bandeira do Brasil:
-   Verde da mata, Ouro real, Azul do rio/céu, Branco da paz
-   ============================================ */
+# PROMPT 01 — Instalar Agente de Design Gráfico
 
+Cole este prompt no Claude Code:
+
+---
+
+```
+Preciso que você instale e configure ferramentas de design gráfico para trabalhar com:
+
+## Ferramentas Necessárias
+
+### 1. Geração de SVG/Logo
+- Instale as dependências para gerar SVGs programaticamente
+- `npm install -g sharp svgo` (otimização de imagens e SVG)
+- `pip install cairosvg Pillow --break-system-packages` (renderização SVG para PNG)
+
+### 2. Geração de Ícones e Favicons
+- `npm install -g sharp-cli` (redimensionamento de imagens)
+- `npm install -g png-to-ico` (geração de favicon.ico)
+- Preciso gerar ícones PWA em todos os tamanhos: 48, 72, 96, 128, 144, 152, 192, 384, 512
+
+### 3. Fontes
+- Baixe as fontes Google Fonts para uso local:
+  - **Inter** (pesos 300, 400, 500, 600, 700) — corpo de texto
+  - **Satoshi** ou **Space Grotesk** (pesos 500, 600, 700) — títulos e destaques
+- Gere os @font-face CSS para carregamento local
+
+### 4. Paleta de Cores — Sistema de Design AgrUAI
+Crie um arquivo `design-tokens.css` com as variáveis CSS:
+
+```css
 :root {
   /* === VERDE MUSGO ESCURO (Base/Fundo) === */
   --agr-verde-900: #0F1F0F;    /* Fundo principal, mais profundo */
@@ -57,3 +82,18 @@
   /* Azul = rio, água, céu, satélite → --agr-azul-* */
   /* Branco = paz, clareza, legibilidade → --agr-branco* */
 }
+```
+
+### 5. Skill de Design (criar em .claude/skills/)
+Crie uma skill chamada `agruai-design` em `.claude/skills/agruai-design/SKILL.md` com:
+- As regras de uso das cores acima
+- Regras de tipografia (Inter para corpo, Space Grotesk para títulos)
+- Regras de espaçamento (8px grid system)
+- Regras de componentes (cards com glass effect, bordas em ouro sutil, cantos arredondados 12px)
+- Regras de ícones (linha fina, stroke 1.5px, cor ouro ou branco)
+- A filosofia: "Premium rural — sofisticação do campo, não da cidade. Ouro real, não dourado de bijuteria. Verde da mata, não verde de farmácia. Azul do rio e do céu, não azul corporate."
+
+Confirme cada instalação e me mostre o design-tokens.css final.
+```
+
+---
