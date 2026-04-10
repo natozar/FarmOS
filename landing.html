@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="AgrUAI — Inteligência rural por satélite para proprietários de múltiplas fazendas. Programa de Acesso Antecipado.">
+<meta property="og:title" content="AgrUAI — Você não administra fazendas. Administra um império.">
+<meta property="og:description" content="Monitoramento por satélite com I.A. para quem pensa em escala. 10 vagas no Programa de Acesso Antecipado.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://agruai.com">
+<meta property="og:image" content="https://agruai.com/og-image.png">
+<meta name="theme-color" content="#0F1F0F">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>AgrUAI — Inteligência Rural por Satélite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:'Inter',-apple-system,sans-serif;background:#0F1F0F;color:#F5F0E8;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Space Grotesk','Inter',sans-serif;font-weight:600;letter-spacing:-.02em}
+img,svg{display:block}
+a{color:inherit;text-decoration:none}
+.container{width:100%;max-width:1100px;margin:0 auto;padding:0 24px}
+@media(min-width:640px){.container{padding:0 40px}}
+@media(min-width:1024px){.container{padding:0 24px}}
+
+/* GRAIN OVERLAY */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:.1s}.reveal-d2{transition-delay:.2s}.reveal-d3{transition-delay:.3s}.reveal-d4{transition-delay:.4s}
+
+/* === HERO === */
+.hero{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(170deg,#0F1F0F 0%,#162916 40%,#1A2E1A 70%,#0F1F0F 100%)}
+.hero-topo{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.hero-topo svg{position:absolute;width:140%;height:140%;left:-20%;top:-20%;opacity:.06;will-change:transform}
+.hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(197,165,114,.06) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.hero-content{position:relative;z-index:2;padding:40px 24px}
+.hero-content>*{opacity:0;transform:translateY(20px);animation:heroIn .8s cubic-bezier(.4,0,.2,1) forwards}
+.hero-content>*:nth-child(1){animation-delay:.2s}
+.hero-content>*:nth-child(2){animation-delay:.5s}
+.hero-content>*:nth-child(3){animation-delay:.7s}
+.hero-content>*:nth-child(4){animation-delay:.9s}
+@keyframes heroIn{to{opacity:1;transform:translateY(0)}}
+.logo{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.8rem,6vw,4.5rem);font-weight:700;letter-spacing:-.04em;line-height:1}
+.logo-agr{color:#F5F0E8}
+.logo-uai{color:#C5A572;position:relative}
+.logo-uai::after{content:'';position:absolute;bottom:-4px;left:0;width:100%;height:2px;background:linear-gradient(90deg,#C5A572,transparent);opacity:.5}
+.hero h1{margin-top:1.5rem;font-size:clamp(1.25rem,3vw,2.1rem);font-weight:600;color:#F5F0E8;line-height:1.3;max-width:620px;margin-left:auto;margin-right:auto}
+.hero-sub{margin-top:1rem;font-size:clamp(.9rem,1.5vw,1.15rem);color:#A89E90;font-weight:400;line-height:1.6}
+.btn-cta{display:inline-flex;align-items:center;gap:10px;margin-top:2.5rem;padding:18px 44px;background:linear-gradient(135deg,#C5A572,#B8945A);color:#0F1F0F;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;border:none;border-radius:8px;cursor:pointer;transition:all .25s ease;letter-spacing:.02em;box-shadow:0 4px 24px rgba(197,165,114,.2),0 0 0 0 rgba(197,165,114,0);position:relative;overflow:hidden}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(197,165,114,.3),0 0 0 1px rgba(197,165,114,.15)}
+.btn-cta:active{transform:translateY(0) scale(.98)}
+.btn-cta::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);opacity:0;transition:opacity .25s}
+.btn-cta:hover::before{opacity:1}
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);opacity:.4;animation:bounceHint 2.5s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes bounceHint{0%,100%{transform:translateX(-50%) translateY(0);opacity:.4}50%{transform:translateX(-50%) translateY(10px);opacity:.7}}
+
+/* === PROBLEMA === */
+.problema{padding:100px 0 60px;background:#0F1F0F;text-align:center;position:relative}
+.problema h2{font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;max-width:700px;margin:0 auto;line-height:1.35}
+.problema p{margin-top:28px;font-size:1.05rem;color:#D1C9BC;line-height:1.85;max-width:580px;margin-left:auto;margin-right:auto}
+.sep{margin:70px auto 0;max-width:240px;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.25),transparent)}
+
+/* === O QUE É === */
+.oque{padding:100px 0;background:#1A2E1A;position:relative;overflow:hidden}
+.oque::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.oque h2{text-align:center;font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:56px;line-height:1.35}
+.blocos{display:grid;grid-template-columns:1fr;gap:20px;max-width:960px;margin:0 auto}
+@media(min-width:640px){.blocos{grid-template-columns:1fr 1fr 1fr;gap:24px}}
+.bloco{background:rgba(15,31,15,.6);border:1px solid rgba(197,165,114,.08);border-radius:16px;padding:36px 28px;position:relative;transition:all .3s ease;overflow:hidden}
+.bloco::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--bloco-cor,#C5A572),transparent);opacity:0;transition:opacity .3s}
+.bloco:hover{border-color:rgba(197,165,114,.2);transform:translateY(-4px);box-shadow:0 12px 40px rgba(15,31,15,.5)}
+.bloco:hover::before{opacity:1}
+.bloco-icon{width:52px;height:52px;margin-bottom:20px;padding:10px;background:rgba(197,165,114,.06);border-radius:12px;display:flex;align-items:center;justify-content:center}
+.bloco-icon svg{width:32px;height:32px}
+.bloco h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.1rem;color:#C5A572;margin-bottom:12px;letter-spacing:-.01em}
+.bloco p{font-size:.92rem;color:#D1C9BC;line-height:1.75}
+.bloco:first-child{--bloco-cor:#4A90A4}
+.bloco:first-child .bloco-icon{background:rgba(74,144,164,.08)}
+.bloco:first-child h3{color:#5DA8BE}
+
+/* === PROVA === */
+.prova{padding:80px 0;background:#0F1F0F;text-align:center;position:relative}
+.prova::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.prova-cards{display:grid;grid-template-columns:1fr;gap:40px;max-width:860px;margin:0 auto}
+@media(min-width:640px){.prova-cards{grid-template-columns:1fr 1fr 1fr;gap:32px}}
+.prova-card{position:relative;padding:32px 16px}
+.prova-card .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.1;margin-bottom:12px}
+.prova-card .sub{font-size:.88rem;color:#A89E90;line-height:1.65;max-width:240px;margin-left:auto;margin-right:auto}
+@media(min-width:640px){.prova-card:not(:last-child)::after{content:'';position:absolute;right:0;top:20%;height:60%;width:1px;background:linear-gradient(180deg,transparent,rgba(197,165,114,.15),transparent)}}
+/* Vagas counter */
+.vagas-tag{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:6px 16px;border-radius:20px;background:rgba(197,165,114,.08);border:1px solid rgba(197,165,114,.15);font-size:.75rem;font-weight:500;color:#C5A572;letter-spacing:.03em}
+.vagas-dot{width:6px;height:6px;border-radius:50%;background:#C5A572;animation:vagasPulse 2s ease infinite}
+@keyframes vagasPulse{0%,100%{opacity:1}50%{opacity:.4}}
+.vagas-barra{width:100%;max-width:180px;height:4px;background:rgba(197,165,114,.12);border-radius:2px;margin:14px auto 0;overflow:hidden}
+.vagas-fill{height:100%;width:0%;background:linear-gradient(90deg,#C5A572,#D4B88A);border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.vagas-esgotadas .vagas-dot{background:#C45A4A;animation:none}
+.vagas-esgotadas .vagas-tag{border-color:rgba(196,90,74,.2);background:rgba(196,90,74,.08);color:#C45A4A}
+
+/* === FORMULARIO === */
+.formulario{padding:100px 0;background:#1A2E1A;position:relative;overflow:hidden}
+.formulario::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.formulario h2{text-align:center;font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:12px}
+.formulario .form-sub{text-align:center;font-size:.95rem;color:#D1C9BC;max-width:530px;margin:0 auto 48px;line-height:1.7}
+.form-wrap{max-width:460px;margin:0 auto;background:rgba(15,31,15,.4);border:1px solid rgba(197,165,114,.08);border-radius:20px;padding:40px 32px}
+@media(max-width:640px){.form-wrap{padding:32px 20px;border-radius:16px}}
+.form-group{margin-bottom:22px}
+.form-group label{display:block;font-size:.78rem;font-weight:500;color:#D1C9BC;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 16px;background:#0F1F0F;border:1.5px solid #2E4A2E;border-radius:8px;color:#F5F0E8;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:400;transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;-webkit-appearance:none;appearance:none}
+.form-group select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23A89E90' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
+.form-group input::placeholder,.form-group textarea::placeholder{color:#7A7268}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#C5A572;box-shadow:0 0 0 3px rgba(197,165,114,.12);background:#111F11}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-group .input-hint{font-size:.72rem;color:#7A7268;margin-top:4px}
+.btn-submit{width:100%;padding:18px;background:linear-gradient(135deg,#C5A572,#B8945A);color:#0F1F0F;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:1px;border:none;border-radius:8px;cursor:pointer;transition:all .25s ease;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(197,165,114,.15)}
+.btn-submit:hover{box-shadow:0 6px 28px rgba(197,165,114,.25);transform:translateY(-1px)}
+.btn-submit:active{transform:translateY(0) scale(.98)}
+.btn-submit.enviando{pointer-events:none;opacity:.8}
+.btn-submit.enviando::after{content:'';position:absolute;top:0;left:-100%;width:200%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:submitShine 1.2s ease infinite}
+@keyframes submitShine{to{left:100%}}
+.form-micro{text-align:center;margin-top:14px;font-size:.75rem;color:#7A7268;line-height:1.5}
+
+/* === OBRIGADO === */
+.obrigado{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px;min-height:400px}
+.obrigado.visivel{display:flex;animation:obgIn .6s ease}
+@keyframes obgIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.obrigado-check{width:88px;height:88px;margin-bottom:28px}
+.obrigado-check circle{stroke:#C5A572;stroke-width:2;fill:none;stroke-dasharray:188;stroke-dashoffset:188;animation:drawCircle .7s cubic-bezier(.4,0,.2,1) forwards}
+.obrigado-check polyline{stroke:#C5A572;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:drawCheck .4s ease .6s forwards}
+@keyframes drawCircle{to{stroke-dashoffset:0}}
+@keyframes drawCheck{to{stroke-dashoffset:0}}
+.obrigado h3{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.5rem;color:#C5A572;margin-bottom:12px}
+.obrigado p{font-size:1rem;color:#D1C9BC;max-width:400px;line-height:1.65;margin-bottom:28px}
+.btn-voltar{display:inline-block;padding:14px 36px;border:1.5px solid #C5A572;color:#C5A572;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.9rem;border-radius:8px;cursor:pointer;background:transparent;transition:all .25s ease}
+.btn-voltar:hover{background:rgba(197,165,114,.08);transform:translateY(-1px)}
+
+/* === FOOTER === */
+.footer{padding:48px 0;background:#0F1F0F;text-align:center;position:relative}
+.footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.1),transparent)}
+.footer-logo{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;letter-spacing:-.02em;margin-bottom:12px;display:inline-flex;align-items:center;gap:10px}
+.footer-icon{opacity:.4}
+.footer p{font-size:.8rem;color:#7A7268;line-height:1.6}
+.footer .tagline{font-size:.75rem;color:#A89E90;margin-top:6px;letter-spacing:.03em}
+
+/* FOCUS VISIBLE */
+:focus-visible{outline:2px solid #C5A572;outline-offset:3px;border-radius:4px}
+@media(prefers-reduced-motion:reduce){
+.reveal,.hero-content>*{opacity:1;transform:none;transition:none;animation:none}
+.scroll-hint{animation:none}
+.obrigado-check circle,.obrigado-check polyline{animation:none;stroke-dashoffset:0}
+.btn-submit.enviando::after{animation:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="topo">
+  <div class="hero-bg"></div>
+  <div class="hero-topo">
+    <svg viewBox="0 0 1400 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Topography lines -->
+      <path d="M-50 680 Q100 600 250 640 Q400 680 550 620 Q700 560 850 600 Q1000 640 1150 580 Q1300 520 1450 560" fill="none" stroke="#C5A572" stroke-width="1.2"/>
+      <path d="M-50 720 Q150 660 350 700 Q550 740 750 670 Q950 600 1150 650 Q1350 700 1450 660" fill="none" stroke="#C5A572" stroke-width="1"/>
+      <path d="M-50 760 Q200 710 400 740 Q600 770 800 720 Q1000 670 1200 710 Q1400 750 1450 730" fill="none" stroke="#C5A572" stroke-width=".8"/>
+      <path d="M-50 800 Q250 760 500 780 Q750 800 1000 760 Q1250 720 1450 750" fill="none" stroke="#C5A572" stroke-width=".6"/>
+      <path d="M-50 840 Q300 810 600 830 Q900 850 1200 820 Q1450 800 1450 800" fill="none" stroke="#C5A572" stroke-width=".4"/>
+      <!-- Orbit -->
+      <ellipse cx="1000" cy="220" rx="340" ry="130" fill="none" stroke="#C5A572" stroke-width=".7" stroke-dasharray="10 8" opacity=".4"/>
+      <ellipse cx="1000" cy="220" rx="240" ry="90" fill="none" stroke="#C5A572" stroke-width=".4" stroke-dasharray="6 6" opacity=".2"/>
+      <!-- Satellite -->
+      <circle cx="1180" cy="170" r="4" fill="#C5A572" opacity=".5"/>
+      <circle cx="1180" cy="170" r="8" fill="none" stroke="#C5A572" stroke-width=".5" opacity=".2"/>
+      <!-- Downlink -->
+      <line x1="1180" y1="178" x2="900" y2="600" stroke="#C5A572" stroke-width=".6" stroke-dasharray="4 6" opacity=".15"/>
+      <!-- Scan lines -->
+      <path d="M750 580 Q850 560 950 575 Q1050 590 1100 570" fill="none" stroke="#4A90A4" stroke-width=".5" stroke-dasharray="3 4" opacity=".15"/>
+    </svg>
+  </div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="logo"><span class="logo-agr">Agr</span><span class="logo-uai">UAI</span></div>
+    <h1>Você não administra fazendas. Administra um império.</h1>
+    <p class="hero-sub">Inteligência por satélite para quem pensa em escala.</p>
+    <a href="#reserva" class="btn-cta">Quero acesso antecipado</a>
+  </div>
+  <div class="scroll-hint" aria-hidden="true">
+    <svg width="24" height="14" viewBox="0 0 24 14" fill="none"><path d="M2 2l10 10L22 2" stroke="#C5A572" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+</section>
+
+<!-- ===== PROBLEMA ===== -->
+<section class="problema">
+  <div class="container">
+    <h2 class="reveal">O dono de 5 fazendas não tem tempo para 5 planilhas.</h2>
+    <p class="reveal reveal-d1">Quem administra múltiplas propriedades precisa de visão de conjunto — não de dados espalhados em WhatsApp, cadernos e promessas de gestor. A decisão certa depende da informação certa, na hora certa, vista de cima.</p>
+    <div class="sep"></div>
+  </div>
+</section>
+
+<!-- ===== O QUE É ===== -->
+<section class="oque">
+  <div class="container">
+    <h2 class="reveal">Seus olhos no céu. Suas decisões no chão.</h2>
+    <div class="blocos">
+
+      <div class="bloco reveal reveal-d1">
+        <div class="bloco-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="16" cy="10" rx="12" ry="5.5" stroke="#4A90A4" stroke-width="1.5" stroke-dasharray="3 2.5" opacity=".6"/>
+            <circle cx="25" cy="7" r="2.5" fill="#4A90A4"/>
+            <line x1="25" y1="9.5" x2="18" y2="23" stroke="#4A90A4" stroke-width="1.2" stroke-dasharray="2 2.5" opacity=".5"/>
+            <path d="M4 26 Q10 21 16 23 Q22 25 28 21" stroke="#4A90A4" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M4 29 Q12 25 18 27 Q24 29 28 26" stroke="#4A90A4" stroke-width="1" stroke-linecap="round" opacity=".4"/>
+          </svg>
+        </div>
+        <h3>Monitoramento por Satélite</h3>
+        <p>Imagens reais das suas propriedades, atualizadas a cada 5 dias. Veja a saúde da pastagem, a evolução da cultura e áreas de risco sem sair do escritório.</p>
+      </div>
+
+      <div class="bloco reveal reveal-d2">
+        <div class="bloco-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/>
+            <rect x="17.5" y="2" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/>
+            <rect x="2" y="17.5" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/>
+            <rect x="17.5" y="17.5" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/>
+            <path d="M5 10 Q7 6 10 9" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".45"/>
+            <path d="M20 10 Q22 6 26 9" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".45"/>
+            <path d="M5 25 Q7 21 10 24" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".45"/>
+            <path d="M20 25 Q22 21 26 24" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".45"/>
+          </svg>
+        </div>
+        <h3>Todas as fazendas. Uma tela.</h3>
+        <p>Dashboard unificado para proprietários que pensam como gestores de portfólio. Compare propriedades, identifique problemas antes que virem prejuízo.</p>
+      </div>
+
+      <div class="bloco reveal reveal-d3">
+        <div class="bloco-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="9" stroke="#C5A572" stroke-width="1.5"/>
+            <line x1="20.5" y1="20.5" x2="28" y2="28" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round"/>
+            <polyline points="8,17 11,12 15,15 20,9" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+        <h3>I.A. que fala a língua do campo</h3>
+        <p>Alertas automáticos, análises preditivas e relatórios que traduzem dados de satélite em ação: 'mover gado', 'irrigar lote 3', 'investigar área norte'.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROVA SOCIAL ===== -->
+<section class="prova">
+  <div class="container">
+    <div class="prova-cards">
+      <div class="prova-card reveal reveal-d1">
+        <div class="num" style="color:#4A90A4">Sentinel-2</div>
+        <div class="sub">Satélite da Agência Espacial Europeia. Dados abertos, resolução 10m/pixel.</div>
+      </div>
+      <div class="prova-card reveal reveal-d2">
+        <div class="num" style="color:#C5A572">5 dias</div>
+        <div class="sub">Frequência de revisita. Sua fazenda monitorada duas vezes por semana.</div>
+      </div>
+      <div class="prova-card reveal reveal-d3">
+        <div class="num" style="color:#F5F0E8"><span id="vagasNum">10</span> vagas</div>
+        <div class="sub" id="vagasSub">Programa de Acesso Antecipado. Parceiros que ajudam a construir a ferramenta.</div>
+        <div class="vagas-tag" id="vagasTag"><span class="vagas-dot"></span> <span id="vagasStatus">Vagas abertas</span></div>
+        <div class="vagas-barra" id="vagasBarra"><div class="vagas-fill" id="vagasFill"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FORMULÁRIO ===== -->
+<section class="formulario" id="reserva">
+  <div class="container">
+    <h2 class="reveal">Programa de Acesso Antecipado</h2>
+    <p class="form-sub reveal reveal-d1">10 proprietários vão ajudar a construir a plataforma definitiva de inteligência rural. Sem custo na fase pioneira.</p>
+
+    <div class="form-wrap reveal reveal-d2" id="formWrap">
+      <form id="leadForm" onsubmit="return enviarLead(event)">
+        <input type="text" name="_honey" id="honey" style="display:none" tabindex="-1" autocomplete="off">
+
+        <div class="form-group">
+          <label for="nome">Nome completo</label>
+          <input type="text" id="nome" name="nome" required placeholder="Como prefere ser chamado" autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label for="contato">WhatsApp ou telefone</label>
+          <input type="tel" id="contato" name="contato" required placeholder="(00) 00000-0000" autocomplete="tel" inputmode="numeric">
+          <div class="input-hint">Formato: (16) 99821-4430</div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" placeholder="Opcional, mas recomendado" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="propriedades">Quantas propriedades rurais possui?</label>
+          <select id="propriedades" name="propriedades" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="2-3">2 a 3 propriedades</option>
+            <option value="4-6">4 a 6 propriedades</option>
+            <option value="7-10">7 a 10 propriedades</option>
+            <option value="10+">Mais de 10 propriedades</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="regiao">Região principal das propriedades</label>
+          <select id="regiao" name="regiao" required>
+            <option value="" disabled selected>Selecione o estado</option>
+            <option value="SP">São Paulo</option>
+            <option value="MG">Minas Gerais</option>
+            <option value="MS">Mato Grosso do Sul</option>
+            <option value="MT">Mato Grosso</option>
+            <option value="GO">Goiás</option>
+            <option value="PR">Paraná</option>
+            <option value="BA">Bahia</option>
+            <option value="TO">Tocantins</option>
+            <option value="outro">Outro estado</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="atividade">Atividade principal</label>
+          <select id="atividade" name="atividade" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="pecuaria">Pecuária de corte</option>
+            <option value="pecuaria-leite">Pecuária de leite</option>
+            <option value="soja-milho">Soja / Milho</option>
+            <option value="cana">Cana-de-açúcar</option>
+            <option value="cafe">Café</option>
+            <option value="misto">Misto (pecuária + lavoura)</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="area_total">Área total aproximada (hectares)</label>
+          <select id="area_total" name="area_total">
+            <option value="" disabled selected>Selecione</option>
+            <option value="500-2000">500 a 2.000 ha</option>
+            <option value="2000-5000">2.000 a 5.000 ha</option>
+            <option value="5000-10000">5.000 a 10.000 ha</option>
+            <option value="10000+">Mais de 10.000 ha</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="desafio">Qual seu maior desafio hoje?</label>
+          <textarea id="desafio" name="desafio" rows="3" placeholder="Ex: Não consigo acompanhar todas as fazendas à distância..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmit">Garantir minha vaga</button>
+        <p class="form-micro">Seus dados são confidenciais. Entraremos em contato apenas para o programa.</p>
+      </form>
+    </div>
+
+    <!-- OBRIGADO -->
+    <div class="obrigado" id="obrigado">
+      <svg class="obrigado-check" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="30"/>
+        <polyline points="20,34 28,42 44,24"/>
+      </svg>
+      <h3>Reserva registrada.</h3>
+      <p>Você está entre os primeiros. Entraremos em contato antes do lançamento.</p>
+      <button class="btn-voltar" onclick="window.scrollTo({top:0,behavior:'smooth'});history.replaceState(null,null,' ');">Voltar ao início</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-logo">
+      <svg class="footer-icon" width="20" height="20" viewBox="0 0 32 32" fill="none" style="display:inline"><ellipse cx="16" cy="10" rx="10" ry="5" stroke="#C5A572" stroke-width="1" stroke-dasharray="3 2" opacity=".4"/><circle cx="23" cy="8" r="2" fill="#C5A572" opacity=".4"/><path d="M6 24 Q12 20 18 22 Q24 24 28 20" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".4"/></svg>
+      <span><span style="color:#F5F0E8">Agr</span><span style="color:#C5A572">UAI</span></span>
+    </div>
+    <p>Ribeirão Preto, SP — Agrishow 2026</p>
+    <p class="tagline">Inteligência Rural por Satélite</p>
+  </div>
+</footer>
+
+<script>
+/* === Reveal on scroll === */
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('visible')});return}
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.add('visible');obs.unobserve(entry.target)}})},{threshold:.12,rootMargin:'0px 0px -60px 0px'});
+  els.forEach(function(el){obs.observe(el)});
+})();
+
+/* === Phone mask === */
+(function(){
+  var tel=document.getElementById('contato');
+  if(!tel)return;
+  tel.addEventListener('input',function(e){
+    var v=e.target.value.replace(/\D/g,'');
+    if(v.length>11)v=v.slice(0,11);
+    if(v.length>6)v='('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7);
+    else if(v.length>2)v='('+v.slice(0,2)+') '+v.slice(2);
+    else if(v.length>0)v='('+v;
+    e.target.value=v;
+  });
+})();
+
+/* === Supabase config === */
+var SUPA_URL='https://mrourzdxrahpysscckxm.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yb3VyemR4cmFocHlzc2Nja3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODMzMTUsImV4cCI6MjA4ODU1OTMxNX0.A4ueyDJgOu4cbxcHxsMTDBNHkxAOUlWFoYuv88LdnU4';
+var TOTAL_VAGAS=10;
+
+/* === Submit to Supabase === */
+function enviarLead(e){
+  e.preventDefault();
+  if(document.getElementById('honey').value)return false;
+  var btn=document.getElementById('btnSubmit');
+  var form=document.getElementById('leadForm');
+  btn.textContent='Enviando...';
+  btn.classList.add('enviando');
+
+  var dados={
+    nome:document.getElementById('nome').value.trim(),
+    contato:document.getElementById('contato').value.trim(),
+    email:document.getElementById('email').value.trim()||null,
+    propriedades:document.getElementById('propriedades').value,
+    regiao:document.getElementById('regiao').value,
+    atividade:document.getElementById('atividade').value,
+    area_total:document.getElementById('area_total').value||null,
+    desafio:document.getElementById('desafio').value.trim()||null,
+    origem:'landing-agrishow-2026'
+  };
+
+  fetch(SUPA_URL+'/rest/v1/leads_agruai',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'apikey':SUPA_KEY,
+      'Authorization':'Bearer '+SUPA_KEY,
+      'Prefer':'return=minimal'
+    },
+    body:JSON.stringify(dados)
+  }).then(function(res){
+    if(res.ok){mostrarObrigado()}
+    else{throw new Error('Erro '+res.status)}
+  }).catch(function(){
+    btn.textContent='Erro — tente novamente';
+    btn.classList.remove('enviando');
+    setTimeout(function(){btn.textContent='Garantir minha vaga'},3000);
+  });
+  return false;
+}
+
+/* === Contador de vagas === */
+function atualizarVagas(preenchidas){
+  var restantes=Math.max(0,TOTAL_VAGAS-preenchidas);
+  var pct=Math.min(100,Math.round((preenchidas/TOTAL_VAGAS)*100));
+  var numEl=document.getElementById('vagasNum');
+  var subEl=document.getElementById('vagasSub');
+  var statusEl=document.getElementById('vagasStatus');
+  var fillEl=document.getElementById('vagasFill');
+  var tagEl=document.getElementById('vagasTag');
+  var btnEl=document.getElementById('btnSubmit');
+
+  if(numEl)numEl.textContent=restantes;
+  if(fillEl)setTimeout(function(){fillEl.style.width=pct+'%'},300);
+
+  if(restantes===0){
+    if(subEl)subEl.textContent='Todas as vagas da primeira turma foram preenchidas.';
+    if(statusEl)statusEl.textContent='Turma completa';
+    if(tagEl)tagEl.classList.add('vagas-esgotadas');
+    if(btnEl){btnEl.textContent='Entrar na lista de espera';btnEl.closest('form').dataset.espera='1'}
+  }else if(restantes<=3){
+    if(subEl)subEl.textContent=preenchidas+' de '+TOTAL_VAGAS+' vagas preenchidas. Restam apenas '+restantes+'.';
+    if(statusEl)statusEl.textContent='Últimas vagas';
+  }else{
+    if(subEl)subEl.textContent=preenchidas+' de '+TOTAL_VAGAS+' vagas preenchidas. Garanta a sua.';
+    if(statusEl)statusEl.textContent='Vagas abertas';
+  }
+}
+
+function carregarVagas(){
+  fetch(SUPA_URL+'/rest/v1/rpc/count_leads_agruai',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+  }).then(function(r){return r.json()}).then(function(n){
+    if(typeof n==='number')atualizarVagas(n);
+  }).catch(function(){});
+}
+carregarVagas();
+
+function mostrarObrigado(){
+  var f=document.getElementById('formWrap');
+  var o=document.getElementById('obrigado');
+  var s=document.querySelector('.form-sub');
+  if(f)f.style.display='none';
+  if(s)s.style.display='none';
+  if(o)o.classList.add('visivel');
+  history.replaceState(null,null,'#obrigado');
+  carregarVagas();
+}
+
+/* === Obrigado state (reload) === */
+(function(){
+  if(window.location.hash==='#obrigado')mostrarObrigado();
+  window.addEventListener('hashchange',function(){if(window.location.hash==='#obrigado')mostrarObrigado()});
+})();
+
+/* === Subtle parallax on hero topo === */
+(function(){
+  var topo=document.querySelector('.hero-topo svg');
+  if(!topo||window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var ticking=false;
+  window.addEventListener('scroll',function(){
+    if(!ticking){requestAnimationFrame(function(){
+      var y=window.pageYOffset;
+      if(y<window.innerHeight){topo.style.transform='translateY('+y*.08+'px)'}
+      ticking=false;
+    });ticking=true}
+  },{passive:true});
+})();
+</script>
+</body>
+</html>
