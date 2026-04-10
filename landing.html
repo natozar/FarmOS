@@ -281,12 +281,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
     <p class="form-sub reveal reveal-d1">20 proprietários vão ajudar a construir a plataforma definitiva de inteligência rural. Sem custo na fase pioneira.</p>
 
     <div class="form-wrap reveal reveal-d2" id="formWrap">
-      <form id="leadForm" action="https://formsubmit.co/chatsagrado@gmail.com" method="POST">
-        <input type="hidden" name="_subject" value="AgrUAI — Novo interesse Agrishow">
-        <input type="hidden" name="_captcha" value="true">
-        <input type="hidden" name="_template" value="table">
-        <input type="hidden" name="_next" value="https://natozar.github.io/FarmOS/landing.html#obrigado">
-        <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
+      <form id="leadForm" onsubmit="return enviarLead(event)">
+        <input type="text" name="_honey" id="honey" style="display:none" tabindex="-1" autocomplete="off">
 
         <div class="form-group">
           <label for="nome">Nome completo</label>
@@ -415,31 +411,65 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   });
 })();
 
-/* === Submit feedback === */
-(function(){
-  var form=document.getElementById('leadForm');
-  var btn=document.getElementById('btnSubmit');
-  if(!form||!btn)return;
-  form.addEventListener('submit',function(){
-    btn.textContent='Enviando...';
-    btn.classList.add('enviando');
-  });
-})();
+/* === Supabase config === */
+var SUPA_URL='https://mrourzdxrahpysscckxm.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yb3VyemR4cmFocHlzc2Nja3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODMzMTUsImV4cCI6MjA4ODU1OTMxNX0.A4ueyDJgOu4cbxcHxsMTDBNHkxAOUlWFoYuv88LdnU4';
 
-/* === Obrigado state === */
+/* === Submit to Supabase === */
+function enviarLead(e){
+  e.preventDefault();
+  if(document.getElementById('honey').value)return false;
+  var btn=document.getElementById('btnSubmit');
+  var form=document.getElementById('leadForm');
+  btn.textContent='Enviando...';
+  btn.classList.add('enviando');
+
+  var dados={
+    nome:document.getElementById('nome').value.trim(),
+    contato:document.getElementById('contato').value.trim(),
+    email:document.getElementById('email').value.trim()||null,
+    propriedades:document.getElementById('propriedades').value,
+    regiao:document.getElementById('regiao').value,
+    atividade:document.getElementById('atividade').value,
+    area_total:document.getElementById('area_total').value||null,
+    desafio:document.getElementById('desafio').value.trim()||null,
+    origem:'landing-agrishow-2026'
+  };
+
+  fetch(SUPA_URL+'/rest/v1/leads_agruai',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'apikey':SUPA_KEY,
+      'Authorization':'Bearer '+SUPA_KEY,
+      'Prefer':'return=minimal'
+    },
+    body:JSON.stringify(dados)
+  }).then(function(res){
+    if(res.ok){mostrarObrigado()}
+    else{throw new Error('Erro '+res.status)}
+  }).catch(function(){
+    btn.textContent='Erro — tente novamente';
+    btn.classList.remove('enviando');
+    setTimeout(function(){btn.textContent='Garantir minha vaga'},3000);
+  });
+  return false;
+}
+
+function mostrarObrigado(){
+  var f=document.getElementById('formWrap');
+  var o=document.getElementById('obrigado');
+  var s=document.querySelector('.form-sub');
+  if(f)f.style.display='none';
+  if(s)s.style.display='none';
+  if(o)o.classList.add('visivel');
+  history.replaceState(null,null,'#obrigado');
+}
+
+/* === Obrigado state (reload) === */
 (function(){
-  function check(){
-    if(window.location.hash==='#obrigado'){
-      var f=document.getElementById('formWrap');
-      var o=document.getElementById('obrigado');
-      var s=document.querySelector('.form-sub');
-      if(f)f.style.display='none';
-      if(s)s.style.display='none';
-      if(o)o.classList.add('visivel');
-    }
-  }
-  check();
-  window.addEventListener('hashchange',check);
+  if(window.location.hash==='#obrigado')mostrarObrigado();
+  window.addEventListener('hashchange',function(){if(window.location.hash==='#obrigado')mostrarObrigado()});
 })();
 
 /* === Subtle parallax on hero topo === */
