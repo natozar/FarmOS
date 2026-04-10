@@ -127,18 +127,71 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .form-micro{text-align:center;margin-top:14px;font-size:.75rem;color:#7A7268;line-height:1.5}
 
 /* === OBRIGADO === */
-.obrigado{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px;min-height:400px}
-.obrigado.visivel{display:flex;animation:obgIn .6s ease}
-@keyframes obgIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-.obrigado-check{width:88px;height:88px;margin-bottom:28px}
-.obrigado-check circle{stroke:#C5A572;stroke-width:2;fill:none;stroke-dasharray:188;stroke-dashoffset:188;animation:drawCircle .7s cubic-bezier(.4,0,.2,1) forwards}
-.obrigado-check polyline{stroke:#C5A572;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:drawCheck .4s ease .6s forwards}
-@keyframes drawCircle{to{stroke-dashoffset:0}}
-@keyframes drawCheck{to{stroke-dashoffset:0}}
-.obrigado h3{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.5rem;color:#C5A572;margin-bottom:12px}
-.obrigado p{font-size:1rem;color:#D1C9BC;max-width:400px;line-height:1.65;margin-bottom:28px}
-.btn-voltar{display:inline-block;padding:14px 36px;border:1.5px solid #C5A572;color:#C5A572;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.9rem;border-radius:8px;cursor:pointer;background:transparent;transition:all .25s ease}
-.btn-voltar:hover{background:rgba(197,165,114,.08);transform:translateY(-1px)}
+.obrigado{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px;min-height:400px;position:relative}
+.obrigado.visivel{display:flex;animation:obgIn .7s cubic-bezier(.4,0,.2,1)}
+@keyframes obgIn{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.obg-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.obg-bg svg{width:100%;height:100%;opacity:.04}
+.obg-scan{position:absolute;top:-2px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(74,144,164,.6),rgba(197,165,114,.4),transparent);animation:scanLine 4s ease-in-out infinite;z-index:1}
+@keyframes scanLine{0%{top:-2px;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+.confirm-card{position:relative;z-index:2;background:linear-gradient(165deg,rgba(26,46,26,.7) 0%,rgba(15,31,15,.6) 100%);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(197,165,114,.1);border-radius:28px;padding:44px 32px 36px;max-width:430px;width:100%;overflow:hidden;text-align:center}
+.confirm-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 5%,#4A90A4 25%,#C5A572 50%,#4A90A4 75%,transparent 95%);background-size:200% 100%;animation:borderShimmer 3s ease infinite}
+@keyframes borderShimmer{0%,100%{background-position:0% 0%}50%{background-position:200% 0%}}
+.confirm-card::after{content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(74,144,164,.05) 0%,transparent 70%);pointer-events:none}
+@media(max-width:480px){.confirm-card{padding:36px 20px 28px;border-radius:20px}}
+.sat-wrap{width:120px;height:120px;margin:0 auto 24px;position:relative}
+.sat-ring-outer{position:absolute;inset:0;border:1px solid rgba(197,165,114,.12);border-radius:50%}
+.sat-ring-mid{position:absolute;inset:12px;border:1px solid rgba(74,144,164,.14);border-radius:50%;transform:rotate(60deg)}
+.sat-ring-inner{position:absolute;inset:26px;border:1px dashed rgba(197,165,114,.08);border-radius:50%;transform:rotate(-30deg)}
+.sat-body{position:absolute;width:10px;height:10px;top:50%;left:50%;margin:-5px 0 0 -5px;animation:orbitSat 3.5s linear infinite}
+.sat-core{width:10px;height:10px;background:#C5A572;border-radius:50%;box-shadow:0 0 10px rgba(197,165,114,.7),0 0 24px rgba(197,165,114,.35),0 0 48px rgba(197,165,114,.12)}
+.sat-trail{position:absolute;top:50%;left:50%;width:32px;height:2px;background:linear-gradient(90deg,rgba(197,165,114,.5),transparent);transform:translate(-100%,-50%);border-radius:1px}
+@keyframes orbitSat{from{transform:rotate(0deg) translateY(-55px) rotate(0deg)}to{transform:rotate(360deg) translateY(-55px) rotate(-360deg)}}
+.sat-body-2{position:absolute;width:6px;height:6px;top:50%;left:50%;margin:-3px 0 0 -3px;animation:orbitSat2 5.2s linear infinite}
+.sat-core-2{width:6px;height:6px;background:#4A90A4;border-radius:50%;box-shadow:0 0 6px rgba(74,144,164,.6),0 0 16px rgba(74,144,164,.2)}
+.sat-trail-2{position:absolute;top:50%;left:50%;width:18px;height:1.5px;background:linear-gradient(90deg,rgba(74,144,164,.35),transparent);transform:translate(-100%,-50%);border-radius:1px}
+@keyframes orbitSat2{from{transform:rotate(120deg) translateY(-38px) rotate(-120deg)}to{transform:rotate(480deg) translateY(-38px) rotate(-480deg)}}
+.sat-center{position:absolute;inset:30px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(37,211,102,.06) 0%,rgba(37,211,102,.02) 50%,transparent 70%);border-radius:50%}
+.sat-center svg{width:32px;height:32px}
+.sat-center polyline{stroke:#25D366;stroke-width:2.8;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30;animation:drawSatCheck .5s ease .5s forwards}
+@keyframes drawSatCheck{to{stroke-dashoffset:0}}
+.sat-pulse{position:absolute;inset:22px;border:1px solid rgba(37,211,102,.15);border-radius:50%;animation:pulseRing 2.5s ease-out infinite}
+.sat-pulse-2{position:absolute;inset:22px;border:1px solid rgba(74,144,164,.1);border-radius:50%;animation:pulseRing 2.5s ease-out 1.2s infinite}
+@keyframes pulseRing{0%{transform:scale(1);opacity:.3}100%{transform:scale(1.6);opacity:0}}
+.confirm-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:24px;background:linear-gradient(135deg,rgba(74,144,164,.1),rgba(74,144,164,.05));border:1px solid rgba(74,144,164,.2);font-family:'Space Grotesk',sans-serif;font-size:.65rem;font-weight:600;color:#5DA8BE;letter-spacing:.08em;text-transform:uppercase;margin-bottom:22px}
+.confirm-badge-dot{width:6px;height:6px;border-radius:50%;background:#4A90A4;position:relative}
+.confirm-badge-dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(74,144,164,.3);animation:dotPing 2s ease infinite}
+@keyframes dotPing{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.5);opacity:0}}
+.confirm-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.6rem;color:#F5F0E8;margin-bottom:8px;letter-spacing:-.03em;line-height:1.2}
+.confirm-gold{color:#C5A572}
+.confirm-sub{font-size:.85rem;color:#A89E90;line-height:1.65;margin-bottom:30px;max-width:340px;margin-left:auto;margin-right:auto}
+.confirm-sub strong{color:#D1C9BC;font-weight:500}
+.confirm-info{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;padding:20px 8px;margin:0 -8px 28px;border-top:1px solid rgba(197,165,114,.06);border-bottom:1px solid rgba(197,165,114,.06);position:relative}
+.confirm-info::before{content:'';position:absolute;top:0;left:33.3%;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(197,165,114,.08),transparent)}
+.confirm-info::after{content:'';position:absolute;top:0;left:66.6%;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(197,165,114,.08),transparent)}
+.confirm-info-item{text-align:center}
+.confirm-info-label{font-size:.55rem;color:#7A7268;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-weight:500}
+.confirm-info-value{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;color:#F5F0E8;letter-spacing:-.01em}
+.confirm-info-value.gold{color:#C5A572}
+.confirm-info-value.blue{color:#5DA8BE}
+@media(max-width:360px){.confirm-info{gap:0;padding:16px 4px}.confirm-info-value{font-size:.92rem}}
+.confirm-wa{display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;border:1px solid rgba(37,211,102,.15);border-radius:14px;background:linear-gradient(135deg,rgba(37,211,102,.04),rgba(37,211,102,.02));cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);text-decoration:none;color:inherit;margin-bottom:20px;position:relative;overflow:hidden}
+.confirm-wa::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,211,102,.06),transparent);opacity:0;transition:opacity .3s}
+.confirm-wa:hover{border-color:rgba(37,211,102,.3);transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,211,102,.08)}
+.confirm-wa:hover::before{opacity:1}
+.confirm-wa-icon{width:40px;height:40px;border-radius:12px;background:rgba(37,211,102,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.confirm-wa-icon svg{width:20px;height:20px;fill:#25D366}
+.confirm-wa-text{text-align:left;flex:1}
+.confirm-wa-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.85rem;color:#25D366;margin-bottom:3px}
+.confirm-wa-hint{font-size:.7rem;color:#7A7268;line-height:1.45}
+.confirm-wa-arrow{color:#25D366;opacity:.4;font-size:1.1rem;transition:all .3s}
+.confirm-wa:hover .confirm-wa-arrow{opacity:.8;transform:translateX(3px)}
+.confirm-footer{display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid rgba(197,165,114,.04)}
+.confirm-footer-logo{font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:-.01em;color:#7A7268}
+.confirm-footer-logo .fl{color:#A89E90}
+.confirm-footer-logo .fg{color:rgba(197,165,114,.5)}
+.confirm-voltar{font-size:.72rem;color:#7A7268;cursor:pointer;background:none;border:none;font-family:'Inter',sans-serif;padding:6px 12px;transition:all .2s;border-radius:6px}
+.confirm-voltar:hover{color:#D1C9BC;background:rgba(197,165,114,.04)}
 
 /* === FOOTER === */
 .footer{padding:48px 0;background:#0F1F0F;text-align:center;position:relative}
@@ -148,20 +201,19 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .footer p{font-size:.8rem;color:#7A7268;line-height:1.6}
 .footer .tagline{font-size:.75rem;color:#A89E90;margin-top:6px;letter-spacing:.03em}
 
-/* COMPARTILHAR */
-.share-whatsapp{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border:1.5px solid #25D366;color:#25D366;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.85rem;border-radius:8px;cursor:pointer;background:transparent;transition:all .25s ease;margin-bottom:16px;letter-spacing:.01em;text-decoration:none}
-.share-whatsapp:hover{background:rgba(37,211,102,.08);transform:translateY(-1px);box-shadow:0 4px 16px rgba(37,211,102,.12)}
-.share-whatsapp:active{transform:translateY(0) scale(.98)}
-.share-whatsapp svg{width:20px;height:20px;flex-shrink:0}
-.share-divider{font-size:.72rem;color:#7A7268;margin-bottom:20px;letter-spacing:.02em}
-
 /* FOCUS VISIBLE */
 :focus-visible{outline:2px solid #C5A572;outline-offset:3px;border-radius:4px}
 @media(prefers-reduced-motion:reduce){
 .reveal,.hero-content>*{opacity:1;transform:none;transition:none;animation:none}
 .scroll-hint{animation:none}
-.obrigado-check circle,.obrigado-check polyline{animation:none;stroke-dashoffset:0}
 .btn-submit.enviando::after{animation:none}
+.obrigado.visivel{animation:none}
+.sat-body,.sat-body-2{animation:none;opacity:.5}
+.sat-pulse,.sat-pulse-2{animation:none;opacity:0}
+.sat-center polyline{animation:none;stroke-dashoffset:0}
+.confirm-badge-dot::after{animation:none}
+.obg-scan{animation:none;opacity:0}
+.confirm-card::before{animation:none}
 }
 </style>
 </head>
@@ -376,18 +428,47 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 
     <!-- OBRIGADO -->
     <div class="obrigado" id="obrigado">
-      <svg class="obrigado-check" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="32" cy="32" r="30"/>
-        <polyline points="20,34 28,42 44,24"/>
-      </svg>
-      <h3>Reserva registrada.</h3>
-      <p>Você está entre os primeiros. Entraremos em contato antes do lançamento.</p>
-      <a class="share-whatsapp" href="https://api.whatsapp.com/send?text=Achei%20uma%20ferramenta%20de%20monitoramento%20por%20sat%C3%A9lite%20pra%20quem%20tem%20v%C3%A1rias%20fazendas.%20T%C3%A3o%20abrindo%20vagas%20limitadas%20pra%20teste.%20D%C3%A1%20uma%20olhada%3A%20https%3A%2F%2Fagruai.com" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        Mandar pra um amigo
-      </a>
-      <p class="share-divider">Vagas são limitadas — ele vai agradecer.</p>
-      <button class="btn-voltar" onclick="window.scrollTo({top:0,behavior:'smooth'});history.replaceState(null,null,' ');">Voltar ao início</button>
+      <div class="obg-bg">
+        <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+          <defs><pattern id="obgGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0v40" fill="none" stroke="#C5A572" stroke-width=".3"/></pattern></defs>
+          <rect width="100%" height="100%" fill="url(#obgGrid)"/>
+          <circle cx="400" cy="300" r="120" fill="none" stroke="#4A90A4" stroke-width=".4" stroke-dasharray="4 6" opacity=".5"/>
+          <circle cx="400" cy="300" r="200" fill="none" stroke="#4A90A4" stroke-width=".3" stroke-dasharray="2 8" opacity=".3"/>
+          <circle cx="400" cy="300" r="280" fill="none" stroke="#C5A572" stroke-width=".2" stroke-dasharray="1 10" opacity=".2"/>
+          <line x1="0" y1="300" x2="800" y2="300" stroke="#4A90A4" stroke-width=".2" stroke-dasharray="4 12" opacity=".2"/>
+          <line x1="400" y1="0" x2="400" y2="600" stroke="#4A90A4" stroke-width=".2" stroke-dasharray="4 12" opacity=".2"/>
+        </svg>
+        <div class="obg-scan"></div>
+      </div>
+      <div class="confirm-card">
+        <div class="sat-wrap">
+          <div class="sat-ring-outer"></div>
+          <div class="sat-ring-mid"></div>
+          <div class="sat-ring-inner"></div>
+          <div class="sat-pulse"></div>
+          <div class="sat-pulse-2"></div>
+          <div class="sat-body"><div class="sat-core"></div><div class="sat-trail"></div></div>
+          <div class="sat-body-2"><div class="sat-core-2"></div><div class="sat-trail-2"></div></div>
+          <div class="sat-center"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><polyline points="9,19 15,25 27,12"/></svg></div>
+        </div>
+        <div class="confirm-badge"><span class="confirm-badge-dot"></span>Posição garantida</div>
+        <h3 class="confirm-title">Você está <span class="confirm-gold">dentro.</span></h3>
+        <p class="confirm-sub">Suas fazendas vão ser monitoradas por satélite antes de qualquer outro produtor no Brasil. <strong>Nós entramos em contato.</strong></p>
+        <div class="confirm-info">
+          <div class="confirm-info-item"><div class="confirm-info-label">Programa</div><div class="confirm-info-value">AgrUAI</div></div>
+          <div class="confirm-info-item"><div class="confirm-info-label">Restam</div><div class="confirm-info-value gold" id="obrigadoVagas">— de 10</div></div>
+          <div class="confirm-info-item"><div class="confirm-info-label">Status</div><div class="confirm-info-value blue">● Ativo</div></div>
+        </div>
+        <a class="confirm-wa" href="https://api.whatsapp.com/send?text=Estou%20testando%20uma%20plataforma%20de%20monitoramento%20por%20sat%C3%A9lite%20pra%20quem%20administra%20v%C3%A1rias%20fazendas.%20S%C3%B3%20t%C3%AAm%2010%20vagas%20e%20t%C3%A3o%20fechando.%20D%C3%A1%20uma%20olhada%3A%20https%3A%2F%2Fagruai.com" target="_blank" rel="noopener">
+          <div class="confirm-wa-icon"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
+          <div class="confirm-wa-text"><div class="confirm-wa-title">Indicar um produtor</div><div class="confirm-wa-hint">Conhece outro produtor que ia querer isso? Mande antes que feche.</div></div>
+          <span class="confirm-wa-arrow">›</span>
+        </a>
+        <div class="confirm-footer">
+          <div class="confirm-footer-logo"><span class="fl">Agr</span><span class="fg">UAI</span> · Inteligência Rural</div>
+          <button class="confirm-voltar" onclick="window.scrollTo({top:0,behavior:'smooth'});history.replaceState(null,null,' ');">← Voltar</button>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -521,6 +602,7 @@ function mostrarObrigado(){
   if(o)o.classList.add('visivel');
   history.replaceState(null,null,'#obrigado');
   carregarVagas();
+  setTimeout(function(){var ov=document.getElementById('obrigadoVagas');if(ov){var vt=document.querySelector('.vagas-tag');if(vt){var nums=vt.textContent.match(/\d+/g);if(nums&&nums.length>=2)ov.textContent=nums[0]+' de '+nums[1];}}},500);
 }
 
 /* === Obrigado state (reload) === */
