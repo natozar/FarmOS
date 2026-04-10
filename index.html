@@ -104,7 +104,7 @@ button{cursor:pointer}
 .conexao-ping{color:var(--muted);font-size:.65rem}
 
 /* NOTIFICATION BELL */
-.notif-btn{position:relative;font-size:1.2rem;padding:6px;border-radius:var(--radius-sm);transition:background var(--transition)}
+.notif-btn{position:relative;font-size:1.2rem;padding:10px;border-radius:var(--radius-sm);transition:background var(--transition);min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
 .notif-btn:hover{background:rgba(255,255,255,.05)}
 .notif-badge{position:absolute;top:0;right:0;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;transform:scale(0);transition:transform .3s ease;font-family:'DM Sans',sans-serif}
 .notif-badge.visivel{transform:scale(1)}
@@ -226,7 +226,7 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
 .sat-section{margin-top:20px}
 .sat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .sat-header h4{font-size:.95rem;margin:0}
-.btn-sat{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--gold);color:var(--gold);font-size:.75rem;font-weight:600;transition:all .2s;white-space:nowrap}
+.btn-sat{display:flex;align-items:center;gap:5px;padding:10px 16px;border-radius:20px;min-height:44px;border:1.5px solid var(--gold);color:var(--gold);font-size:.75rem;font-weight:600;transition:all .2s;white-space:nowrap}
 .btn-sat:hover{background:var(--gold);color:var(--dark)}
 .btn-sat.ativo{background:var(--gold);color:var(--dark)}
 .sat-panel{margin-top:10px;background:rgba(13,27,42,.5);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;display:none;animation:fadeSlideIn .3s ease forwards}
@@ -478,7 +478,7 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
 /* BOTTOM NAV */
 .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:100;padding:4px 0;padding-bottom:calc(4px + var(--sab))}
 .bottom-nav-inner{display:flex;justify-content:space-around}
-.bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;font-size:.62rem;color:var(--muted);transition:color var(--transition);text-decoration:none;flex:1;min-height:48px;min-width:48px;justify-content:center}
+.bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;font-size:.68rem;color:var(--muted);transition:color var(--transition);text-decoration:none;flex:1;min-height:48px;min-width:48px;justify-content:center}
 .bottom-nav-item .bnav-icon{font-size:1.2rem}
 .bottom-nav-item.ativo{color:var(--green)}
 
@@ -519,7 +519,7 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
   .mapa-container{height:55vh;min-height:280px}
   .modal{padding:20px;margin:10px}.modal-grid{grid-template-columns:1fr}
   .chart-wrap{height:220px}
-  .notif-dropdown{width:calc(100vw - 40px);right:-60px}
+  .notif-dropdown{width:calc(100vw - 32px);right:-10px;left:auto;max-width:360px}
   .conexao-status{display:none}
   .pasto-grid{grid-template-columns:1fr}
   .top-bar h2{font-size:var(--text-xl)}
@@ -545,7 +545,7 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
 <body>
 
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-<button class="hamburger" id="btnHamburger">☰</button>
+<button class="hamburger" id="btnHamburger" aria-label="Abrir menu">☰</button>
 
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
@@ -578,7 +578,7 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
     </div>
     <div class="global-bar-right">
       <button class="btn-modo-toggle" id="btnModoToggle" onclick="alternarModo()"><span id="btnModoTexto">👷 Modo Gestor</span></button>
-      <div style="position:relative"><button class="notif-btn" id="notifBtn">🔔<span class="notif-badge" id="notifBadge">0</span></button><div class="notif-dropdown" id="notifDropdown"><div class="notif-header" id="notifHeader">Notificações</div><div id="notifLista"></div></div></div>
+      <div style="position:relative"><button class="notif-btn" id="notifBtn" aria-label="Notificações">🔔<span class="notif-badge" id="notifBadge">0</span></button><div class="notif-dropdown" id="notifDropdown"><div class="notif-header" id="notifHeader">Notificações</div><div id="notifLista"></div></div></div>
       <div class="atualizado"><span class="dot-live"></span> <span id="tempoAtualizado">Ao vivo</span></div>
     </div>
   </div>
@@ -654,15 +654,14 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav"><div class="bottom-nav-inner">
   <a class="bottom-nav-item ativo" data-tela="mapa" href="#mapa"><span class="bnav-icon">📍</span>Mapa</a>
-  <a class="bottom-nav-item" data-tela="dashboard" href="#dashboard"><span class="bnav-icon">📊</span>Dashboard</a>
+  <a class="bottom-nav-item" data-tela="dashboard" href="#dashboard"><span class="bnav-icon">📊</span>Painel</a>
   <a class="bottom-nav-item" data-tela="propriedades" href="#propriedades"><span class="bnav-icon">🌾</span>Fazendas</a>
   <a class="bottom-nav-item" data-tela="rebanho" href="#rebanho"><span class="bnav-icon">🐄</span>Rebanho</a>
   <a class="bottom-nav-item" data-tela="central" href="#central"><span class="bnav-icon">📡</span>Ao Vivo</a>
-  <a class="bottom-nav-item" href="#" id="bnav-gestor" onclick="event.preventDefault();alternarModo()" style="color:var(--amber)"><span class="bnav-icon">👷</span>Gestor</a>
 </div></nav>
 
 <!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalConteudo"></div></div>
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true"><div class="modal" id="modalConteudo"></div></div>
 
 <!-- GESTOR OVERLAY -->
 <div class="gestor-overlay" id="gestorOverlay"><div class="gestor-container" id="gestorConteudo"></div></div>
@@ -673,7 +672,7 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
 </div>
 
 <!-- FAB RECADOS -->
-<button class="fab-recados" id="fabRecados" onclick="abrirCentralRecados()" title="Enviar recado às fazendas">📨</button>
+<button class="fab-recados" id="fabRecados" onclick="abrirCentralRecados()" title="Enviar recado às fazendas" aria-label="Central de Recados">📨</button>
 
 <!-- RECADOS OVERLAY -->
 <div class="recados-overlay" id="recadosOverlay"><div class="recados-container" id="recadosConteudo"></div></div>
@@ -783,7 +782,7 @@ var dLat=(f.area/100000)*.35;var dLng=(f.area/100000)*.45;var bounds=[[f.coords[
 
 function toggleSatelite(id){var f=fazendas.find(function(x){return x.id===id});if(!f)return;var overlay=AppState.miniMapas['overlay_'+id];var ativo=AppState.miniMapas['satAtivo_'+id];var btn=document.getElementById('btnSat'+id);var panel=document.getElementById('satPanel'+id);if(!ativo){overlay.setOpacity(.88);btn.innerHTML='🗺️ Mapa Normal';btn.classList.add('ativo');panel.classList.add('visivel');AppState.miniMapas['satAtivo_'+id]=true;mostrarToast('🛰️ Sentinel-2 · NDVI: '+f.ndvi.toFixed(2),'sucesso')}else{overlay.setOpacity(0);btn.innerHTML='🛰️ Ver Satélite';btn.classList.remove('ativo');panel.classList.remove('visivel');AppState.miniMapas['satAtivo_'+id]=false}}
 function gerarHistorico7Dias(f){var dias=[];for(var i=6;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);dias.push({data:d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}),rebanho:f.rebanho.total+Math.floor((Math.random()-.5)*30),ndvi:+(f.ndvi+(Math.random()-.5)*.06).toFixed(2),checkin:i===0?(f.checkin||'—'):('0'+(6+Math.floor(Math.random()*3))+':'+String(Math.floor(Math.random()*60)).padStart(2,'0'))})}return dias}
-function fecharModal(){document.getElementById('modalOverlay').classList.remove('aberto');Object.keys(AppState.miniMapas).forEach(function(k){AppState.miniMapas[k].remove();delete AppState.miniMapas[k]})}
+function fecharModal(){document.getElementById('modalOverlay').classList.remove('aberto');Object.keys(AppState.miniMapas).forEach(function(k){try{if(AppState.miniMapas[k]&&typeof AppState.miniMapas[k].remove==='function')AppState.miniMapas[k].remove()}catch(e){}delete AppState.miniMapas[k]})}
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)fecharModal()});
 
 /* ========== REBANHO ========== */
@@ -822,16 +821,16 @@ function dispararEventosAuto(){eventosAuto.forEach(function(ev){setTimeout(funct
 
 /* ========== GESTOR — WIZARD 5 PASSOS ========== */
 function ativarModoGestor(){AppState.gestorPasso=1;var f=fazendas[0];AppState.gestorDados={cria:f.rebanho.cria,recria:f.rebanho.recria,confinamento:f.rebanho.confinamento,pasto:'Pasto Norte',temOcorrencia:false,tipoOcorrencia:[],descOcorrencia:'',fotoTirada:false};renderizarGestor();document.getElementById('gestorOverlay').classList.add('aberto');document.getElementById('fabRecados').classList.add('oculto')}
-function fecharGestor(){document.getElementById('gestorOverlay').classList.remove('aberto');document.getElementById('fabRecados').classList.remove('oculto');var btn=document.getElementById('btnModoToggle');if(btn){btn.classList.remove('gestor-ativo');document.getElementById('btnModoTexto').textContent='👷 Modo Gestor';var badge=document.getElementById('modoBadge');badge.textContent='👔 Proprietário';badge.className='modo-badge prop';var bnav=document.getElementById('bnav-gestor');if(bnav)bnav.style.color='var(--amber)'}}
+function fecharGestor(){document.getElementById('gestorOverlay').classList.remove('aberto');document.getElementById('fabRecados').classList.remove('oculto');var btn=document.getElementById('btnModoToggle');if(btn){btn.classList.remove('gestor-ativo');document.getElementById('btnModoTexto').textContent='👷 Modo Gestor';var badge=document.getElementById('modoBadge');badge.textContent='👔 Proprietário';badge.className='modo-badge prop'}}
 function renderizarGestor(){var f=fazendas[0];var p=AppState.gestorPasso;var d=AppState.gestorDados;var total=d.cria+d.recria+d.confinamento;var passoLabels=['Rebanho','Pasto','Foto','Ocorrência','Enviar'];var progressHTML='<div class="progress-bar">';for(var i=1;i<=5;i++){var cls=i<p?'feito':i===p?'ativo':'';progressHTML+='<div class="progress-step '+cls+'">'+(i<p?'✓':i)+'</div>';if(i<5)progressHTML+='<div class="progress-line'+(i<p?' feito':'')+'"></div>'}progressHTML+='<div class="progress-texto">Passo '+p+' de 5 — '+passoLabels[p-1]+'</div></div>';
 var headerHTML='<div class="gestor-top"><h2>👷 FarmOS Gestor</h2><button class="btn-voltar" style="width:auto;padding:8px 16px;margin:0" onclick="fecharGestor()">← Voltar</button></div><div class="gestor-info"><div class="gestor-info-nome">'+f.gestor+'</div><div class="gestor-info-detalhe">📍 '+f.nome+' — '+f.municipio+'/'+f.estado+'<br>⏰ Hoje: '+obterDataCurta()+' | Último check-in: '+(f.checkin||'—')+'</div></div>';
 var stepHTML='';
 if(p===1){stepHTML='<div class="wizard-step ativo"><h3 class="wizard-titulo">🐄 Contagem do Rebanho</h3><div class="counter-group"><div class="counter-label">Lote A — Cria</div><div class="counter-row"><button class="counter-btn" onclick="ajustarContagem(\'cria\',-10)">−</button><div class="counter-valor" id="valCria">'+formatarNumero(d.cria)+'</div><button class="counter-btn" onclick="ajustarContagem(\'cria\',10)">+</button></div></div><div class="counter-group"><div class="counter-label">Lote B — Recria</div><div class="counter-row"><button class="counter-btn" onclick="ajustarContagem(\'recria\',-10)">−</button><div class="counter-valor" id="valRecria">'+formatarNumero(d.recria)+'</div><button class="counter-btn" onclick="ajustarContagem(\'recria\',10)">+</button></div></div><div class="counter-group"><div class="counter-label">Confinamento</div><div class="counter-row"><button class="counter-btn" onclick="ajustarContagem(\'confinamento\',-10)">−</button><div class="counter-valor" id="valConfinamento">'+formatarNumero(d.confinamento)+'</div><button class="counter-btn" onclick="ajustarContagem(\'confinamento\',10)">+</button></div></div><div class="counter-total">TOTAL: <strong id="valTotal">'+formatarNumero(total)+'</strong> cabeças</div></div>'}
 else if(p===2){var pastos=['Pasto Norte','Pasto Sul','Pasto Leste','Setor Confinamento'];stepHTML='<div class="wizard-step ativo"><h3 class="wizard-titulo">🌿 Qual pasto está em uso hoje?</h3><div class="pasto-grid">'+pastos.map(function(pp){return'<div class="pasto-option'+(d.pasto===pp?' selecionado':'')+'" onclick="selecionarPastoWizard(this,\''+pp+'\')">'+pp+'</div>'}).join('')+'</div><div class="pasto-info">Área atual: Brachiaria brizantha — 240 ha<br>Dias neste pasto: 12 dias ⚠️ (máx recomendado: 21 dias)</div></div>'}
 else if(p===3){stepHTML='<div class="wizard-step ativo"><h3 class="wizard-titulo">📸 Foto do Pasto de Hoje</h3>'+(d.fotoTirada?'<div class="foto-preview visivel"><div class="foto-preview-img"><div class="foto-preview-meta">📍 '+f.coords[0].toFixed(4)+', '+f.coords[1].toFixed(4)+' · ⏰ '+obterHora()+' — '+obterDataCurta()+'</div></div><div class="foto-preview-actions"><button style="background:var(--border);color:var(--text)" onclick="AppState.gestorDados.fotoTirada=false;renderizarGestor()">🔄 Refazer</button><button style="background:var(--green);color:#fff">✅ Usar esta</button></div></div>':'<div class="foto-capture" onclick="AppState.gestorDados.fotoTirada=true;renderizarGestor()"><div class="foto-capture-icon">📷</div><div class="foto-capture-text">Toque para capturar foto<br><span style="font-size:.75rem">ou escolher da galeria</span></div></div>')+'</div>'}
-else if(p===4){var tipos=[{icon:'🐄',label:'Animal doente/morto'},{icon:'🔧',label:'Equipamento'},{icon:'🌿',label:'Pasto/cerca'},{icon:'💧',label:'Água/irrigação'},{icon:'👤',label:'Pessoa/segurança'},{icon:'🌪️',label:'Clima/desastre'}];stepHTML='<div class="wizard-step ativo"><h3 class="wizard-titulo">⚠️ Alguma ocorrência hoje?</h3><div class="ocorrencia-toggle"><button class="sem-oc'+(d.temOcorrencia?'':' ativo')+'" onclick="AppState.gestorDados.temOcorrencia=false;AppState.gestorDados.tipoOcorrencia=[];renderizarGestor()">✅ Não, tudo normal</button><button class="com-oc'+(d.temOcorrencia?' ativo':'')+'" onclick="AppState.gestorDados.temOcorrencia=true;renderizarGestor()">⚠️ Sim, registrar</button></div>'+(d.temOcorrencia?'<p style="font-size:.75rem;color:var(--muted);margin-bottom:8px">Selecione uma ou mais categorias:</p><div class="tipo-ocorrencia-grid">'+tipos.map(function(t){return'<div class="tipo-oc-btn'+(d.tipoOcorrencia.indexOf(t.label)>=0?' ativo':'')+'" onclick="toggleTipoOcorrencia(\''+t.label+'\')">'+t.icon+'<br>'+t.label+'</div>'}).join('')+'</div><textarea class="form-textarea" placeholder="Descreva o que aconteceu..." onchange="AppState.gestorDados.descOcorrencia=this.value">'+d.descOcorrencia+'</textarea>':'')+'</div>'}
+else if(p===4){var tipos=[{icon:'🐄',label:'Animal doente/morto'},{icon:'🔧',label:'Equipamento'},{icon:'🌿',label:'Pasto/cerca'},{icon:'💧',label:'Água/irrigação'},{icon:'👤',label:'Pessoa/segurança'},{icon:'🌪️',label:'Clima/desastre'}];stepHTML='<div class="wizard-step ativo"><h3 class="wizard-titulo">⚠️ Alguma ocorrência hoje?</h3><div class="ocorrencia-toggle"><button class="sem-oc'+(d.temOcorrencia?'':' ativo')+'" onclick="AppState.gestorDados.temOcorrencia=false;AppState.gestorDados.tipoOcorrencia=[];renderizarGestor()">✅ Não, tudo normal</button><button class="com-oc'+(d.temOcorrencia?' ativo':'')+'" onclick="AppState.gestorDados.temOcorrencia=true;renderizarGestor()">⚠️ Sim, registrar</button></div>'+(d.temOcorrencia?'<p style="font-size:.75rem;color:var(--muted);margin-bottom:8px">Selecione uma ou mais categorias:</p><div class="tipo-ocorrencia-grid">'+tipos.map(function(t){return'<div class="tipo-oc-btn'+(d.tipoOcorrencia.indexOf(t.label)>=0?' ativo':'')+'" onclick="toggleTipoOcorrencia(\''+t.label+'\')">'+t.icon+'<br>'+t.label+'</div>'}).join('')+'</div><textarea class="form-textarea" placeholder="Descreva o que aconteceu..." oninput="AppState.gestorDados.descOcorrencia=this.value">'+d.descOcorrencia+'</textarea>':'')+'</div>'}
 else if(p===5){stepHTML='<div class="wizard-step ativo"><h3 class="wizard-titulo">✅ Resumo do Check-in</h3><div class="resumo-card"><div class="resumo-item"><span class="resumo-icon">📍</span> '+f.nome+'</div><div class="resumo-item"><span class="resumo-icon">📅</span> '+obterDataCurta()+' — '+obterHora()+'</div><div class="resumo-item"><span class="resumo-icon">👷</span> '+f.gestor+'</div><div class="resumo-item"><span class="resumo-icon">🐄</span> Rebanho: <strong>'+formatarNumero(total)+'</strong> cabeças</div><div class="resumo-item"><span class="resumo-icon">🌿</span> '+d.pasto+'</div><div class="resumo-item"><span class="resumo-icon">📸</span> '+(d.fotoTirada?'1 foto enviada':'Nenhuma foto')+'</div><div class="resumo-item"><span class="resumo-icon">⚠️</span> Ocorrências: '+(d.temOcorrencia&&d.tipoOcorrencia.length>0?d.tipoOcorrencia.join(', ')+(d.descOcorrencia?' — '+d.descOcorrencia:''):'Nenhuma')+'</div></div><button class="btn-enviar" onclick="enviarCheckinAnimado()">ENVIAR CHECK-IN</button></div>'}
-var navHTML='';if(p<5){navHTML='<div class="btn-nav-wizard">'+(p>1?'<button class="btn-anterior" onclick="AppState.gestorPasso--;renderizarGestor()">← Anterior</button>':'')+'<button class="btn-proximo" onclick="AppState.gestorPasso++;renderizarGestor()">Próximo →</button></div>'}else if(p>1&&p<5){navHTML='<div class="btn-nav-wizard"><button class="btn-anterior" onclick="AppState.gestorPasso--;renderizarGestor()">← Anterior</button></div>'}
+var navHTML='';if(p<5){navHTML='<div class="btn-nav-wizard">'+(p>1?'<button class="btn-anterior" onclick="AppState.gestorPasso--;renderizarGestor()">← Anterior</button>':'')+'<button class="btn-proximo" onclick="AppState.gestorPasso++;renderizarGestor()">Próximo →</button></div>'}else if(p===5){navHTML='<div class="btn-nav-wizard"><button class="btn-anterior" onclick="AppState.gestorPasso=4;renderizarGestor()">← Anterior</button></div>'}
 document.getElementById('gestorConteudo').innerHTML=headerHTML+progressHTML+stepHTML+navHTML}
 
 function ajustarContagem(campo,delta){AppState.gestorDados[campo]=Math.max(0,AppState.gestorDados[campo]+delta);document.getElementById('val'+campo.charAt(0).toUpperCase()+campo.slice(1)).textContent=formatarNumero(AppState.gestorDados[campo]);var total=AppState.gestorDados.cria+AppState.gestorDados.recria+AppState.gestorDados.confinamento;document.getElementById('valTotal').textContent=formatarNumero(total);vibrar([30])}
@@ -898,7 +897,7 @@ function concluirEnvioRecado(){document.getElementById('envioOverlay').classList
 adicionarEventoCentral('recado',destTxt,'Proprietário',recadosState.categoriaEmoji+' '+recadosState.categoriaNome+': '+msgTruncada,true);adicionarNotificacao('info','Recado enviado',destTxt+' — '+recadosState.categoriaNome);mostrarToast('📨 Recado enviado para '+recadosState.fazendasSelecionadas.length+' fazenda(s)','sucesso');navegarPara('central')}
 
 /* ========== MODO TOGGLE ========== */
-function alternarModo(){if(document.getElementById('gestorOverlay').classList.contains('aberto')){fecharGestor();var btn=document.getElementById('btnModoToggle');var badge=document.getElementById('modoBadge');btn.classList.remove('gestor-ativo');document.getElementById('btnModoTexto').textContent='👷 Modo Gestor';badge.textContent='👔 Proprietário';badge.className='modo-badge prop';var bnav=document.getElementById('bnav-gestor');if(bnav)bnav.style.color='var(--amber)';mostrarToast('👔 Painel do Proprietário','sucesso');navegarPara('dashboard')}else{var btn=document.getElementById('btnModoToggle');var badge=document.getElementById('modoBadge');btn.classList.add('gestor-ativo');document.getElementById('btnModoTexto').textContent='👔 Voltar ao Painel';badge.textContent='👷 Gestor de Campo';badge.className='modo-badge gest';var bnav=document.getElementById('bnav-gestor');if(bnav)bnav.style.color='var(--green)';ativarModoGestor();mostrarToast('👷 Modo Gestor ativado','alerta')}}
+function alternarModo(){if(document.getElementById('gestorOverlay').classList.contains('aberto')){fecharGestor();var btn=document.getElementById('btnModoToggle');var badge=document.getElementById('modoBadge');btn.classList.remove('gestor-ativo');document.getElementById('btnModoTexto').textContent='👷 Modo Gestor';badge.textContent='👔 Proprietário';badge.className='modo-badge prop';mostrarToast('👔 Painel do Proprietário','sucesso');navegarPara('dashboard')}else{var btn=document.getElementById('btnModoToggle');var badge=document.getElementById('modoBadge');btn.classList.add('gestor-ativo');document.getElementById('btnModoTexto').textContent='👔 Voltar ao Painel';badge.textContent='👷 Gestor de Campo';badge.className='modo-badge gest';ativarModoGestor();mostrarToast('👷 Modo Gestor ativado','alerta')}}
 
 /* ========== HAPTIC ========== */
 function vibrar(pattern){try{if(navigator.vibrate)navigator.vibrate(pattern)}catch(e){}}
@@ -916,7 +915,7 @@ window.addEventListener('online',function(){atualizarStatusConexao();mostrarToas
 window.addEventListener('offline',function(){atualizarStatusConexao();mostrarToast('Modo offline — dados em cache','alerta')});
 
 /* ========== KEYBOARD NAV ========== */
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(document.getElementById('envioOverlay').classList.contains('aberto'))return;if(document.getElementById('gestorOverlay').classList.contains('aberto')){fecharGestor();return}if(document.getElementById('modalOverlay').classList.contains('aberto')){fecharModal();return}document.getElementById('notifDropdown').classList.remove('aberto')}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(document.getElementById('envioOverlay').classList.contains('aberto'))return;if(document.getElementById('recadosOverlay').classList.contains('aberto')){fecharCentralRecados();return}if(document.getElementById('gestorOverlay').classList.contains('aberto')){fecharGestor();return}if(document.getElementById('modalOverlay').classList.contains('aberto')){fecharModal();return}document.getElementById('notifDropdown').classList.remove('aberto')}});
 
 /* ========== RESIZE DEBOUNCE ========== */
 var resizeTimer;
@@ -925,7 +924,7 @@ window.addEventListener('resize',function(){clearTimeout(resizeTimer);resizeTime
 /* ========== INIT ========== */
 function iniciar(){document.querySelectorAll('.nav-item[data-tela]').forEach(function(item){item.addEventListener('click',function(e){e.preventDefault();navegarPara(this.dataset.tela)})});document.querySelectorAll('.bottom-nav-item[data-tela]').forEach(function(item){item.addEventListener('click',function(e){e.preventDefault();navegarPara(this.dataset.tela)})});document.getElementById('btnHamburger').addEventListener('click',abrirSidebar);document.getElementById('sidebarBackdrop').addEventListener('click',fecharSidebar);document.getElementById('btnGestor').addEventListener('click',ativarModoGestor);
 adicionarNotificacao('critico','Check-in pendente','Faz. Boa Vista — Carlos Mendes não realizou check-in');adicionarNotificacao('atencao','Ocorrência','Faz. Carneirinho — Cerca setor 3 danificada');adicionarNotificacao('info','Check-in OK','Faz. Serra Verde — 1.650 cabeças · Pasto Leste');
-carregarEventosIniciais();var hash=window.location.hash.replace('#','')||'mapa';if(!document.getElementById('tela-'+hash))hash='mapa';renderizarKPIsMapa();navegarPara(hash);setInterval(simularDadosTempoReal,30000);setInterval(atualizarTempo,1000);setInterval(atualizarPing,5000);dispararEventosAuto();atualizarStatusConexao();
+carregarEventosIniciais();var hash=window.location.hash.replace('#','')||'mapa';if(!document.getElementById('tela-'+hash))hash='mapa';renderizarKPIsMapa();navegarPara(hash);AppState.intervals=[setInterval(simularDadosTempoReal,30000),setInterval(atualizarTempo,1000),setInterval(atualizarPing,5000)];dispararEventosAuto();atualizarStatusConexao();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){})}
 document.addEventListener('DOMContentLoaded',iniciar);
 </script>

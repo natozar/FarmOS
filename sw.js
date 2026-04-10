@@ -1,4 +1,4 @@
-const CACHE_NAME = 'farmos-v9';
+const CACHE_NAME = 'farmos-v10';
 const STATIC_ASSETS = [
   './',
   './index.html',
