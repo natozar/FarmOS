@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Dark green background with rounded corners -->
+  <rect width="32" height="32" rx="6" fill="#0F1F0F"/>
+
+  <!-- Simplified terrain contour -->
+  <path d="M5 24 Q10 20, 16 21 Q22 22, 27 18"
+        fill="none" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M4 27 Q10 24, 16 25 Q22 26, 28 22"
+        fill="none" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>
+
+  <!-- Satellite orbit arc -->
+  <path d="M8 9 Q16 4, 24 9"
+        fill="none" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Satellite point -->
+  <circle cx="24" cy="9" r="2.5" fill="#C5A572"/>
+
+  <!-- Signal line -->
+  <line x1="23" y1="12" x2="16" y2="18"
+        stroke="#C5A572" stroke-width="1" stroke-linecap="round" stroke-dasharray="2,2" opacity="0.55"/>
+</svg>

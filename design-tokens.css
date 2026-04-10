@@ -1,0 +1,59 @@
+/* ============================================
+   AgrUAI — Sistema de Design Tokens
+   Paleta inspirada na bandeira do Brasil:
+   Verde da mata, Ouro real, Azul do rio/céu, Branco da paz
+   ============================================ */
+
+:root {
+  /* === VERDE MUSGO ESCURO (Base/Fundo) === */
+  --agr-verde-900: #0F1F0F;    /* Fundo principal, mais profundo */
+  --agr-verde-800: #1A2E1A;    /* Fundo de cards, painéis */
+  --agr-verde-700: #243824;    /* Fundo hover, sidebar */
+  --agr-verde-600: #2E4A2E;    /* Bordas sutis, separadores */
+  --agr-verde-500: #3D5E3D;    /* Texto secundário sobre fundo escuro */
+
+  /* === OURO REAL (Acentos — NÃO dourado brega) === */
+  --agr-ouro-500: #C5A572;     /* Acento principal */
+  --agr-ouro-400: #D4B88A;     /* Hover em elementos ouro */
+  --agr-ouro-300: #E0CAA3;     /* Texto destaque suave */
+  --agr-ouro-600: #B8945A;     /* Bordas e ícones */
+  --agr-ouro-700: #9A7B45;     /* Ouro mais escuro, sombras */
+
+  /* === AZUL ÁGUA/CÉU/RIO (Secundário — dados, mapas, satélite) === */
+  --agr-azul-500: #4A90A4;     /* Azul água — sereno, não corporate */
+  --agr-azul-400: #5DA8BE;     /* Hover, links */
+  --agr-azul-300: #7BBFD4;     /* Indicadores de satélite/mapa */
+  --agr-azul-600: #3A7A8E;     /* Bordas de gráficos */
+  --agr-azul-700: #2B5F6E;     /* Fundo de badges de dados */
+
+  /* === BRANCO/NEUTROS (Texto e paz) === */
+  --agr-branco: #F5F0E8;       /* Off-white quente — texto principal */
+  --agr-branco-puro: #FAFAF7;  /* Títulos de máximo contraste */
+  --agr-cinza-300: #D1C9BC;    /* Texto secundário */
+  --agr-cinza-400: #A89E90;    /* Texto terciário, placeholders */
+  --agr-cinza-500: #7A7268;    /* Texto desabilitado */
+
+  /* === ESTADOS (Alertas e Status) === */
+  --agr-sucesso: #4A8C5C;      /* Verde vivo — check-in ok */
+  --agr-alerta: #D4A040;       /* Âmbar ouro — atenção */
+  --agr-perigo: #C45A4A;       /* Vermelho terra — crítico */
+  --agr-info: #4A90A4;         /* Azul água — informativo */
+
+  /* === SOMBRAS E GLASSMORPHISM === */
+  --agr-sombra-sm: 0 2px 8px rgba(15, 31, 15, 0.3);
+  --agr-sombra-md: 0 4px 16px rgba(15, 31, 15, 0.4);
+  --agr-sombra-lg: 0 8px 32px rgba(15, 31, 15, 0.5);
+  --agr-glass: rgba(26, 46, 26, 0.7);
+  --agr-glass-border: rgba(197, 165, 114, 0.15);
+
+  /* === TIPOGRAFIA === */
+  --font-heading: 'Space Grotesk', 'Inter', sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* === BANDEIRA DO BRASIL — Referência semântica === */
+  /* Verde = mata, floresta, campo → --agr-verde-* */
+  /* Amarelo = ouro, minério, riqueza → --agr-ouro-* */
+  /* Azul = rio, água, céu, satélite → --agr-azul-* */
+  /* Branco = paz, clareza, legibilidade → --agr-branco* */
+}

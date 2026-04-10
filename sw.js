@@ -1,4 +1,4 @@
-const CACHE_NAME = 'farmos-v10';
+const CACHE_NAME = 'agruai-v1';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -11,8 +11,8 @@ const STATIC_ASSETS = [
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
 ];
 
-const FONT_CACHE = 'farmos-fonts-v1';
-const MAP_CACHE = 'farmos-maps-v1';
+const FONT_CACHE = 'agruai-fonts-v1';
+const MAP_CACHE = 'agruai-maps-v1';
 const MAP_CACHE_LIMIT = 500;
 
 self.addEventListener('install', e => {
