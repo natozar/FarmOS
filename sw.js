@@ -1,7 +1,7 @@
-const CACHE_NAME = 'agruai-v1';
+const CACHE_NAME = 'agruai-v2';
 const STATIC_ASSETS = [
   './',
-  './index.html',
+  './app.html',
   './manifest.json',
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',
@@ -99,7 +99,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE_NAME).then(c => c.put(e.request, res.clone()));
         }
         return res;
-      }).catch(() => caches.match(e.request).then(c => c || caches.match('./index.html')))
+      }).catch(() => caches.match(e.request).then(c => c || caches.match('./app.html')))
     );
     return;
   }
