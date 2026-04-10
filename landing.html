@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="AgrUAI — Inteligência rural por satélite para proprietários de múltiplas fazendas. Programa de Acesso Antecipado.">
 <meta property="og:title" content="AgrUAI — Você não administra fazendas. Administra um império.">
-<meta property="og:description" content="Monitoramento por satélite com I.A. para quem pensa em escala. 20 vagas no Programa de Acesso Antecipado.">
+<meta property="og:description" content="Monitoramento por satélite com I.A. para quem pensa em escala. 10 vagas no Programa de Acesso Antecipado.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://agruai.com">
 <meta property="og:image" content="https://agruai.com/og-image.png">
@@ -98,6 +98,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .vagas-tag{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:6px 16px;border-radius:20px;background:rgba(197,165,114,.08);border:1px solid rgba(197,165,114,.15);font-size:.75rem;font-weight:500;color:#C5A572;letter-spacing:.03em}
 .vagas-dot{width:6px;height:6px;border-radius:50%;background:#C5A572;animation:vagasPulse 2s ease infinite}
 @keyframes vagasPulse{0%,100%{opacity:1}50%{opacity:.4}}
+.vagas-barra{width:100%;max-width:180px;height:4px;background:rgba(197,165,114,.12);border-radius:2px;margin:14px auto 0;overflow:hidden}
+.vagas-fill{height:100%;width:0%;background:linear-gradient(90deg,#C5A572,#D4B88A);border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.vagas-esgotadas .vagas-dot{background:#C45A4A;animation:none}
+.vagas-esgotadas .vagas-tag{border-color:rgba(196,90,74,.2);background:rgba(196,90,74,.08);color:#C45A4A}
 
 /* === FORMULARIO === */
 .formulario{padding:100px 0;background:#1A2E1A;position:relative;overflow:hidden}
@@ -266,9 +270,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
         <div class="sub">Frequência de revisita. Sua fazenda monitorada duas vezes por semana.</div>
       </div>
       <div class="prova-card reveal reveal-d3">
-        <div class="num" style="color:#F5F0E8">20 vagas</div>
-        <div class="sub">Programa de Acesso Antecipado. Parceiros que ajudam a construir a ferramenta.</div>
-        <div class="vagas-tag"><span class="vagas-dot"></span> Vagas abertas</div>
+        <div class="num" style="color:#F5F0E8"><span id="vagasNum">10</span> vagas</div>
+        <div class="sub" id="vagasSub">Programa de Acesso Antecipado. Parceiros que ajudam a construir a ferramenta.</div>
+        <div class="vagas-tag" id="vagasTag"><span class="vagas-dot"></span> <span id="vagasStatus">Vagas abertas</span></div>
+        <div class="vagas-barra" id="vagasBarra"><div class="vagas-fill" id="vagasFill"></div></div>
       </div>
     </div>
   </div>
@@ -278,7 +283,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 <section class="formulario" id="reserva">
   <div class="container">
     <h2 class="reveal">Programa de Acesso Antecipado</h2>
-    <p class="form-sub reveal reveal-d1">20 proprietários vão ajudar a construir a plataforma definitiva de inteligência rural. Sem custo na fase pioneira.</p>
+    <p class="form-sub reveal reveal-d1">10 proprietários vão ajudar a construir a plataforma definitiva de inteligência rural. Sem custo na fase pioneira.</p>
 
     <div class="form-wrap reveal reveal-d2" id="formWrap">
       <form id="leadForm" onsubmit="return enviarLead(event)">
@@ -414,6 +419,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 /* === Supabase config === */
 var SUPA_URL='https://mrourzdxrahpysscckxm.supabase.co';
 var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yb3VyemR4cmFocHlzc2Nja3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODMzMTUsImV4cCI6MjA4ODU1OTMxNX0.A4ueyDJgOu4cbxcHxsMTDBNHkxAOUlWFoYuv88LdnU4';
+var TOTAL_VAGAS=10;
 
 /* === Submit to Supabase === */
 function enviarLead(e){
@@ -456,6 +462,44 @@ function enviarLead(e){
   return false;
 }
 
+/* === Contador de vagas === */
+function atualizarVagas(preenchidas){
+  var restantes=Math.max(0,TOTAL_VAGAS-preenchidas);
+  var pct=Math.min(100,Math.round((preenchidas/TOTAL_VAGAS)*100));
+  var numEl=document.getElementById('vagasNum');
+  var subEl=document.getElementById('vagasSub');
+  var statusEl=document.getElementById('vagasStatus');
+  var fillEl=document.getElementById('vagasFill');
+  var tagEl=document.getElementById('vagasTag');
+  var btnEl=document.getElementById('btnSubmit');
+
+  if(numEl)numEl.textContent=restantes;
+  if(fillEl)setTimeout(function(){fillEl.style.width=pct+'%'},300);
+
+  if(restantes===0){
+    if(subEl)subEl.textContent='Todas as vagas da primeira turma foram preenchidas.';
+    if(statusEl)statusEl.textContent='Turma completa';
+    if(tagEl)tagEl.classList.add('vagas-esgotadas');
+    if(btnEl){btnEl.textContent='Entrar na lista de espera';btnEl.closest('form').dataset.espera='1'}
+  }else if(restantes<=3){
+    if(subEl)subEl.textContent=preenchidas+' de '+TOTAL_VAGAS+' vagas preenchidas. Restam apenas '+restantes+'.';
+    if(statusEl)statusEl.textContent='Últimas vagas';
+  }else{
+    if(subEl)subEl.textContent=preenchidas+' de '+TOTAL_VAGAS+' vagas preenchidas. Garanta a sua.';
+    if(statusEl)statusEl.textContent='Vagas abertas';
+  }
+}
+
+function carregarVagas(){
+  fetch(SUPA_URL+'/rest/v1/rpc/count_leads_agruai',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+  }).then(function(r){return r.json()}).then(function(n){
+    if(typeof n==='number')atualizarVagas(n);
+  }).catch(function(){});
+}
+carregarVagas();
+
 function mostrarObrigado(){
   var f=document.getElementById('formWrap');
   var o=document.getElementById('obrigado');
@@ -464,6 +508,7 @@ function mostrarObrigado(){
   if(s)s.style.display='none';
   if(o)o.classList.add('visivel');
   history.replaceState(null,null,'#obrigado');
+  carregarVagas();
 }
 
 /* === Obrigado state (reload) === */
