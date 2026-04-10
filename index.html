@@ -238,6 +238,68 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
 .sat-leg-cor{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 .sat-footer{font-size:.65rem;color:var(--muted);border-top:1px solid rgba(42,63,82,.3);padding-top:8px}
 
+/* FAB RECADOS */
+.fab-recados{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--gold);box-shadow:0 4px 16px rgba(201,168,76,.4);display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:250;transition:transform .2s ease,box-shadow .2s ease;animation:fabPulse 8s infinite}
+.fab-recados:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(201,168,76,.5)}
+.fab-recados:active{transform:scale(.95)}
+.fab-recados.oculto{display:none}
+@keyframes fabPulse{0%,90%,100%{box-shadow:0 4px 16px rgba(201,168,76,.4)}95%{box-shadow:0 4px 24px rgba(201,168,76,.7),0 0 0 8px rgba(201,168,76,.1)}}
+@media(max-width:768px){.fab-recados{bottom:calc(80px + var(--sab) + 16px);right:16px}}
+@media(min-width:1025px){.fab-recados{right:calc(24px)}}
+
+/* RECADOS OVERLAY */
+.recados-overlay{position:fixed;inset:0;background:var(--dark);z-index:280;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.recados-overlay.aberto{display:block;animation:fadeSlideIn .3s ease forwards}
+.recados-container{max-width:600px;margin:0 auto;padding:20px 20px 100px}
+.recados-top{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:20px}
+.recados-top h2{font-size:1.15rem;font-family:'DM Sans',sans-serif;font-weight:600;display:flex;align-items:center;gap:8px}
+.recados-titulo{font-size:1.15rem;font-weight:600;margin-bottom:4px}
+.recados-sub{font-size:.8rem;color:var(--muted);margin-bottom:16px}
+
+/* FAZENDA SELECT CARD */
+.faz-select-grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:600px){.faz-select-grid{grid-template-columns:1fr 1fr}}
+.faz-select-card{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s ease}
+.faz-select-card:hover{border-color:rgba(201,168,76,.4)}
+.faz-select-card.selecionado{border-color:var(--gold);background:rgba(201,168,76,.05)}
+.faz-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.7rem;color:transparent;transition:all .2s}
+.faz-select-card.selecionado .faz-check{background:var(--gold);border-color:var(--gold);color:var(--dark)}
+.faz-select-info{flex:1;min-width:0}
+.faz-select-nome{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.faz-select-meta{font-size:.72rem;color:var(--muted)}
+.btn-todas{width:100%;padding:12px;border-radius:var(--radius-sm);border:1.5px solid var(--gold);color:var(--gold);font-weight:600;font-size:.85rem;margin-bottom:12px;transition:all .2s}
+.btn-todas:hover,.btn-todas.ativo{background:rgba(201,168,76,.12)}
+.btn-continuar{width:100%;padding:16px;border-radius:var(--radius);background:var(--gold);color:var(--dark);font-weight:700;font-size:.95rem;transition:all .2s;position:sticky;bottom:calc(16px + var(--sab));z-index:5}
+.btn-continuar:hover{background:#b8943e}
+.btn-continuar:disabled{opacity:.4;cursor:not-allowed}
+
+/* CATEGORIA CARDS */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.cat-grid{grid-template-columns:1fr}}
+@media(min-width:1025px){.cat-grid{grid-template-columns:1fr 1fr 1fr}}
+.cat-card{padding:18px 16px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s}
+.cat-card:hover{border-color:var(--gold);background:rgba(201,168,76,.04)}
+.cat-card.alerta-cat{border-left:3px solid var(--amber)}
+.cat-icon{font-size:1.6rem;margin-bottom:8px}
+.cat-nome{font-size:.9rem;font-weight:700;margin-bottom:4px}
+.cat-desc{font-size:.75rem;color:var(--muted);line-height:1.4}
+
+/* COMPOSIÇÃO */
+.recado-dest{font-size:.8rem;color:var(--muted);margin-bottom:12px;padding:10px 14px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border)}
+.recado-cat-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:rgba(201,168,76,.1);color:var(--gold);font-size:.78rem;font-weight:600;margin-bottom:12px}
+.recado-textarea{width:100%;padding:14px 16px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:16px;resize:vertical;min-height:120px;transition:border-color .2s;font-family:'DM Sans',sans-serif;line-height:1.5}
+.recado-textarea:focus{border-color:var(--gold)}
+.prio-toggle{display:flex;gap:8px;margin:14px 0}
+.prio-btn{flex:1;padding:12px;border-radius:var(--radius-sm);border:2px solid var(--border);font-size:.85rem;font-weight:600;transition:all .2s}
+.prio-btn.normal.ativo{background:rgba(45,155,111,.1);border-color:var(--green);color:var(--green)}
+.prio-btn.urgente.ativo{background:rgba(232,64,64,.1);border-color:var(--red);color:var(--red)}
+.btn-enviar-recado{width:100%;padding:16px;border-radius:var(--radius);background:var(--gold);color:var(--dark);font-weight:700;font-size:1rem;transition:all .2s;position:sticky;bottom:calc(16px + var(--sab));z-index:5}
+.btn-enviar-recado:hover{background:#b8943e}
+.btn-enviar-recado:disabled{opacity:.4;cursor:not-allowed}
+
+/* EVENTO RECADO NO FEED */
+.evento-tipo.recado{color:var(--gold)}
+
 /* MODE TOGGLE */
 .btn-modo-toggle{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;border:1.5px solid var(--green);color:var(--green);font-size:.78rem;font-weight:600;white-space:nowrap;transition:all .2s ease}
 .btn-modo-toggle:hover{background:var(--green);color:#fff}
@@ -611,6 +673,12 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
 <!-- FAB GESTOR (mobile) -->
 <button class="fab" id="fabGestor" onclick="ativarModoGestor()" title="Check-in do Gestor">📋</button>
 
+<!-- FAB RECADOS -->
+<button class="fab-recados" id="fabRecados" onclick="abrirCentralRecados()" title="Enviar recado às fazendas">📨</button>
+
+<!-- RECADOS OVERLAY -->
+<div class="recados-overlay" id="recadosOverlay"><div class="recados-container" id="recadosConteudo"></div></div>
+
 <!-- INSTALL BANNER -->
 <div class="install-banner" id="installBanner">
   <span style="font-size:1.5rem">🌿</span>
@@ -743,8 +811,8 @@ function inicializarGraficosCulturas(){if(AppState.graficosIniciados.culturas)re
 /* ========== CENTRAL AO VIVO ========== */
 var eventosCentral=[];
 function adicionarEventoCentral(tipo,fazenda,gestor,detalhes,novo){eventosCentral.unshift({tipo:tipo,fazenda:fazenda,gestor:gestor,detalhes:detalhes,tempo:new Date(),novo:!!novo});renderizarCentral()}
-function renderizarCentral(){var feed=document.getElementById('centralFeed');feed.innerHTML=eventosCentral.map(function(e){var cor=e.tipo==='checkin'?'var(--green)':e.tipo==='ocorrencia'?'var(--amber)':'var(--red)';var dotCor=e.tipo==='checkin'?'#2D9B6F':e.tipo==='ocorrencia'?'#E8A020':'#E84040';var label=e.tipo==='checkin'?'✅ Check-in enviado':e.tipo==='ocorrencia'?'⚠️ Ocorrência registrada':'🔴 Check-in ATRASADO';return'<div class="evento-item'+(e.novo?' novo':'')+'"><div class="evento-dot" style="background:'+dotCor+'"></div><div class="evento-conteudo"><div class="evento-tipo '+e.tipo+'">'+label+'</div><div class="evento-desc"><strong>'+e.fazenda+'</strong> · '+e.gestor+'<br>'+e.detalhes+'</div><div class="evento-meta"><span>'+tempoAtras(e.tempo)+'</span></div></div></div>'}).join('');if(eventosCentral.length===0){feed.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Aguardando eventos...</div>'}}
-function carregarEventosIniciais(){fazendas.forEach(function(f){if(f.checkin){adicionarEventoCentral('checkin',f.nome,f.gestor,formatarNumero(f.rebanho.total)+' cabeças · '+f.pasto_atual.split(' — ')[0]+' · Sem ocorrências',false);if(f.ocorrencias>0)adicionarEventoCentral('ocorrencia',f.nome,f.gestor,f.ocorrencia_desc,false)}else{adicionarEventoCentral('atraso',f.nome,f.gestor,'Prazo: 07:00 · Check-in não realizado',false)}})}
+function renderizarCentral(){var feed=document.getElementById('centralFeed');feed.innerHTML=eventosCentral.map(function(e){var dotCor=e.tipo==='checkin'?'#2D9B6F':e.tipo==='ocorrencia'?'#E8A020':e.tipo==='recado'?'#C9A84C':'#E84040';var label=e.tipo==='checkin'?'✅ Check-in enviado':e.tipo==='ocorrencia'?'⚠️ Ocorrência registrada':e.tipo==='recado'?'📨 Recado do Proprietário':'🔴 Check-in ATRASADO';return'<div class="evento-item'+(e.novo?' novo':'')+'"><div class="evento-dot" style="background:'+dotCor+'"></div><div class="evento-conteudo"><div class="evento-tipo '+e.tipo+'">'+label+'</div><div class="evento-desc"><strong>'+e.fazenda+'</strong> · '+e.gestor+'<br>'+e.detalhes+'</div><div class="evento-meta"><span>'+tempoAtras(e.tempo)+'</span></div></div></div>'}).join('');if(eventosCentral.length===0){feed.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Aguardando eventos...</div>'}}
+function carregarEventosIniciais(){fazendas.forEach(function(f){if(f.checkin){adicionarEventoCentral('checkin',f.nome,f.gestor,formatarNumero(f.rebanho.total)+' cabeças · '+f.pasto_atual.split(' — ')[0]+' · Sem ocorrências',false);if(f.ocorrencias>0)adicionarEventoCentral('ocorrencia',f.nome,f.gestor,f.ocorrencia_desc,false)}else{adicionarEventoCentral('atraso',f.nome,f.gestor,'Prazo: 07:00 · Check-in não realizado',false)}});adicionarEventoCentral('recado','Faz. Carneirinho','Proprietário','📋 Solicitar Relatório: Preciso do status da vacinação até amanhã',false);adicionarEventoCentral('recado','Todas as fazendas','Proprietário','⚠️ Alerta ao Campo: Previsão de geada para sábado — proteger bezerros',false)}
 
 /* SIMULAÇÃO AO VIVO (8 SEGUNDOS) */
 function simularCheckinAoVivo(){if(AppState.demoRodando)return;AppState.demoRodando=true;var btn=document.getElementById('btnDemoAoVivo');btn.disabled=true;btn.textContent='🎬 Simulação em andamento...';var seq=document.getElementById('demoSequencia');seq.innerHTML='';seq.classList.add('ativo');var f=fazendas[4];var steps=[{t:0,msg:'📱 Gestor abre o app no campo...'},{t:1500,msg:'👷 '+f.gestor+' ('+f.nome+') — Iniciou o check-in...'},{t:3000,msg:'🐄 Contagem enviada: '+formatarNumero(f.rebanho.total)+' cabeças'},{t:4500,msg:'📸 Foto do pasto enviada'},{t:5500,msg:'📡 Sincronizando com servidor... ▓▓▓▓▓▓▓▓░░ 80%'},{t:6500,msg:'✅ Dados recebidos pelo servidor!'},{t:7500,msg:'🔔 Dashboard atualizado — '+f.nome+': 🔴 Pendente → ✅ '+obterHora()},{t:8500,msg:'🗺️ Marcador no mapa atualizado — verde!'}];steps.forEach(function(step){setTimeout(function(){var div=document.createElement('div');div.className='demo-step';div.innerHTML='<span style="color:var(--green)">▸</span> '+step.msg;seq.appendChild(div);seq.scrollTop=seq.scrollHeight},step.t)});setTimeout(function(){f.status='ok';f.checkin=obterHora();adicionarEventoCentral('checkin',f.nome,f.gestor,formatarNumero(f.rebanho.total)+' cabeças · Pasto Central · Sem ocorrências',true);adicionarNotificacao('info','Check-in recebido',f.nome+' — '+f.gestor+' — '+formatarNumero(f.rebanho.total)+' cabeças');mostrarToast('✅ Check-in de '+f.nome+' recebido!','sucesso');var marker=document.getElementById('marker-'+f.id);if(marker){marker.className='farm-marker ok';marker.style.animation='none';marker.offsetHeight;marker.style.animation='kpiHighlight 3s ease'}if(AppState.telaAtual==='mapa'){renderizarKPIsMapa();var cards=document.querySelectorAll('.kpi-card');if(cards[2])cards[2].classList.add('highlight')}if(AppState.telaAtual==='dashboard'){renderizarKPIsDash();renderizarFeed()}},7500);setTimeout(function(){btn.disabled=false;btn.textContent='🎬 Simular check-in ao vivo';AppState.demoRodando=false;setTimeout(function(){seq.classList.remove('ativo')},3000)},10000)}
@@ -754,8 +822,8 @@ var eventosAuto=[{delay:15000,tipo:'checkin',fazId:7},{delay:45000,tipo:'ocorren
 function dispararEventosAuto(){eventosAuto.forEach(function(ev){setTimeout(function(){var f=fazendas.find(function(x){return x.id===ev.fazId});if(!f)return;if(ev.tipo==='checkin'){adicionarEventoCentral('checkin',f.nome,f.gestor,formatarNumero(f.rebanho.total)+' cabeças · Atualização automática',true);adicionarNotificacao('info','Atualização',f.nome+' — dados atualizados');mostrarToast(f.nome+' — dados atualizados','sucesso')}else if(ev.tipo==='ocorrencia'){adicionarEventoCentral('ocorrencia',f.nome,f.gestor,'Verificação de irrigação setor 2 necessária',true);adicionarNotificacao('atencao','Ocorrência',f.nome+' — verificação de irrigação necessária');mostrarToast(f.nome+' — nova ocorrência','alerta')}else{adicionarEventoCentral('atraso',f.nome,f.gestor,'Check-in não realizado — prazo excedido',true);adicionarNotificacao('critico','Check-in atrasado',f.nome+' — '+f.gestor+' não realizou check-in');mostrarToast(f.nome+' — check-in atrasado!','erro')}},ev.delay)})}
 
 /* ========== GESTOR — WIZARD 5 PASSOS ========== */
-function ativarModoGestor(){AppState.gestorPasso=1;var f=fazendas[0];AppState.gestorDados={cria:f.rebanho.cria,recria:f.rebanho.recria,confinamento:f.rebanho.confinamento,pasto:'Pasto Norte',temOcorrencia:false,tipoOcorrencia:[],descOcorrencia:'',fotoTirada:false};renderizarGestor();document.getElementById('gestorOverlay').classList.add('aberto')}
-function fecharGestor(){document.getElementById('gestorOverlay').classList.remove('aberto');var btn=document.getElementById('btnModoToggle');if(btn){btn.classList.remove('gestor-ativo');document.getElementById('btnModoTexto').textContent='👷 Modo Gestor';var badge=document.getElementById('modoBadge');badge.textContent='👔 Proprietário';badge.className='modo-badge prop';var bnav=document.getElementById('bnav-gestor');if(bnav)bnav.style.color='var(--amber)'}}
+function ativarModoGestor(){AppState.gestorPasso=1;var f=fazendas[0];AppState.gestorDados={cria:f.rebanho.cria,recria:f.rebanho.recria,confinamento:f.rebanho.confinamento,pasto:'Pasto Norte',temOcorrencia:false,tipoOcorrencia:[],descOcorrencia:'',fotoTirada:false};renderizarGestor();document.getElementById('gestorOverlay').classList.add('aberto');document.getElementById('fabRecados').classList.add('oculto')}
+function fecharGestor(){document.getElementById('gestorOverlay').classList.remove('aberto');document.getElementById('fabRecados').classList.remove('oculto');var btn=document.getElementById('btnModoToggle');if(btn){btn.classList.remove('gestor-ativo');document.getElementById('btnModoTexto').textContent='👷 Modo Gestor';var badge=document.getElementById('modoBadge');badge.textContent='👔 Proprietário';badge.className='modo-badge prop';var bnav=document.getElementById('bnav-gestor');if(bnav)bnav.style.color='var(--amber)'}}
 function renderizarGestor(){var f=fazendas[0];var p=AppState.gestorPasso;var d=AppState.gestorDados;var total=d.cria+d.recria+d.confinamento;var passoLabels=['Rebanho','Pasto','Foto','Ocorrência','Enviar'];var progressHTML='<div class="progress-bar">';for(var i=1;i<=5;i++){var cls=i<p?'feito':i===p?'ativo':'';progressHTML+='<div class="progress-step '+cls+'">'+(i<p?'✓':i)+'</div>';if(i<5)progressHTML+='<div class="progress-line'+(i<p?' feito':'')+'"></div>'}progressHTML+='<div class="progress-texto">Passo '+p+' de 5 — '+passoLabels[p-1]+'</div></div>';
 var headerHTML='<div class="gestor-top"><h2>👷 FarmOS Gestor</h2><button class="btn-voltar" style="width:auto;padding:8px 16px;margin:0" onclick="fecharGestor()">← Voltar</button></div><div class="gestor-info"><div class="gestor-info-nome">'+f.gestor+'</div><div class="gestor-info-detalhe">📍 '+f.nome+' — '+f.municipio+'/'+f.estado+'<br>⏰ Hoje: '+obterDataCurta()+' | Último check-in: '+(f.checkin||'—')+'</div></div>';
 var stepHTML='';
@@ -784,6 +852,51 @@ function fecharSidebar(){document.getElementById('sidebar').classList.remove('ab
 function simularDadosTempoReal(){fazendas.forEach(function(f){if(f.rebanho.total>0){var v=Math.floor((Math.random()-.5)*10);f.rebanho.cria=Math.max(0,f.rebanho.cria+Math.floor(v/3));f.rebanho.recria=Math.max(0,f.rebanho.recria+Math.floor(v/3));f.rebanho.confinamento=Math.max(0,f.rebanho.confinamento+(v-2*Math.floor(v/3)));f.rebanho.total=f.rebanho.cria+f.rebanho.recria+f.rebanho.confinamento}f.ndvi=+(f.ndvi+(Math.random()-.5)*.01).toFixed(2);f.ndvi=Math.max(.4,Math.min(.95,f.ndvi))});AppState.ultimaAtualizacao=new Date();if(AppState.telaAtual==='dashboard')renderizarKPIsDash();if(AppState.telaAtual==='mapa')renderizarKPIsMapa();if(AppState.telaAtual==='rebanho'){renderizarKPIsRebanho();renderizarTabelaRebanho()}}
 function atualizarTempo(){var seg=Math.floor((new Date()-AppState.ultimaAtualizacao)/1000);var t=seg<5?'Ao vivo':'Atualizado há '+seg+'s';document.querySelectorAll('#tempoAtualizado,#tempoAtualizado2').forEach(function(el){el.textContent=t})}
 function atualizarPing(){var ping=Math.floor(Math.random()*200)+180;document.querySelectorAll('#pingDisplay,#pingDisplay2').forEach(function(el){el.textContent=ping+'ms'})}
+
+/* ========== CENTRAL DE RECADOS ========== */
+var recadosState={passo:1,fazendasSelecionadas:[],categoria:null,categoriaNome:'',categoriaEmoji:'',mensagem:'',prioridade:'normal'};
+var categorias=[
+  {id:'relatorio',emoji:'📋',nome:'Solicitar Relatório',desc:'Pedir informação atualizada',placeholder:'Preciso do relatório atualizado de...'},
+  {id:'ordem',emoji:'🔧',nome:'Ordem de Serviço',desc:'Delegar tarefa ao gestor',placeholder:'Executar a seguinte tarefa: ...'},
+  {id:'alerta',emoji:'⚠️',nome:'Alerta ao Campo',desc:'Aviso urgente para o gestor',placeholder:'ATENÇÃO: ...',urgente:true},
+  {id:'autorizacao',emoji:'✅',nome:'Autorização',desc:'Aprovar compra ou ação',placeholder:'Autorizo a seguinte ação/compra: ...'},
+  {id:'visita',emoji:'📅',nome:'Agendar Visita',desc:'Informar ida ao campo',placeholder:'Visita programada para [data]: ...'},
+  {id:'livre',emoji:'💬',nome:'Recado Livre',desc:'Mensagem aberta ao gestor',placeholder:'...'}
+];
+
+function abrirCentralRecados(){recadosState={passo:1,fazendasSelecionadas:[],categoria:null,categoriaNome:'',categoriaEmoji:'',mensagem:'',prioridade:'normal'};document.getElementById('fabRecados').classList.add('oculto');renderizarRecados();document.getElementById('recadosOverlay').classList.add('aberto')}
+function fecharCentralRecados(){document.getElementById('recadosOverlay').classList.remove('aberto');document.getElementById('fabRecados').classList.remove('oculto')}
+
+function renderizarRecados(){var c=document.getElementById('recadosConteudo');var topHTML='<div class="recados-top"><button class="btn-voltar" style="width:auto;padding:8px 14px;margin:0" onclick="'+(recadosState.passo>1?'recadosState.passo--;renderizarRecados()':'fecharCentralRecados()')+'">← Voltar</button><h2>📨 Central de Recados</h2></div>';
+if(recadosState.passo===1){renderizarRecadosPasso1(c,topHTML)}
+else if(recadosState.passo===2){renderizarRecadosPasso2(c,topHTML)}
+else if(recadosState.passo===3){renderizarRecadosPasso3(c,topHTML)}}
+
+function renderizarRecadosPasso1(c,top){var selIds=recadosState.fazendasSelecionadas;var todasSel=selIds.length===fazendas.length;
+c.innerHTML=top+'<div class="recados-titulo">Para quais fazendas?</div><div class="recados-sub">Selecione uma ou mais propriedades</div>'+
+'<button class="btn-todas'+(todasSel?' ativo':'')+'" onclick="toggleTodasFazendas()">📍 Todas as Fazendas'+(todasSel?' ✓':'')+'</button>'+
+'<div class="faz-select-grid">'+fazendas.map(function(f){var sel=selIds.indexOf(f.id)>=0;return'<div class="faz-select-card'+(sel?' selecionado':'')+'" onclick="toggleFazendaRecado('+f.id+')"><div class="faz-check">'+(sel?'✓':'')+'</div><div class="faz-select-info"><div class="faz-select-nome">'+f.nome+'</div><div class="faz-select-meta">'+f.municipio+'/'+f.estado+' · '+formatarNumero(f.area)+' ha<br>👷 '+f.gestor+' <span class="status-dot '+f.status+'" style="width:7px;height:7px;margin-left:4px"></span></div></div></div>'}).join('')+'</div>'+
+'<div style="height:20px"></div><button class="btn-continuar" '+(selIds.length===0?'disabled':'')+' onclick="recadosState.passo=2;renderizarRecados()">Continuar ('+selIds.length+' fazenda'+(selIds.length!==1?'s':'')+' selecionada'+(selIds.length!==1?'s':'')+')</button>'}
+
+function toggleFazendaRecado(id){var i=recadosState.fazendasSelecionadas.indexOf(id);if(i>=0){recadosState.fazendasSelecionadas.splice(i,1)}else{recadosState.fazendasSelecionadas.push(id)}vibrar([30]);renderizarRecados()}
+function toggleTodasFazendas(){if(recadosState.fazendasSelecionadas.length===fazendas.length){recadosState.fazendasSelecionadas=[]}else{recadosState.fazendasSelecionadas=fazendas.map(function(f){return f.id})}vibrar([30]);renderizarRecados()}
+
+function renderizarRecadosPasso2(c,top){c.innerHTML=top+'<div class="recados-titulo">Que tipo de recado?</div><div class="recados-sub">Escolha a categoria</div><div class="cat-grid">'+categorias.map(function(cat){return'<div class="cat-card'+(cat.urgente?' alerta-cat':'')+'" onclick="selecionarCategoria(\''+cat.id+'\')"><div class="cat-icon">'+cat.emoji+'</div><div class="cat-nome">'+cat.nome+'</div><div class="cat-desc">'+cat.desc+'</div></div>'}).join('')+'</div>'}
+
+function selecionarCategoria(id){var cat=categorias.find(function(c){return c.id===id});recadosState.categoria=id;recadosState.categoriaNome=cat.nome;recadosState.categoriaEmoji=cat.emoji;recadosState.mensagem='';recadosState.prioridade=cat.urgente?'urgente':'normal';recadosState.passo=3;vibrar([30]);renderizarRecados()}
+
+function renderizarRecadosPasso3(c,top){var cat=categorias.find(function(ct){return ct.id===recadosState.categoria});var nomes=recadosState.fazendasSelecionadas.map(function(id){var f=fazendas.find(function(x){return x.id===id});return f?f.nome.replace('Fazenda ',''):''});var destTxt=nomes.length<=2?nomes.join(', '):nomes.slice(0,2).join(', ')+' e +'+(nomes.length-2)+' outra'+(nomes.length-2>1?'s':'');
+c.innerHTML=top+'<div class="recado-cat-badge">'+cat.emoji+' '+cat.nome+'</div><div class="recado-dest">Para: <strong>'+destTxt+'</strong></div><label style="font-size:.82rem;color:var(--muted);display:block;margin-bottom:6px">Mensagem</label><textarea class="recado-textarea" id="recadoTexto" placeholder="'+cat.placeholder+'" oninput="recadosState.mensagem=this.value">'+recadosState.mensagem+'</textarea><div style="margin-top:12px;font-size:.82rem;color:var(--muted)">Prioridade:</div><div class="prio-toggle"><button class="prio-btn normal'+(recadosState.prioridade==='normal'?' ativo':'')+'" onclick="recadosState.prioridade=\'normal\';renderizarRecados()">✅ Normal</button><button class="prio-btn urgente'+(recadosState.prioridade==='urgente'?' ativo':'')+'" onclick="recadosState.prioridade=\'urgente\';renderizarRecados()">🔴 Urgente</button></div><button class="btn-enviar-recado" id="btnEnviarRecado" onclick="enviarRecadoAnimado()">📨 Enviar Recado</button>'}
+
+function enviarRecadoAnimado(){var msg=recadosState.mensagem||document.getElementById('recadoTexto').value;if(!msg.trim()){mostrarToast('Escreva uma mensagem','alerta');return}recadosState.mensagem=msg;var ov=document.getElementById('envioOverlay');ov.classList.add('aberto');ov.querySelector('#envioConteudo').innerHTML='<div style="font-size:3rem;animation:sucessoIn .5s ease">📨</div><div class="envio-texto" style="margin-top:16px">Enviando recado...</div><div class="envio-progress"><div class="envio-progress-bar" id="envioBarR"></div></div><div class="envio-status" id="envioStatusR">📡 Conectando...</div>';
+var bar=document.getElementById('envioBarR');var st=document.getElementById('envioStatusR');
+setTimeout(function(){bar.style.width='40%';st.textContent='📤 Enviando para '+recadosState.fazendasSelecionadas.length+' fazenda(s)...'},400);
+setTimeout(function(){bar.style.width='80%';st.textContent='🔔 Notificando gestores...'},1000);
+setTimeout(function(){bar.style.width='100%';st.textContent='✅ Entregue!'},1600);
+setTimeout(function(){vibrar([100,50,100]);var nGestores=recadosState.fazendasSelecionadas.length;ov.querySelector('#envioConteudo').innerHTML='<div class="sucesso-check" style="background:var(--gold)">✓</div><div class="sucesso-titulo">Recado enviado!</div><div class="sucesso-sub" style="color:var(--gold)">'+nGestores+' gestor'+(nGestores>1?'es':'')+' notificado'+(nGestores>1?'s':'')+'</div><div style="margin-top:16px;color:var(--muted);font-size:.85rem">Os gestores receberão o recado<br>no próximo acesso ao app.</div><button class="btn-enviar" style="max-width:280px;margin:24px auto 0;background:var(--gold);color:var(--dark)" onclick="concluirEnvioRecado()">Continuar</button>'},2200)}
+
+function concluirEnvioRecado(){document.getElementById('envioOverlay').classList.remove('aberto');fecharCentralRecados();var nomes=recadosState.fazendasSelecionadas.map(function(id){var f=fazendas.find(function(x){return x.id===id});return f?f.nome:''});var destTxt=nomes.length<=2?nomes.join(', '):nomes.length+' fazendas';var msgTruncada=recadosState.mensagem.length>60?recadosState.mensagem.substring(0,60)+'...':recadosState.mensagem;
+adicionarEventoCentral('recado',destTxt,'Proprietário',recadosState.categoriaEmoji+' '+recadosState.categoriaNome+': '+msgTruncada,true);adicionarNotificacao('info','Recado enviado',destTxt+' — '+recadosState.categoriaNome);mostrarToast('📨 Recado enviado para '+recadosState.fazendasSelecionadas.length+' fazenda(s)','sucesso');navegarPara('central')}
 
 /* ========== MODO TOGGLE ========== */
 function alternarModo(){if(document.getElementById('gestorOverlay').classList.contains('aberto')){fecharGestor();var btn=document.getElementById('btnModoToggle');var badge=document.getElementById('modoBadge');btn.classList.remove('gestor-ativo');document.getElementById('btnModoTexto').textContent='👷 Modo Gestor';badge.textContent='👔 Proprietário';badge.className='modo-badge prop';var bnav=document.getElementById('bnav-gestor');if(bnav)bnav.style.color='var(--amber)';mostrarToast('👔 Painel do Proprietário','sucesso');navegarPara('dashboard')}else{var btn=document.getElementById('btnModoToggle');var badge=document.getElementById('modoBadge');btn.classList.add('gestor-ativo');document.getElementById('btnModoTexto').textContent='👔 Voltar ao Painel';badge.textContent='👷 Gestor de Campo';badge.className='modo-badge gest';var bnav=document.getElementById('bnav-gestor');if(bnav)bnav.style.color='var(--green)';ativarModoGestor();mostrarToast('👷 Modo Gestor ativado','alerta')}}
