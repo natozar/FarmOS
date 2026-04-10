@@ -242,10 +242,10 @@ tbody tr:hover{background:rgba(45,155,111,.05)}
 .fab-recados{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--gold);box-shadow:0 4px 16px rgba(201,168,76,.4);display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:250;transition:transform .2s ease,box-shadow .2s ease;animation:fabPulse 8s infinite}
 .fab-recados:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(201,168,76,.5)}
 .fab-recados:active{transform:scale(.95)}
-.fab-recados.oculto{display:none}
+.fab-recados.oculto{display:none!important}
 @keyframes fabPulse{0%,90%,100%{box-shadow:0 4px 16px rgba(201,168,76,.4)}95%{box-shadow:0 4px 24px rgba(201,168,76,.7),0 0 0 8px rgba(201,168,76,.1)}}
-@media(max-width:768px){.fab-recados{bottom:calc(80px + var(--sab) + 16px);right:16px}}
-@media(min-width:1025px){.fab-recados{right:calc(24px)}}
+@media(max-width:768px){.fab-recados{bottom:calc(80px + var(--sab) + 80px);right:16px}}
+@media(min-width:1025px){.fab-recados{right:24px}}
 
 /* RECADOS OVERLAY */
 .recados-overlay{position:fixed;inset:0;background:var(--dark);z-index:280;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
