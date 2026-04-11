@@ -481,7 +481,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
       <svg class="footer-icon" width="20" height="20" viewBox="0 0 32 32" fill="none" style="display:inline"><ellipse cx="16" cy="10" rx="10" ry="5" stroke="#C5A572" stroke-width="1" stroke-dasharray="3 2" opacity=".4"/><circle cx="23" cy="8" r="2" fill="#C5A572" opacity=".4"/><path d="M6 24 Q12 20 18 22 Q24 24 28 20" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".4"/></svg>
       <span><span style="color:#F5F0E8">Agr</span><span style="color:#C5A572">UAI</span></span>
     </div>
-    <p>Ribeirão Preto, SP — Agrishow 2026</p>
+    <p>Ribeirão Preto, SP — 2026</p>
     <p class="tagline">Inteligência Rural por Satélite</p>
   </div>
 </footer>
@@ -510,8 +510,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 })();
 
 /* === Supabase config === */
-var SUPA_URL='https://mrourzdxrahpysscckxm.supabase.co';
-var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yb3VyemR4cmFocHlzc2Nja3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODMzMTUsImV4cCI6MjA4ODU1OTMxNX0.A4ueyDJgOu4cbxcHxsMTDBNHkxAOUlWFoYuv88LdnU4';
+var SUPA_URL='https://kyvbnntoxslrtrsiejzc.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5dmJubnR2eHNscnRyc2llanpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjQ1NDcsImV4cCI6MjA5MTQ0MDU0N30.Dx-9SKxWfAoxXg3gzx3NpzJD1taZgkQCCjwDXlY9J6I';
 var TOTAL_VAGAS=10;
 
 /* === Submit to Supabase === */
@@ -532,10 +532,10 @@ function enviarLead(e){
     atividade:document.getElementById('atividade').value,
     area_total:document.getElementById('area_total').value||null,
     desafio:document.getElementById('desafio').value.trim()||null,
-    origem:'landing-agrishow-2026'
+    origem:'landing-agruai-2026'
   };
 
-  fetch(SUPA_URL+'/rest/v1/leads_agruai',{
+  fetch(SUPA_URL+'/rest/v1/participantes',{
     method:'POST',
     headers:{
       'Content-Type':'application/json',
