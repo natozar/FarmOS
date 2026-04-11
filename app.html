@@ -487,7 +487,8 @@ tbody tr:hover{background:rgba(74,140,92,.05)}
 .hamburger{display:none;position:fixed;top:calc(12px + var(--sat));left:12px;z-index:110;width:44px;height:44px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border);align-items:center;justify-content:center;font-size:1.2rem;color:var(--text)}
 
 /* INSTALL BANNER */
-.install-banner{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--gold);padding:16px 20px;padding-bottom:calc(16px + var(--sab));z-index:200;display:none;align-items:center;gap:12px;box-shadow:0 -4px 24px rgba(0,0,0,.4);animation:fadeSlideIn .3s ease forwards}
+.install-banner{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--gold);padding:14px 20px;padding-bottom:calc(14px + var(--sab));z-index:200;display:none;align-items:center;gap:12px;box-shadow:0 -4px 24px rgba(0,0,0,.4);animation:fadeSlideIn .3s ease forwards}
+@media(max-width:768px){.install-banner{bottom:calc(52px + var(--sab))}}
 .install-banner.visivel{display:flex}
 .install-banner-text{flex:1;font-size:.82rem;line-height:1.4}
 .install-banner-text strong{color:var(--gold)}
@@ -848,7 +849,8 @@ function abrirSidebar(){document.getElementById('sidebar').classList.add('aberta
 function fecharSidebar(){document.getElementById('sidebar').classList.remove('aberta');document.getElementById('sidebarBackdrop').classList.remove('aberta')}
 
 /* ========== SIMULAÇÃO TEMPO REAL ========== */
-function simularDadosTempoReal(){fazendas.forEach(function(f){if(f.rebanho.total>0){var v=Math.floor((Math.random()-.5)*10);f.rebanho.cria=Math.max(0,f.rebanho.cria+Math.floor(v/3));f.rebanho.recria=Math.max(0,f.rebanho.recria+Math.floor(v/3));f.rebanho.confinamento=Math.max(0,f.rebanho.confinamento+(v-2*Math.floor(v/3)));f.rebanho.total=f.rebanho.cria+f.rebanho.recria+f.rebanho.confinamento}f.ndvi=+(f.ndvi+(Math.random()-.5)*.01).toFixed(2);f.ndvi=Math.max(.4,Math.min(.95,f.ndvi))});AppState.ultimaAtualizacao=new Date();if(AppState.telaAtual==='dashboard')renderizarKPIsDash();if(AppState.telaAtual==='mapa')renderizarKPIsMapa();if(AppState.telaAtual==='rebanho'){renderizarKPIsRebanho();renderizarTabelaRebanho()}}
+if(!window._baseData){window._baseData=fazendas.map(function(f){return{cria:f.rebanho.cria,recria:f.rebanho.recria,conf:f.rebanho.confinamento,ndvi:f.ndvi}})}
+function simularDadosTempoReal(){fazendas.forEach(function(f,i){if(f.rebanho.total>0){var b=window._baseData[i];var pct=.02;f.rebanho.cria=b.cria+Math.floor((Math.random()-.5)*2*b.cria*pct);f.rebanho.recria=b.recria+Math.floor((Math.random()-.5)*2*b.recria*pct);f.rebanho.confinamento=b.conf+Math.floor((Math.random()-.5)*2*b.conf*pct);f.rebanho.total=f.rebanho.cria+f.rebanho.recria+f.rebanho.confinamento}f.ndvi=+(window._baseData[i].ndvi+(Math.random()-.5)*.02).toFixed(2);f.ndvi=Math.max(.4,Math.min(.95,f.ndvi))});AppState.ultimaAtualizacao=new Date();if(AppState.telaAtual==='dashboard')renderizarKPIsDash();if(AppState.telaAtual==='mapa')renderizarKPIsMapa();if(AppState.telaAtual==='rebanho'){renderizarKPIsRebanho();renderizarTabelaRebanho()}}
 function atualizarTempo(){var seg=Math.floor((new Date()-AppState.ultimaAtualizacao)/1000);var t=seg<5?'Ao vivo':'Atualizado há '+seg+'s';document.querySelectorAll('#tempoAtualizado').forEach(function(el){el.textContent=t})}
 function atualizarPing(){var ping=Math.floor(Math.random()*200)+180;document.querySelectorAll('#pingDisplay').forEach(function(el){el.textContent=ping+'ms'})}
 
