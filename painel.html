@@ -227,6 +227,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 </div>
 
 <script>
+window.addEventListener('load',function(){
 /* ========== CONFIG ========== */
 var SUPA_URL='https://kyvbnntoxslrtrsiejzc.supabase.co';
 var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5dmJubnRveHNscnRyc2llanpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjQ1NDcsImV4cCI6MjA5MTQ0MDU0N30.Dx-9SKxWfAoxXg3gzx3NpzJD1taZgkQCCjwDXlY9J6I';
@@ -355,3 +356,6 @@ var r=await sb.auth.getSession();if(r.data.session){State.user=r.data.session.us
 
 sb.auth.onAuthStateChange(function(event,session){if(event==='SIGNED_IN'&&session){State.user=session.user;iniciarApp()}});
 checkSession();
+// Expose to onclick handlers
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;
+});
