@@ -282,7 +282,27 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .confirm-badge-dot::after{animation:none}
 .obg-scan{animation:none;opacity:0}
 .confirm-card::before{animation:none}
+.pwa-popup-overlay{animation:none}
+.pwa-popup-card{animation:none}
 }
+
+/* === PWA POPUP === */
+.pwa-popup-overlay{position:fixed;inset:0;background:rgba(15,31,15,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .4s ease}
+.pwa-popup-overlay.visible{opacity:1}
+.pwa-popup-overlay.closing{opacity:0;transition:opacity .25s ease}
+.pwa-popup-card{max-width:360px;width:100%;background:#1A2E1A;border:1px solid rgba(197,165,114,.12);border-radius:20px;padding:40px 28px;text-align:center;transform:translateY(20px);transition:transform .4s ease;position:relative}
+.pwa-popup-overlay.visible .pwa-popup-card{transform:translateY(0)}
+.pwa-popup-overlay.closing .pwa-popup-card{transform:translateY(-10px)}
+.pwa-popup-icon{width:64px;height:64px;margin:0 auto 20px;background:rgba(74,144,164,.08);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.pwa-popup-icon svg{width:32px;height:32px}
+.pwa-popup-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;color:#F5F0E8;margin-bottom:12px;letter-spacing:-.02em}
+.pwa-popup-sub{font-size:.9rem;color:#A89E90;line-height:1.65;margin-bottom:28px}
+.pwa-install-btn{width:100%;padding:16px;background:linear-gradient(135deg,#C5A572,#B8945A);color:#0F1F0F;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;border:none;border-radius:8px;cursor:pointer;transition:all .25s;box-shadow:0 4px 20px rgba(197,165,114,.2);display:flex;align-items:center;justify-content:center;gap:8px}
+.pwa-install-btn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(197,165,114,.3)}
+.pwa-dismiss-btn{display:block;width:100%;margin-top:16px;padding:8px;background:none;border:none;color:#908880;font-size:.8rem;cursor:pointer;transition:color .2s;font-family:'Inter',sans-serif}
+.pwa-dismiss-btn:hover{color:#D1C9BC}
+.pwa-ios-hint{margin-top:16px;padding:14px;background:rgba(15,31,15,.6);border:1px solid rgba(197,165,114,.08);border-radius:10px;font-size:.8rem;color:#A89E90;line-height:1.6;display:none}
+.pwa-ios-hint strong{color:#F5F0E8}
 </style>
 </head>
 <body>
@@ -752,6 +772,7 @@ function mostrarObrigado(){
   history.replaceState(null,null,'#obrigado');
   carregarVagas();
   setTimeout(function(){var ov=document.getElementById('obrigadoVagas');if(ov){var vt=document.querySelector('.vagas-tag');if(vt){var nums=vt.textContent.match(/\d+/g);if(nums&&nums.length>=2)ov.textContent=nums[0]+' de '+nums[1];}}},500);
+  setTimeout(function(){if(window.mostrarPWAPopup)window.mostrarPWAPopup()},2000);
 }
 
 /* === Obrigado state (reload) === */
@@ -772,6 +793,47 @@ function mostrarObrigado(){
       ticking=false;
     });ticking=true}
   },{passive:true});
+})();
+
+/* === PWA Install Popup === */
+(function(){
+var deferredPrompt=null;var popupShown=false;
+var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e});
+window.mostrarPWAPopup=function(){
+  if(window.matchMedia('(display-mode:standalone)').matches)return;
+  if(window.navigator.standalone===true)return;
+  if(localStorage.getItem('agruai_pwa_dismissed'))return;
+  if(popupShown)return;
+  if(window.innerWidth>768&&!('ontouchstart' in window))return;
+  popupShown=true;
+  var ov=document.createElement('div');
+  ov.className='pwa-popup-overlay';
+  ov.setAttribute('role','dialog');
+  ov.setAttribute('aria-modal','true');
+  ov.setAttribute('aria-label','Instalar AgrUAI');
+  ov.innerHTML='<div class="pwa-popup-card">'+
+    '<div class="pwa-popup-icon"><svg viewBox="0 0 32 32" fill="none"><ellipse cx="16" cy="11" rx="10" ry="4.5" stroke="#4A90A4" stroke-width="1.5" stroke-dasharray="3 2"/><circle cx="23" cy="8" r="2.5" fill="#C5A572"/><line x1="23" y1="10.5" x2="17" y2="22" stroke="#4A90A4" stroke-width="1" stroke-dasharray="2 2" opacity=".5"/><path d="M5 25 Q11 21 17 23 Q23 25 27 22" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round"/></svg></div>'+
+    '<div class="pwa-popup-title">Instale o AgrUAI no seu celular</div>'+
+    '<p class="pwa-popup-sub">Você será o primeiro a saber quando o monitoramento da sua fazenda estiver ativo. Sem spam — apenas uma notificação quando estiver tudo pronto.</p>'+
+    '<button class="pwa-install-btn" aria-label="Instalar aplicativo">Instalar agora <span>📲</span></button>'+
+    '<div class="pwa-ios-hint" id="pwaIosHint"><strong>Como instalar no iPhone:</strong><br>Toque no ícone <strong>Compartilhar</strong> (⎙) na barra do Safari e depois em <strong>Adicionar à Tela de Início</strong>.</div>'+
+    '<button class="pwa-dismiss-btn" aria-label="Fechar">Agora não, obrigado</button>'+
+  '</div>';
+  document.body.appendChild(ov);
+  requestAnimationFrame(function(){ov.classList.add('visible')});
+  var installBtn=ov.querySelector('.pwa-install-btn');
+  installBtn.addEventListener('click',function(){
+    if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;fechar(ov)})}
+    else if(isIOS){installBtn.style.display='none';document.getElementById('pwaIosHint').style.display='block'}
+    else{fechar(ov)}
+  });
+  ov.querySelector('.pwa-dismiss-btn').addEventListener('click',function(){localStorage.setItem('agruai_pwa_dismissed','1');fechar(ov)});
+  ov.addEventListener('click',function(e){if(e.target===ov){localStorage.setItem('agruai_pwa_dismissed','1');fechar(ov)}});
+  document.addEventListener('keydown',function escHandler(e){if(e.key==='Escape'){localStorage.setItem('agruai_pwa_dismissed','1');fechar(ov);document.removeEventListener('keydown',escHandler)}});
+  installBtn.focus();
+};
+function fechar(ov){ov.classList.add('closing');setTimeout(function(){if(ov.parentNode)ov.parentNode.removeChild(ov)},300)}
 })();
 </script>
 </body>
