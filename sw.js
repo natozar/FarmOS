@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agruai-v2';
+const CACHE_NAME = 'agruai-v3';
 const STATIC_ASSETS = [
   './',
   './app.html',
