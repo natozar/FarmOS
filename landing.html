@@ -3,12 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="AgrUAI — Inteligência rural por satélite para proprietários de múltiplas fazendas. Programa de Acesso Antecipado.">
-<meta property="og:title" content="AgrUAI — Você não administra fazendas. Administra um império.">
-<meta property="og:description" content="Monitoramento por satélite com I.A. para quem pensa em escala. 10 vagas no Programa de Acesso Antecipado.">
+<meta name="description" content="AgrUAI — Monitoramento de fazendas por satélite para donos de múltiplas propriedades rurais. Veja a saúde da vegetação, receba alertas e tome decisões à distância. Acesso antecipado gratuito.">
+<meta property="og:title" content="AgrUAI — Suas fazendas vistas do espaço">
+<meta property="og:description" content="Monitoramento por satélite com I.A. para quem administra múltiplas propriedades rurais. 10 vagas no programa de acesso antecipado.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://agruai.com">
 <meta property="og:image" content="https://agruai.com/og-image.png">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AgrUAI — Suas fazendas vistas do espaço">
+<meta name="twitter:description" content="Monitoramento por satélite para donos de múltiplas propriedades rurais.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"AgrUAI","description":"Inteligência rural por satélite para proprietários de múltiplas fazendas","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL","description":"Programa de Acesso Antecipado gratuito"},"author":{"@type":"Organization","name":"AgrUAI","url":"https://agruai.com"}}</script>
 <meta name="theme-color" content="#0F1F0F">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>AgrUAI — Inteligência Rural por Satélite</title>
@@ -84,6 +89,65 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .bloco:first-child{--bloco-cor:#4A90A4}
 .bloco:first-child .bloco-icon{background:rgba(74,144,164,.08)}
 .bloco:first-child h3{color:#5DA8BE}
+
+/* === COMO FUNCIONA === */
+.como-funciona{padding:100px 0;background:#0F1F0F;position:relative}
+.como-funciona::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.como-funciona h2{text-align:center;font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:56px;line-height:1.35}
+.passos{display:grid;grid-template-columns:1fr;gap:24px;max-width:960px;margin:0 auto}
+@media(min-width:768px){.passos{grid-template-columns:1fr 1fr 1fr;gap:20px}}
+.passo{background:rgba(26,46,26,.5);border:1px solid rgba(197,165,114,.08);border-radius:16px;padding:32px 24px;text-align:center;position:relative;transition:all .3s ease}
+.passo:hover{border-color:rgba(197,165,114,.2);transform:translateY(-4px);box-shadow:0 12px 40px rgba(15,31,15,.5)}
+.passo-num{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(197,165,114,.1);color:#C5A572;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:16px;border:1px solid rgba(197,165,114,.2)}
+.passo-icon{width:56px;height:56px;margin:0 auto 16px;padding:12px;background:rgba(74,144,164,.06);border-radius:14px;display:flex;align-items:center;justify-content:center}
+.passo-icon svg{width:32px;height:32px}
+.passo h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.05rem;color:#C5A572;margin-bottom:10px}
+.passo p{font-size:.88rem;color:#D1C9BC;line-height:1.7}
+.passo-arrow{display:none;position:absolute;right:-14px;top:50%;transform:translateY(-50%);color:rgba(197,165,114,.25);font-size:1.2rem}
+@media(min-width:768px){.passo-arrow{display:block}}
+
+/* === PARA QUEM === */
+.para-quem{padding:100px 0;background:#1A2E1A;position:relative}
+.para-quem::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.para-quem h2{text-align:center;font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:56px;line-height:1.35}
+.perfis{display:grid;grid-template-columns:1fr;gap:20px;max-width:800px;margin:0 auto}
+@media(min-width:640px){.perfis{grid-template-columns:1fr 1fr}}
+.perfil{background:rgba(15,31,15,.5);border:1px solid rgba(197,165,114,.06);border-radius:16px;padding:28px 24px;transition:all .3s ease}
+.perfil:hover{border-color:rgba(197,165,114,.2);box-shadow:0 8px 32px rgba(15,31,15,.4)}
+.perfil-icon{font-size:2rem;margin-bottom:12px}
+.perfil h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1rem;color:#C5A572;margin-bottom:8px}
+.perfil p{font-size:.88rem;color:#A89E90;line-height:1.7}
+
+/* === PREVIEW === */
+.preview{padding:100px 0;background:#0F1F0F;position:relative;text-align:center}
+.preview::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.preview h2{font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:12px}
+.preview-sub{font-size:.95rem;color:#A89E90;max-width:480px;margin:0 auto 48px;line-height:1.7}
+.phone-mock{max-width:340px;margin:0 auto;background:#1A2E1A;border:2px solid rgba(197,165,114,.12);border-radius:28px;padding:16px 12px 20px;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative;overflow:hidden}
+.phone-mock::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:60px;height:4px;border-radius:4px;background:rgba(197,165,114,.1)}
+.phone-header{display:flex;align-items:center;justify-content:space-between;padding:16px 8px 12px;font-size:.7rem;color:#A89E90}
+.phone-header strong{color:#C5A572;font-weight:600;font-family:'Space Grotesk',sans-serif;font-size:.8rem}
+.phone-map{height:140px;background:linear-gradient(135deg,#162916,#1A2E1A 40%,#0F1F0F);border-radius:12px;margin-bottom:12px;position:relative;overflow:hidden;border:1px solid rgba(74,144,164,.1)}
+.phone-poly{position:absolute;opacity:.6}
+.phone-poly svg{width:100%;height:100%}
+.phone-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.phone-stat{background:rgba(15,31,15,.6);border:1px solid rgba(197,165,114,.06);border-radius:8px;padding:10px 8px;text-align:center}
+.phone-stat-icon{font-size:.85rem;margin-bottom:2px}
+.phone-stat-val{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;color:#F5F0E8}
+.phone-stat-label{font-size:.58rem;color:#908880;margin-top:2px}
+
+/* === FAQ === */
+.faq{padding:80px 0;background:#0F1F0F;position:relative}
+.faq::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.faq h2{text-align:center;font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:48px}
+.faq-list{max-width:680px;margin:0 auto}
+.faq-list details{border-bottom:1px solid rgba(197,165,114,.06)}
+.faq-list summary{padding:20px 0;font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:1rem;color:#F5F0E8;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;transition:color .2s}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary::after{content:'+';font-size:1.3rem;color:#C5A572;transition:transform .2s;flex-shrink:0;margin-left:12px}
+.faq-list details[open] summary::after{content:'−'}
+.faq-list details[open] summary{color:#C5A572}
+.faq-answer{padding:0 0 20px;font-size:.9rem;color:#A89E90;line-height:1.75;max-width:600px}
 
 /* === PROVA === */
 .prova{padding:80px 0;background:#0F1F0F;text-align:center;position:relative}
@@ -246,8 +310,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   <div class="hero-content">
     <div class="logo"><span class="logo-agr">Agr</span><span class="logo-uai">UAI</span></div>
     <h1>Você não administra fazendas. Administra um império.</h1>
-    <p class="hero-sub">Inteligência por satélite para quem pensa em escala.</p>
-    <a href="#reserva" class="btn-cta">Quero acesso antecipado</a>
+    <p class="hero-sub">Veja a saúde de todas as suas propriedades pelo celular. Dados de satélite, alertas automáticos, zero burocracia.</p>
+    <a href="#reserva" class="btn-cta">Monitorar minhas fazendas — grátis</a>
   </div>
   <div class="scroll-hint" aria-hidden="true">
     <svg width="24" height="14" viewBox="0 0 24 14" fill="none"><path d="M2 2l10 10L22 2" stroke="#C5A572" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -316,17 +380,81 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   </div>
 </section>
 
+<!-- ===== COMO FUNCIONA ===== -->
+<section class="como-funciona">
+  <div class="container">
+    <h2 class="reveal">3 passos. Do cadastro ao alerta.</h2>
+    <div class="passos">
+      <div class="passo reveal reveal-d1">
+        <div class="passo-num">1</div>
+        <div class="passo-icon"><svg viewBox="0 0 32 32" fill="none"><rect x="4" y="6" width="24" height="20" rx="3" stroke="#4A90A4" stroke-width="1.5"/><circle cx="16" cy="16" r="4" stroke="#C5A572" stroke-width="1.5"/><path d="M16 12v-2M16 20v2M20 16h2M12 16h-2" stroke="#C5A572" stroke-width="1" opacity=".5"/></svg></div>
+        <h3>Cadastre sua propriedade</h3>
+        <p>Desenhe o perímetro no mapa ou informe o código CAR. Em 2 minutos sua fazenda está no sistema.</p>
+        <span class="passo-arrow">→</span>
+      </div>
+      <div class="passo reveal reveal-d2">
+        <div class="passo-num">2</div>
+        <div class="passo-icon"><svg viewBox="0 0 32 32" fill="none"><ellipse cx="16" cy="12" rx="11" ry="5" stroke="#4A90A4" stroke-width="1.5" stroke-dasharray="3 2"/><circle cx="24" cy="9" r="2.5" fill="#C5A572"/><line x1="24" y1="11.5" x2="18" y2="24" stroke="#4A90A4" stroke-width="1" stroke-dasharray="2 2" opacity=".5"/><path d="M6 26 Q12 22 18 24 Q24 26 28 23" stroke="#4A90A4" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <h3>Satélite passa a cada 5 dias</h3>
+        <p>Imagens do Sentinel-2 capturam índices de vegetação, umidade e anomalias — automaticamente.</p>
+        <span class="passo-arrow">→</span>
+      </div>
+      <div class="passo reveal reveal-d3">
+        <div class="passo-num">3</div>
+        <div class="passo-icon"><svg viewBox="0 0 32 32" fill="none"><rect x="6" y="4" width="20" height="24" rx="3" stroke="#C5A572" stroke-width="1.5"/><path d="M10 12h12M10 16h8M10 20h10" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".5"/><circle cx="22" cy="8" r="4" fill="#C45A4A" opacity=".8"/></svg></div>
+        <h3>Receba inteligência, não dados</h3>
+        <p>Alertas no celular quando algo muda. Relatórios que dizem "mover gado do lote 3" em vez de "NDVI caiu 0.12".</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PARA QUEM É ===== -->
+<section class="para-quem">
+  <div class="container">
+    <h2 class="reveal">Feito para quem administra terras, não planilhas.</h2>
+    <div class="perfis">
+      <div class="perfil reveal reveal-d1"><div class="perfil-icon">🏛️</div><h3>Dono de múltiplas fazendas</h3><p>Você tem propriedades em 2+ estados e depende de gestores para saber o que acontece em cada uma.</p></div>
+      <div class="perfil reveal reveal-d2"><div class="perfil-icon">👨‍👧‍👦</div><h3>Herdeiro que moderniza</h3><p>A família construiu o patrimônio. Você quer proteger com tecnologia o que gerações construíram com suor.</p></div>
+      <div class="perfil reveal reveal-d3"><div class="perfil-icon">📈</div><h3>Investidor rural</h3><p>Comprou terras como ativo. Precisa monitorar sem estar presente — e provar valor para sócios.</p></div>
+      <div class="perfil reveal reveal-d4"><div class="perfil-icon">🤝</div><h3>Gestor de grupo</h3><p>Administra fazendas de terceiros e precisa prestar contas com dados, não com achismo.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PREVIEW CONCEITUAL ===== -->
+<section class="preview">
+  <div class="container">
+    <h2 class="reveal">Todas as suas fazendas. Uma tela.</h2>
+    <p class="preview-sub reveal reveal-d1">Dashboard que mostra saúde da vegetação, alertas e evolução — sem precisar visitar cada propriedade.</p>
+    <div class="phone-mock reveal reveal-d2">
+      <div class="phone-header"><strong>AgrUAI</strong><span>● 3 propriedades</span></div>
+      <div class="phone-map">
+        <div class="phone-poly" style="left:15%;top:20%;width:35%;height:45%"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="10,80 30,15 70,10 90,50 80,85 40,90" fill="rgba(74,140,92,.25)" stroke="#4A8C5C" stroke-width="1.5"/></svg></div>
+        <div class="phone-poly" style="left:55%;top:30%;width:30%;height:35%"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="15,70 25,20 75,15 85,60 60,85" fill="rgba(197,165,114,.15)" stroke="#C5A572" stroke-width="1.5"/></svg></div>
+        <div class="phone-poly" style="left:20%;top:60%;width:25%;height:30%"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="20,75 35,20 80,25 70,80" fill="rgba(74,144,164,.15)" stroke="#4A90A4" stroke-width="1.5"/></svg></div>
+      </div>
+      <div class="phone-stats">
+        <div class="phone-stat"><div class="phone-stat-icon">📊</div><div class="phone-stat-val">NDVI 0.74</div><div class="phone-stat-label">Saúde média</div></div>
+        <div class="phone-stat"><div class="phone-stat-icon">🌧️</div><div class="phone-stat-val">12mm</div><div class="phone-stat-label">Chuva 7 dias</div></div>
+        <div class="phone-stat"><div class="phone-stat-icon">⚠️</div><div class="phone-stat-val">1 alerta</div><div class="phone-stat-label">Ação necessária</div></div>
+        <div class="phone-stat"><div class="phone-stat-icon">📈</div><div class="phone-stat-val">+3%</div><div class="phone-stat-label">vs 30 dias</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ===== PROVA SOCIAL ===== -->
 <section class="prova">
   <div class="container">
     <div class="prova-cards">
       <div class="prova-card reveal reveal-d1">
         <div class="num" style="color:#4A90A4">Sentinel-2</div>
-        <div class="sub">Satélite da Agência Espacial Europeia. Dados abertos, resolução 10m/pixel.</div>
+        <div class="sub">Dados da Agência Espacial Europeia. Mesma fonte que governos usam para monitorar desmatamento. Resolução de 10 metros por pixel.</div>
       </div>
       <div class="prova-card reveal reveal-d2">
         <div class="num" style="color:#C5A572">5 dias</div>
-        <div class="sub">Frequência de revisita. Sua fazenda monitorada duas vezes por semana.</div>
+        <div class="sub">Duas passagens por semana. Você vê a evolução da propriedade quase em tempo real — sem drone, sem sensor, sem custo extra.</div>
       </div>
       <div class="prova-card reveal reveal-d3">
         <div class="num" style="color:#F5F0E8"><span id="vagasNum">10</span> vagas</div>
@@ -474,6 +602,21 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   </div>
 </section>
 
+<!-- ===== FAQ ===== -->
+<section class="faq">
+  <div class="container">
+    <h2 class="reveal">Perguntas frequentes</h2>
+    <div class="faq-list reveal reveal-d1">
+      <details><summary>Quanto custa?</summary><div class="faq-answer">Na fase de Acesso Antecipado, zero. Os 10 primeiros parceiros usam gratuitamente enquanto ajudam a moldar a plataforma. Após o lançamento, teremos planos a partir de R$ 97/mês por propriedade.</div></details>
+      <details><summary>Preciso instalar algo?</summary><div class="faq-answer">Não. O AgrUAI funciona direto no navegador do celular ou computador. É um aplicativo web (PWA) — basta acessar o link e salvar na tela inicial.</div></details>
+      <details><summary>Funciona na minha região?</summary><div class="faq-answer">Se o satélite Sentinel-2 cobre (e cobre todo o Brasil), funciona. Não dependemos de internet na fazenda, sensores ou drones. Tudo vem do espaço.</div></details>
+      <details><summary>Como o satélite sabe que minha pastagem está ruim?</summary><div class="faq-answer">Medimos o NDVI — um índice que calcula a saúde da vegetação pela cor que ela reflete. Verde escuro = saudável. Amarelo/marrom = estresse. O satélite vê o que seu olho não vê a 200km de distância.</div></details>
+      <details><summary>Vocês substituem o gestor de fazenda?</summary><div class="faq-answer">Não. Damos ao dono a mesma informação que o gestor tem — em tempo real, direto no celular. É supervisão inteligente, não substituição.</div></details>
+      <details><summary>E se eu tiver propriedades em estados diferentes?</summary><div class="faq-answer">Perfeito — é exatamente pra isso que o AgrUAI foi feito. Você vê todas as propriedades no mesmo mapa, compara indicadores lado a lado, recebe alertas unificados.</div></details>
+    </div>
+  </div>
+</section>
+
 <!-- ===== FOOTER ===== -->
 <footer class="footer">
   <div class="container">
@@ -481,8 +624,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
       <svg class="footer-icon" width="20" height="20" viewBox="0 0 32 32" fill="none" style="display:inline"><ellipse cx="16" cy="10" rx="10" ry="5" stroke="#C5A572" stroke-width="1" stroke-dasharray="3 2" opacity=".4"/><circle cx="23" cy="8" r="2" fill="#C5A572" opacity=".4"/><path d="M6 24 Q12 20 18 22 Q24 24 28 20" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".4"/></svg>
       <span><span style="color:#F5F0E8">Agr</span><span style="color:#C5A572">UAI</span></span>
     </div>
-    <p>Ribeirão Preto, SP — 2026</p>
     <p class="tagline">Inteligência Rural por Satélite</p>
+    <p>Feito em Ribeirão Preto, SP</p>
+    <p style="margin-top:8px"><a href="mailto:contato@agruai.com" style="color:#C5A572;text-decoration:none">contato@agruai.com</a></p>
+    <p style="margin-top:12px;font-size:.7rem;color:#908880">© 2026 AgrUAI. Todos os direitos reservados.</p>
   </div>
 </footer>
 
