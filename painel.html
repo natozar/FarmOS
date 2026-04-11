@@ -232,9 +232,7 @@ var SUPA_URL='https://kyvbnntoxslrtrsiejzc.supabase.co';
 var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5dmJubnRveHNscnRyc2llanpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjQ1NDcsImV4cCI6MjA5MTQ0MDU0N30.Dx-9SKxWfAoxXg3gzx3NpzJD1taZgkQCCjwDXlY9J6I';
 var MAPBOX_TOKEN=['pk.eyJ1Ijoib','mF0b3phciIsIm','EiOiJjbW50bDZ4','eWQwcG81MnFva','HNqdGJ6MnQ4In','0.5NPBhg9r_3K','z2zb5uU4onA'].join('');
 
-var sb;
-try{sb=window.supabase.createClient(SUPA_URL,SUPA_KEY)}catch(e){console.error('Supabase init error:',e)}
-try{mapboxgl.accessToken=MAPBOX_TOKEN}catch(e){console.error('Mapbox init error:',e)}
+var sb=null;
 
 /* ========== STATE ========== */
 var State={user:null,tela:'login',authMode:'entrar',cadStep:1,cadData:{},drawnGeoJSON:null,mapInstance:null,drawInstance:null,mapaGeral:null,propriedades:[]};
@@ -354,4 +352,6 @@ async function iniciarApp(){var nome=State.user.user_metadata&&State.user.user_m
 async function checkSession(){showLoading('Verificando sessão...');
 var r=await sb.auth.getSession();if(r.data.session){State.user=r.data.session.user;hideLoading();iniciarApp()}else{hideLoading()}}
 
-if(sb&&sb.auth){sb.auth.onAuthStateChange(function(event,session){if(event==='SIGNED_IN'&&session){State.user=session.user;iniciarApp()}});checkSession()}
+function boot(){try{sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);mapboxgl.accessToken=MAPBOX_TOKEN}catch(e){console.error('Init error:',e);return}
+sb.auth.onAuthStateChange(function(event,session){if(event==='SIGNED_IN'&&session){State.user=session.user;iniciarApp()}});checkSession()}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',boot)}else{boot()}
