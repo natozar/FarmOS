@@ -30,7 +30,7 @@ button{cursor:pointer}
 /* LOGIN */
 .login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;flex:1;width:100%}
 .login-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 32px;text-align:center}
-.login-logo{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;margin-bottom:4px;letter-spacing:-.03em}
+.login-logo{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;margin:0 0 4px;letter-spacing:-.03em}
 .login-logo .l1{color:var(--text)}.login-logo .l2{color:var(--gold)}
 .login-sub{font-size:.78rem;color:var(--muted);margin-bottom:28px}
 .login-tabs{display:flex;margin-bottom:20px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
@@ -141,10 +141,11 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 <body>
 
 <!-- LOGIN -->
+<main>
 <div class="screen ativo" id="tela-login">
   <div class="login-screen">
     <div class="login-card">
-      <div class="login-logo"><span class="l1">Agr</span><span class="l2">UAI</span></div>
+      <h1 class="login-logo"><span class="l1">Agr</span><span class="l2">UAI</span></h1>
       <div class="login-sub">Inteligência Rural por Satélite</div>
       <div class="login-tabs">
         <button class="login-tab ativo" id="tabEntrar" onclick="trocarTab('entrar')">Entrar</button>
@@ -204,6 +205,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
   <div class="mapa-full" id="mapaFullContainer"></div>
 </div>
 
+</main>
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav" id="bottomNav" style="display:none">
   <a class="bnav" href="#mapa" onclick="event.preventDefault();navegarPara('mapa')"><span class="bnav-icon">🗺️</span>Mapa</a>
