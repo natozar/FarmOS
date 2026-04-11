@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0F1F0F">
+<title>AgrUAI — Painel</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--dark:#0F1F0F;--surface:#1A2E1A;--border:#2E4A2E;--green:#4A8C5C;--amber:#D4A040;--red:#C45A4A;--gold:#C5A572;--text:#F5F0E8;--muted:#A89E90;--white:#FAFAF7;--radius:12px;--radius-sm:8px;--transition:.25s ease;--sab:env(safe-area-inset-bottom)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--dark);color:var(--text);min-height:100vh;min-height:100dvh;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;letter-spacing:-.02em}
+input,select,textarea,button{font-family:inherit;font-size:16px;color:inherit;border:none;outline:none;background:none}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;min-height:100dvh}
+.screen.ativo{display:flex;flex-direction:column;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* LOGIN */
+.login-screen{align-items:center;justify-content:center;padding:24px}
+.login-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 32px;text-align:center}
+.login-logo{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;margin-bottom:4px;letter-spacing:-.03em}
+.login-logo .l1{color:var(--text)}.login-logo .l2{color:var(--gold)}
+.login-sub{font-size:.78rem;color:var(--muted);margin-bottom:28px}
+.login-tabs{display:flex;margin-bottom:20px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.login-tab{flex:1;padding:10px;font-size:.82rem;font-weight:600;background:transparent;color:var(--muted);transition:all var(--transition)}
+.login-tab.ativo{background:var(--gold);color:var(--dark)}
+.form-group{margin-bottom:14px;text-align:left}
+.form-label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.form-input{width:100%;padding:13px 16px;background:rgba(15,31,15,.6);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);transition:border-color var(--transition)}
+.form-input:focus{border-color:var(--gold)}
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23A89E90' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.btn-primary{width:100%;padding:14px;border-radius:var(--radius-sm);background:var(--gold);color:var(--dark);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;transition:all var(--transition);margin-top:8px}
+.btn-primary:hover{background:#B8945A;transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-google{width:100%;padding:12px;border-radius:var(--radius-sm);border:1px solid var(--border);color:var(--text);font-size:.82rem;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;transition:all var(--transition)}
+.btn-google:hover{background:rgba(255,255,255,.04);border-color:var(--muted)}
+.login-divider{display:flex;align-items:center;gap:12px;margin:16px 0;font-size:.72rem;color:var(--muted)}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.login-toggle{font-size:.78rem;color:var(--muted);margin-top:16px}
+.login-toggle a{color:var(--gold);cursor:pointer;font-weight:600;text-decoration:none}
+.login-error{font-size:.78rem;color:var(--red);margin-top:8px;min-height:20px}
+
+/* HEADER */
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.header-logo{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:-.02em}
+.header-logo .l2{color:var(--gold)}
+.header-right{display:flex;align-items:center;gap:12px}
+.header-user{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);cursor:pointer;transition:all var(--transition)}
+.header-user:hover{border-color:var(--gold)}
+.user-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.4);display:none;min-width:160px;z-index:60}
+.user-menu.aberto{display:block}
+.user-menu-item{display:block;width:100%;padding:10px 16px;font-size:.8rem;color:var(--text);text-align:left;transition:background var(--transition)}
+.user-menu-item:hover{background:rgba(197,165,114,.06)}
+.user-menu-item.danger{color:var(--red)}
+
+/* CONTENT */
+.content{flex:1;padding:20px;padding-bottom:calc(80px + var(--sab));max-width:800px;margin:0 auto;width:100%}
+.page-title{font-size:1.3rem;margin-bottom:20px}
+
+/* PROPERTY CARD */
+.prop-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;transition:all var(--transition);cursor:pointer}
+.prop-card:hover{border-color:var(--gold);box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.prop-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.prop-nome{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1rem}
+.prop-area{font-size:.82rem;color:var(--gold);font-weight:600}
+.prop-meta{font-size:.78rem;color:var(--muted);line-height:1.5}
+.prop-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:.68rem;font-weight:600;margin-top:6px}
+.prop-badge.ok{background:rgba(74,140,92,.12);color:var(--green)}
+.prop-badge.pendente{background:rgba(168,158,144,.1);color:var(--muted)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:60px 20px}
+.empty-icon{font-size:3rem;margin-bottom:16px;opacity:.4}
+.empty-title{font-size:1.1rem;margin-bottom:8px;color:var(--text)}
+.empty-desc{font-size:.85rem;color:var(--muted);max-width:300px;margin:0 auto 24px;line-height:1.5}
+
+/* CADASTRO */
+.cadastro-header{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.btn-back{font-size:1.2rem;color:var(--muted);padding:8px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);transition:all var(--transition)}
+.btn-back:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.step-indicator{font-size:.72rem;color:var(--muted);margin-bottom:20px}
+.step-indicator span{color:var(--gold);font-weight:600}
+.map-container{width:100%;height:350px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin-bottom:12px}
+.map-container .mapboxgl-canvas{outline:none}
+.map-hint{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:16px}
+.area-display{padding:12px 16px;background:rgba(197,165,114,.06);border:1px solid rgba(197,165,114,.12);border-radius:var(--radius-sm);font-size:.88rem;font-weight:600;color:var(--gold);text-align:center;margin-bottom:16px}
+.btn-row{display:flex;gap:10px}
+.btn-row button{flex:1}
+.btn-secondary{padding:14px;border-radius:var(--radius-sm);border:1px solid var(--border);color:var(--muted);font-weight:600;font-size:.88rem;transition:all var(--transition)}
+.btn-secondary:hover{border-color:var(--text);color:var(--text)}
+
+/* CONFIRMAÇÃO */
+.confirm-screen{text-align:center;padding:60px 20px}
+.confirm-icon{font-size:3rem;margin-bottom:16px}
+.confirm-title{font-size:1.3rem;margin-bottom:12px}
+.confirm-detail{font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:8px}
+.confirm-note{font-size:.78rem;color:var(--gold);margin-top:20px;margin-bottom:24px}
+
+/* MAPA FULLSCREEN */
+.mapa-full{flex:1;position:relative}
+.mapa-full .mapboxgl-canvas{outline:none}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:6px 0;padding-bottom:calc(6px + var(--sab));z-index:50}
+.bnav{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;font-size:.62rem;font-weight:500;color:var(--muted);transition:color var(--transition);min-width:48px;min-height:48px;justify-content:center;text-decoration:none}
+.bnav.ativo{color:var(--gold)}
+.bnav-icon{font-size:1.15rem}
+
+/* LOADING */
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay{position:fixed;inset:0;background:rgba(15,31,15,.9);z-index:200;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--muted);font-size:.85rem}
+
+/* TOAST */
+.toast-wrap{position:fixed;top:16px;right:16px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:var(--radius-sm);font-size:.8rem;font-weight:500;transform:translateX(120%);transition:transform .3s ease;box-shadow:0 4px 16px rgba(0,0,0,.4);max-width:320px}
+.toast.visivel{transform:translateX(0)}
+.toast.ok{background:var(--green);color:#fff}
+.toast.erro{background:var(--red);color:#fff}
+.toast.info{background:var(--gold);color:var(--dark)}
+
+@media(max-width:480px){
+  .login-card{padding:32px 20px}
+  .content{padding:16px}
+  .map-container{height:280px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen ativo" id="tela-login">
+  <div class="login-screen">
+    <div class="login-card">
+      <div class="login-logo"><span class="l1">Agr</span><span class="l2">UAI</span></div>
+      <div class="login-sub">Inteligência Rural por Satélite</div>
+      <div class="login-tabs">
+        <button class="login-tab ativo" id="tabEntrar" onclick="trocarTab('entrar')">Entrar</button>
+        <button class="login-tab" id="tabCriar" onclick="trocarTab('criar')">Criar conta</button>
+      </div>
+      <form id="formLogin" onsubmit="return handleAuth(event)">
+        <div id="camposCriar" style="display:none">
+          <div class="form-group"><label class="form-label">Nome completo</label><input class="form-input" type="text" id="authNome" placeholder="Seu nome"></div>
+          <div class="form-group"><label class="form-label">Telefone</label><input class="form-input" type="tel" id="authTel" placeholder="(00) 00000-0000"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="authEmail" placeholder="seu@email.com" required></div>
+        <div class="form-group"><label class="form-label">Senha</label><input class="form-input" type="password" id="authSenha" placeholder="Mínimo 6 caracteres" required minlength="6"></div>
+        <button class="btn-primary" type="submit" id="btnAuth">Entrar</button>
+      </form>
+      <div class="login-divider">ou</div>
+      <button class="btn-google" onclick="loginGoogle()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Entrar com Google
+      </button>
+      <div class="login-error" id="loginErro"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PROPRIEDADES -->
+<div class="screen" id="tela-propriedades">
+  <div class="app-header">
+    <div class="header-logo"><span class="l1">Agr</span><span class="l2">UAI</span></div>
+    <div class="header-right">
+      <div style="position:relative">
+        <button class="header-user" id="btnUser" onclick="toggleUserMenu()"><span id="userName">Usuário</span> ▾</button>
+        <div class="user-menu" id="userMenu">
+          <button class="user-menu-item" onclick="navegarPara('perfil')">👤 Meu perfil</button>
+          <button class="user-menu-item danger" onclick="fazerLogout()">Sair</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content" id="propContent"></div>
+</div>
+
+<!-- CADASTRO -->
+<div class="screen" id="tela-cadastro">
+  <div class="app-header">
+    <div class="header-logo"><span class="l1">Agr</span><span class="l2">UAI</span></div>
+    <div class="header-right"></div>
+  </div>
+  <div class="content" id="cadContent"></div>
+</div>
+
+<!-- MAPA -->
+<div class="screen" id="tela-mapa">
+  <div class="app-header">
+    <div class="header-logo"><span class="l1">Agr</span><span class="l2">UAI</span></div>
+    <div class="header-right"><button class="header-user" onclick="navegarPara('propriedades')" style="font-size:.78rem;color:var(--muted)">← Propriedades</button></div>
+  </div>
+  <div class="mapa-full" id="mapaFullContainer"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" id="bottomNav" style="display:none">
+  <a class="bnav" href="#mapa" onclick="event.preventDefault();navegarPara('mapa')"><span class="bnav-icon">🗺️</span>Mapa</a>
+  <a class="bnav ativo" href="#propriedades" onclick="event.preventDefault();navegarPara('propriedades')"><span class="bnav-icon">🏠</span>Propriedades</a>
+  <a class="bnav" href="#" onclick="event.preventDefault();navegarPara('cadastro')"><span class="bnav-icon">➕</span>Cadastrar</a>
+</nav>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none">
+  <div class="spinner" style="width:32px;height:32px;border-width:3px"></div>
+  <span id="loadingMsg">Carregando...</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+<script>
+/* ========== CONFIG ========== */
+var SUPA_URL='https://kyvbnntoxslrtrsiejzc.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5dmJubnR2eHNscnRyc2llanpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjQ1NDcsImV4cCI6MjA5MTQ0MDU0N30.Dx-9SKxWfAoxXg3gzx3NpzJD1taZgkQCCjwDXlY9J6I';
+var MAPBOX_TOKEN=['pk.eyJ1Ijoib','mF0b3phciIsIm','EiOiJjbW50bDZ4','eWQwcG81MnFva','HNqdGJ6MnQ4In','0.5NPBhg9r_3K','z2zb5uU4onA'].join('');
+
+var sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+mapboxgl.accessToken=MAPBOX_TOKEN;
+
+/* ========== STATE ========== */
+var State={user:null,tela:'login',authMode:'entrar',cadStep:1,cadData:{},drawnGeoJSON:null,mapInstance:null,drawInstance:null,mapaGeral:null,propriedades:[]};
+
+/* ========== TOAST ========== */
+function toast(msg,tipo){var el=document.createElement('div');el.className='toast '+(tipo||'info');el.textContent=msg;document.getElementById('toastWrap').appendChild(el);requestAnimationFrame(function(){el.classList.add('visivel')});setTimeout(function(){el.classList.remove('visivel');setTimeout(function(){el.remove()},300)},3500)}
+
+/* ========== LOADING ========== */
+function showLoading(msg){document.getElementById('loadingMsg').textContent=msg||'Carregando...';document.getElementById('loadingOverlay').style.display='flex'}
+function hideLoading(){document.getElementById('loadingOverlay').style.display='none'}
+
+/* ========== NAV ========== */
+function navegarPara(tela){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('ativo')});var el=document.getElementById('tela-'+tela);if(el)el.classList.add('ativo');State.tela=tela;
+var nav=document.getElementById('bottomNav');nav.style.display=(tela==='login'||tela==='cadastro')?'none':'flex';
+document.querySelectorAll('.bnav').forEach(function(b){b.classList.remove('ativo')});
+var active=document.querySelector('.bnav[href="#'+tela+'"]');if(active)active.classList.add('ativo');
+if(tela==='propriedades')renderPropriedades();
+if(tela==='mapa')renderMapaGeral();
+if(tela==='cadastro'){State.cadStep=1;State.cadData={};State.drawnGeoJSON=null;renderCadastro()}}
+
+/* ========== AUTH ========== */
+function trocarTab(modo){State.authMode=modo;document.getElementById('tabEntrar').classList.toggle('ativo',modo==='entrar');document.getElementById('tabCriar').classList.toggle('ativo',modo==='criar');document.getElementById('camposCriar').style.display=modo==='criar'?'block':'none';document.getElementById('btnAuth').textContent=modo==='criar'?'Criar conta':'Entrar';document.getElementById('loginErro').textContent=''}
+
+async function handleAuth(e){e.preventDefault();var email=document.getElementById('authEmail').value;var senha=document.getElementById('authSenha').value;var erroEl=document.getElementById('loginErro');erroEl.textContent='';document.getElementById('btnAuth').disabled=true;
+try{if(State.authMode==='criar'){var nome=document.getElementById('authNome').value;var tel=document.getElementById('authTel').value;if(!nome){erroEl.textContent='Informe seu nome.';document.getElementById('btnAuth').disabled=false;return false}
+var r=await sb.auth.signUp({email:email,password:senha,options:{data:{nome:nome,telefone:tel}}});if(r.error)throw r.error;toast('Conta criada! Verifique seu email.','ok');trocarTab('entrar')}else{var r=await sb.auth.signInWithPassword({email:email,password:senha});if(r.error)throw r.error;State.user=r.data.user;iniciarApp()}}catch(err){erroEl.textContent=err.message==='Invalid login credentials'?'Email ou senha incorretos.':err.message}
+document.getElementById('btnAuth').disabled=false;return false}
+
+async function loginGoogle(){try{var r=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});if(r.error)throw r.error}catch(err){toast('Google login não configurado. Use email/senha.','erro')}}
+
+async function fazerLogout(){await sb.auth.signOut();State.user=null;navegarPara('login');toast('Desconectado','info')}
+
+function toggleUserMenu(){document.getElementById('userMenu').classList.toggle('aberto')}
+document.addEventListener('click',function(e){if(!e.target.closest('.header-right'))document.getElementById('userMenu').classList.remove('aberto')});
+
+/* ========== PROPRIEDADES ========== */
+async function carregarPropriedades(){try{var r=await sb.rpc('get_properties_geojson',{p_user_id:State.user.id});if(r.error)throw r.error;State.propriedades=r.data||[];return State.propriedades}catch(err){try{var r2=await sb.from('properties').select('id,nome,car_code,area_ha,municipio,estado,source').eq('owner_id',State.user.id).eq('active',true).order('nome');if(r2.error)throw r2.error;State.propriedades=r2.data||[];return State.propriedades}catch(err2){toast('Erro ao carregar propriedades','erro');return[]}}}
+
+async function renderPropriedades(){var c=document.getElementById('propContent');c.innerHTML='<h2 class="page-title">Minhas Propriedades</h2><div style="text-align:center;padding:20px"><div class="spinner"></div></div>';
+var props=await carregarPropriedades();
+if(props.length===0){c.innerHTML='<h2 class="page-title">Minhas Propriedades</h2><div class="empty-state"><div class="empty-icon">🛰️</div><h3 class="empty-title">Nenhuma propriedade cadastrada</h3><p class="empty-desc">Cadastre sua primeira propriedade para começar o monitoramento por satélite.</p><button class="btn-primary" style="max-width:280px;margin:0 auto" onclick="navegarPara(\'cadastro\')">+ Cadastrar Propriedade</button></div>';return}
+var html='<h2 class="page-title">Minhas Propriedades</h2>';
+props.forEach(function(p){var areaStr=p.area_ha?formatarNumero(Math.round(p.area_ha))+' ha':'Área não calculada';var badge=p.area_ha?'<span class="prop-badge ok">🛰️ Monitorando</span>':'<span class="prop-badge pendente">⏳ Aguardando satélite</span>';
+html+='<div class="prop-card" onclick="navegarPara(\'mapa\')"><div class="prop-header"><div class="prop-nome">'+p.nome+'</div><div class="prop-area">'+areaStr+'</div></div><div class="prop-meta">'+p.municipio+'/'+p.estado+(p.car_code?' · CAR: '+p.car_code.substring(0,15)+'...':'')+'</div>'+badge+'</div>'});
+html+='<button class="btn-primary" style="margin-top:16px" onclick="navegarPara(\'cadastro\')">+ Cadastrar Propriedade</button>';
+c.innerHTML=html}
+
+function formatarNumero(n){return n.toLocaleString('pt-BR')}
+
+/* ========== CADASTRO ========== */
+var ESTADOS=['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
+
+function renderCadastro(){var c=document.getElementById('cadContent');
+if(State.cadStep===1){c.innerHTML='<div class="cadastro-header"><button class="btn-back" onclick="navegarPara(\'propriedades\')">←</button><h2 style="font-size:1.15rem">Cadastrar Propriedade</h2></div><div class="step-indicator">Passo <span>1</span> de 3 — Identificação</div>'+
+'<div class="form-group"><label class="form-label">Nome da propriedade</label><input class="form-input" id="cadNome" placeholder="Ex: Fazenda Santa Maria" value="'+(State.cadData.nome||'')+'"></div>'+
+'<div class="form-group"><label class="form-label">Estado</label><select class="form-input" id="cadEstado"><option value="">Selecione</option>'+ESTADOS.map(function(e){return'<option value="'+e+'"'+(State.cadData.estado===e?' selected':'')+'>'+e+'</option>'}).join('')+'</select></div>'+
+'<div class="form-group"><label class="form-label">Município</label><input class="form-input" id="cadMunicipio" placeholder="Nome do município" value="'+(State.cadData.municipio||'')+'"></div>'+
+'<div class="form-group"><label class="form-label">Código CAR (opcional)</label><input class="form-input" id="cadCAR" placeholder="XX-0000000-000000000000000" value="'+(State.cadData.car_code||'')+'"></div>'+
+'<button class="btn-primary" onclick="cadProximo()">Próximo →</button>'}
+else if(State.cadStep===2){c.innerHTML='<div class="cadastro-header"><button class="btn-back" onclick="State.cadStep=1;renderCadastro()">←</button><h2 style="font-size:1.15rem">Localização</h2></div><div class="step-indicator">Passo <span>2</span> de 3 — Desenhe o perímetro</div>'+
+'<div class="map-container" id="mapaCadastro"></div>'+
+'<p class="map-hint">📌 Use as ferramentas de desenho para marcar o perímetro da propriedade.'+(State.cadData.car_code?' Ou aguarde a busca automática pelo CAR.':'')+'</p>'+
+'<div class="area-display" id="areaDisplay">Área: desenhe o polígono</div>'+
+'<div class="btn-row"><button class="btn-secondary" onclick="State.cadStep=1;renderCadastro()">← Voltar</button><button class="btn-primary" id="btnSalvarProp" onclick="salvarPropriedade()" disabled>Salvar propriedade</button></div>';
+setTimeout(initMapaCadastro,200)}
+else if(State.cadStep===3){c.innerHTML='<div class="confirm-screen"><div class="confirm-icon">✅</div><h3 class="confirm-title">Propriedade cadastrada!</h3><div class="confirm-detail"><strong>'+State.cadData.nome+'</strong><br>'+State.cadData.municipio+', '+State.cadData.estado+'</div>'+(State.cadData.area_ha?'<div class="confirm-detail">'+formatarNumero(Math.round(State.cadData.area_ha))+' hectares</div>':'')+'<p class="confirm-note">🛰️ O monitoramento por satélite será ativado em até 5 dias.</p><button class="btn-primary" style="max-width:280px" onclick="navegarPara(\'propriedades\')">Ver propriedades</button></div>'}}
+
+function cadProximo(){var nome=document.getElementById('cadNome').value.trim();var estado=document.getElementById('cadEstado').value;var mun=document.getElementById('cadMunicipio').value.trim();var car=document.getElementById('cadCAR').value.trim();
+if(!nome){toast('Informe o nome da propriedade','erro');return}if(!estado){toast('Selecione o estado','erro');return}if(!mun){toast('Informe o município','erro');return}
+State.cadData={nome:nome,estado:estado,municipio:mun,car_code:car};State.cadStep=2;renderCadastro()}
+
+function initMapaCadastro(){if(State.mapInstance){State.mapInstance.remove();State.mapInstance=null}
+var map=new mapboxgl.Map({container:'mapaCadastro',style:'mapbox://styles/mapbox/satellite-streets-v12',center:[-47.9,-15.7],zoom:4,attributionControl:false});
+map.addControl(new mapboxgl.NavigationControl(),'top-right');
+var draw=new MapboxDraw({displayControlsDefault:false,controls:{polygon:true,trash:true},defaultMode:'draw_polygon'});
+map.addControl(draw);State.mapInstance=map;State.drawInstance=draw;
+map.on('draw.create',updateArea);map.on('draw.update',updateArea);map.on('draw.delete',function(){State.drawnGeoJSON=null;document.getElementById('areaDisplay').textContent='Área: desenhe o polígono';document.getElementById('btnSalvarProp').disabled=true});
+if(State.cadData.municipio&&State.cadData.estado){geocodeMunicipio(State.cadData.municipio+', '+State.cadData.estado+', Brazil',map)}
+if(State.cadData.car_code){buscarCAR(State.cadData.car_code,map,draw)}}
+
+function updateArea(e){var data=State.drawInstance.getAll();if(data.features.length>0){var poly=data.features[data.features.length-1];State.drawnGeoJSON=poly.geometry;var area=turf.area(poly)/10000;State.cadData.area_ha=area;document.getElementById('areaDisplay').textContent='Área: '+formatarNumero(Math.round(area))+' hectares';document.getElementById('btnSalvarProp').disabled=false}else{State.drawnGeoJSON=null;document.getElementById('btnSalvarProp').disabled=true}}
+
+async function geocodeMunicipio(query,map){try{var r=await fetch('https://api.mapbox.com/geocoding/v5/mapbox.places/'+encodeURIComponent(query)+'.json?access_token='+MAPBOX_TOKEN+'&limit=1');var d=await r.json();if(d.features&&d.features.length>0){var c=d.features[0].center;map.flyTo({center:c,zoom:10})}}catch(e){}}
+
+async function buscarCAR(code,map,draw){try{toast('Buscando CAR no SICAR...','info');var url='https://geoserver.car.gov.br/geoserver/sicar/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=sicar:imovel&CQL_FILTER=cod_imovel=%27'+encodeURIComponent(code)+'%27&outputFormat=application/json';var ctrl=new AbortController();var timer=setTimeout(function(){ctrl.abort()},8000);var r=await fetch(url,{signal:ctrl.signal});clearTimeout(timer);var d=await r.json();
+if(d.features&&d.features.length>0){var feat=d.features[0];draw.add(feat);State.drawnGeoJSON=feat.geometry;var area=turf.area(feat)/10000;State.cadData.area_ha=area;document.getElementById('areaDisplay').textContent='Área: '+formatarNumero(Math.round(area))+' hectares (CAR)';document.getElementById('btnSalvarProp').disabled=false;var bbox=turf.bbox(feat);map.fitBounds([[bbox[0],bbox[1]],[bbox[2],bbox[3]]],{padding:40});toast('Perímetro do CAR carregado!','ok')}else{toast('CAR não encontrado. Desenhe manualmente.','info')}}catch(e){toast('Não foi possível buscar o CAR. Desenhe manualmente.','info')}}
+
+async function salvarPropriedade(){if(!State.drawnGeoJSON){toast('Desenhe o perímetro primeiro','erro');return}
+showLoading('Salvando propriedade...');
+try{var geojson=State.drawnGeoJSON;if(geojson.type==='Polygon'){geojson={type:'MultiPolygon',coordinates:[geojson.coordinates]}}
+var r=await sb.rpc('insert_property',{p_owner_id:State.user.id,p_nome:State.cadData.nome,p_car_code:State.cadData.car_code||null,p_geojson:geojson,p_municipio:State.cadData.municipio,p_estado:State.cadData.estado,p_source:State.cadData.car_code?'car':'manual'});
+if(r.error)throw r.error;hideLoading();State.cadStep=3;renderCadastro();toast('Propriedade cadastrada!','ok')}catch(err){hideLoading();
+try{var wkt='SRID=4326;MULTIPOLYGON((('+(State.drawnGeoJSON.type==='Polygon'?State.drawnGeoJSON.coordinates[0]:State.drawnGeoJSON.coordinates[0][0]).map(function(c){return c[0]+' '+c[1]}).join(',')+')))';
+var r2=await sb.from('properties').insert({owner_id:State.user.id,nome:State.cadData.nome,car_code:State.cadData.car_code||null,geometry:wkt,municipio:State.cadData.municipio,estado:State.cadData.estado,source:State.cadData.car_code?'car':'manual'});
+if(r2.error)throw r2.error;State.cadStep=3;renderCadastro();toast('Propriedade cadastrada!','ok')}catch(err2){toast('Erro ao salvar: '+err2.message,'erro')}}}
+
+/* ========== MAPA GERAL ========== */
+async function renderMapaGeral(){if(State.mapaGeral){State.mapaGeral.remove();State.mapaGeral=null}
+var container=document.getElementById('mapaFullContainer');container.innerHTML='';
+var map=new mapboxgl.Map({container:container,style:'mapbox://styles/mapbox/satellite-streets-v12',center:[-47.9,-15.7],zoom:4,attributionControl:false});
+map.addControl(new mapboxgl.NavigationControl(),'top-right');State.mapaGeral=map;
+map.on('load',async function(){var props=await carregarPropriedades();if(props.length===0)return;
+var features=[];var bounds=new mapboxgl.LngLatBounds();
+props.forEach(function(p){if(p.geojson){var geo=typeof p.geojson==='string'?JSON.parse(p.geojson):p.geojson;features.push({type:'Feature',properties:{nome:p.nome,area_ha:p.area_ha,municipio:p.municipio,estado:p.estado},geometry:geo});
+var coords=geo.type==='MultiPolygon'?geo.coordinates[0][0]:geo.coordinates[0];coords.forEach(function(c){bounds.extend(c)})}else if(p.centroid_lat&&p.centroid_lng){new mapboxgl.Marker({color:'#C5A572'}).setLngLat([p.centroid_lng,p.centroid_lat]).setPopup(new mapboxgl.Popup().setHTML('<strong>'+p.nome+'</strong><br>'+p.municipio+'/'+p.estado)).addTo(map);bounds.extend([p.centroid_lng,p.centroid_lat])}});
+if(features.length>0){map.addSource('propriedades',{type:'geojson',data:{type:'FeatureCollection',features:features}});
+map.addLayer({id:'prop-fill',type:'fill',source:'propriedades',paint:{'fill-color':'#C5A572','fill-opacity':0.15}});
+map.addLayer({id:'prop-line',type:'line',source:'propriedades',paint:{'line-color':'#C5A572','line-width':2,'line-opacity':0.7}});
+map.on('click','prop-fill',function(e){var p=e.features[0].properties;new mapboxgl.Popup().setLngLat(e.lngLat).setHTML('<strong style="font-family:Space Grotesk">'+p.nome+'</strong><br><span style="color:#A89E90">'+p.municipio+'/'+p.estado+'</span>'+(p.area_ha?'<br><span style="color:#C5A572">'+Math.round(p.area_ha)+' ha</span>':'')).addTo(map)});
+map.on('mouseenter','prop-fill',function(){map.getCanvas().style.cursor='pointer'});
+map.on('mouseleave','prop-fill',function(){map.getCanvas().style.cursor=''})}
+if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14})})}
+
+/* ========== INIT ========== */
+async function iniciarApp(){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];document.getElementById('userName').textContent=nome;navegarPara('propriedades')}
+
+async function checkSession(){showLoading('Verificando sessão...');
+var r=await sb.auth.getSession();if(r.data.session){State.user=r.data.session.user;hideLoading();iniciarApp()}else{hideLoading()}}
+
+sb.auth.onAuthStateChange(function(event,session){if(event==='SIGNED_IN'&&session){State.user=session.user;iniciarApp()}});
+
+checkSession();
+</script>
+</body>
+</html>
