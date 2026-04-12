@@ -245,17 +245,8 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .rec-status.visivel{display:block;animation:fadeIn .2s ease}
 .rec-timer{font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif}
 
-/* Audio player in timeline */
-.audio-player{display:flex;align-items:center;gap:8px;margin-top:6px;padding:8px 10px;background:rgba(15,31,15,.5);border:1px solid var(--border);border-radius:var(--radius-sm)}
-.audio-play-btn{width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--dark);display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0;transition:all .2s}
-.audio-play-btn:hover{background:#B8945A;transform:scale(1.08)}
-.audio-wave{flex:1;height:24px;display:flex;align-items:center;gap:1px}
-.audio-wave-bar{width:3px;border-radius:1px;background:var(--gold);opacity:.4;transition:height .1s}
-.audio-wave-bar.active{opacity:1}
-.audio-time{font-size:.65rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:32px;text-align:right}
-.audio-pending{font-size:.6rem;color:var(--muted);font-style:italic;margin-top:2px}
-.ai-badge{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;font-weight:600;padding:2px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(197,165,114,.12),rgba(74,140,92,.08));border:1px solid rgba(197,165,114,.2);color:var(--gold);margin-top:4px}
-.ai-transcription{font-size:.82rem;color:var(--text);line-height:1.5;margin-top:6px;padding:8px 10px;background:rgba(15,31,15,.4);border-left:2px solid var(--gold);border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-style:italic}
+/* Voice badge in timeline */
+.voice-badge{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;font-weight:600;padding:2px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(197,165,114,.12),rgba(74,140,92,.08));border:1px solid rgba(197,165,114,.2);color:var(--gold);margin-left:4px}
 
 /* Offline sync status */
 .sync-status{font-size:.58rem;font-weight:600;padding:1px 7px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;margin-left:4px}
@@ -658,7 +649,7 @@ riskHTML+
 '<div class="tab-panel" id="panelDiario">'+
 '<div style="margin-bottom:10px"><select class="form-input" id="diarioSector" style="font-size:.8rem;padding:10px 14px">'+sectorOptions('operacional')+'</select></div>'+
 '<div class="diario-input-wrap"><textarea class="diario-input" id="diarioInput" placeholder="O que aconteceu hoje na fazenda?" rows="1" maxlength="1000"></textarea><button class="rec-btn" id="btnRec" onclick="toggleRecording()" title="Gravar áudio">&#127908;</button><button class="inv-toggle" id="btnInvToggle" onclick="toggleInvPicker()" title="Vincular insumo">&#128230;</button><button class="diario-send" id="btnDiarioSend" onclick="enviarLog()" title="Enviar">&#10148;</button></div>'+
-'<div class="rec-status" id="recStatus"><span>&#128308; Gravando... </span><span class="rec-timer" id="recTimer">00:00</span></div>'+
+'<div class="rec-status" id="recStatus"><span>&#127908; Ouvindo... fale agora</span></div>'+
 '<div class="inv-picker" id="invPicker"><div class="inv-picker-title">Vincular insumo utilizado</div><div class="inv-list" id="invPickerList"><span style="color:var(--muted);font-size:.8rem">Carregando...</span></div><div class="inv-qty-row" id="invQtyRow" style="display:none"><label class="inv-qty-label">Quantidade usada:</label><input class="inv-qty-input" type="number" id="invQtyInput" min="0.1" step="0.1" placeholder="0"><span class="inv-qty-label" id="invQtyUnit">un</span><button class="btn-secondary" style="padding:8px 12px;font-size:.75rem" onclick="clearInvSelection()">Limpar</button></div></div>'+
 '<div id="timelineContainer"><div style="text-align:center;padding:20px"><div class="spinner"></div></div></div></div>'+
 '<div class="tab-panel" id="panelInsumos"><div class="gestores-title"><span>Estoque / Galpão</span><button class="btn-convidar" onclick="abrirModalInsumo()">+ Cadastrar Insumo</button></div><div id="insumosList" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>'+
@@ -680,17 +671,14 @@ async function loadTimeline(pid){var el=document.getElementById('timelineContain
 try{var r=await sb.rpc('get_property_timeline',{p_property_id:pid,p_limit:30});
 if(r.error){el.innerHTML=renderFieldLogsOnly(pid);return}
 var items=r.data||[];if(items.length===0){el.innerHTML='<div class="timeline-empty">Nenhum registro ainda.<br>Use o campo acima para registrar o que aconteceu na fazenda.</div>';return}
-var remoteHtml=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var isAudio=isLog&&item.content&&item.content.indexOf('[Áudio')===0;var icon=isAudio?'&#127908;':isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
-var audioHtml='';var isTranscribed=isLog&&item.content&&item.content.indexOf('Transcrito por I.A.')>=0;
-if(isAudio&&!isTranscribed){audioHtml=renderAudioPlayer(item.id,0,true)}
-var transcriptionHtml='';if(isTranscribed){var cleanText=item.content.replace(/^🎙️\s*/,'').replace(/\s*\[Transcrito por I\.A\.\]\s*$/,'');transcriptionHtml='<div class="ai-transcription">'+escapeHtml(cleanText)+'</div><span class="ai-badge">&#10024; Transcrito por I.A.</span>'}
-return'<div class="timeline-item"><div class="timeline-icon '+(isTranscribed?'log':iconClass)+'">'+(isTranscribed?'&#127908;':icon)+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+'</div>'+(isTranscribed?transcriptionHtml:'<div class="timeline-text">'+escapeHtml(item.content)+'</div>')+audioHtml+'<div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
+var remoteHtml=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var isVoice=isLog&&item.content&&item.content.indexOf('🎙️')===0;var icon=isVoice?'&#127908;':isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var voiceBadge=isVoice?'<span class="voice-badge">&#127908; Ditado por voz</span>':'';var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
+return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+voiceBadge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div><div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
 var pendingLogs=await getAllPendingLogs();var pendingHtml=pendingLogs.filter(function(l){return l.property_id===pid}).map(function(l){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];return'<div class="timeline-item pending" data-local-id="'+l.localId+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(l.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(l.content)+'</div><div class="timeline-time">'+formatarDataHora(l.created_at)+'</div></div></div>'}).join('');
 el.innerHTML=pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
 
 function renderFieldLogsOnly(pid){return'<div class="timeline-empty">Timeline indisponível. Execute o SQL de field_logs no Supabase.</div>'}
 
-async function enviarLog(){var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content)return;if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
+async function enviarLog(){if(isListening)stopListening();var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content)return;if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
 var btn=document.getElementById('btnDiarioSend');btn.disabled=true;
 var sectorSel=document.getElementById('diarioSector');var sector=sectorSel?sectorSel.value:'operacional';
 var invItem=State.selectedInvItem;var invQty=invItem?parseFloat(document.getElementById('invQtyInput').value)||0:0;
@@ -710,9 +698,7 @@ btn.disabled=false}
 
 function renderPendingInTimeline(log){var el=document.getElementById('timelineContainer');if(!el)return;
 var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];
-var isAudio=log._audioId||log.content.indexOf('[Áudio')===0;var icon=isAudio?'&#127908;':'&#9998;';
-var audioHtml=isAudio&&log._audioId?renderAudioPlayer(log._audioId,0,false):'';
-var html='<div class="timeline-item pending" data-local-id="'+(log.localId||'')+'"><div class="timeline-icon log">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(log.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(log.content)+'</div>'+audioHtml+'<div class="timeline-time">agora</div></div></div>';
+var html='<div class="timeline-item pending" data-local-id="'+(log.localId||'')+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(log.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(log.content)+'</div><div class="timeline-time">agora</div></div></div>';
 var empty=el.querySelector('.timeline-empty');if(empty)el.innerHTML='';el.insertAdjacentHTML('afterbegin',html)}
 
 async function deletarLog(id){try{var r=await sb.from('field_logs').delete().eq('id',id).eq('author_id',State.user.id);if(r.error)throw r.error;toast('Registro excluído','ok');if(State.selectedProperty)loadTimeline(State.selectedProperty)}catch(e){toast('Erro ao excluir','erro')}}
@@ -1036,68 +1022,50 @@ await removePendingLog(l.localId);
 var el=document.querySelector('[data-local-id="'+l.localId+'"]');if(el){el.classList.remove('pending');var badge=el.querySelector('.sync-status');if(badge){badge.className='sync-status synced';badge.textContent='Sincronizado'}}}catch(e){console.error('Sync failed for log',l.localId,e);break}}
 if(State.selectedProperty)loadTimeline(State.selectedProperty)}catch(e){console.error('syncPendingLogs error',e)}}
 
-/* ========== AUDIO RECORDER (ADR-006) ========== */
-var mediaRecorder=null;var audioChunks=[];var recStartTime=0;var recInterval=null;
+/* ========== VOICE-TO-TEXT (ADR-006 v2 — Web Speech API, custo zero) ========== */
+var speechRec=null;var isListening=false;
 
-async function toggleRecording(){
-var btn=document.getElementById('btnRec');var status=document.getElementById('recStatus');
-if(mediaRecorder&&mediaRecorder.state==='recording'){
-mediaRecorder.stop();btn.classList.remove('recording');status.classList.remove('visivel');clearInterval(recInterval);return}
-try{var stream=await navigator.mediaDevices.getUserMedia({audio:true});
-audioChunks=[];mediaRecorder=new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm'});
-mediaRecorder.ondataavailable=function(e){if(e.data.size>0)audioChunks.push(e.data)};
-mediaRecorder.onstop=async function(){stream.getTracks().forEach(function(t){t.stop()});
-var blob=new Blob(audioChunks,{type:mediaRecorder.mimeType});var duration=Math.round((Date.now()-recStartTime)/1000);
-await salvarAudioLog(blob,duration)};
-mediaRecorder.start(250);recStartTime=Date.now();btn.classList.add('recording');status.classList.add('visivel');
-recInterval=setInterval(function(){var s=Math.round((Date.now()-recStartTime)/1000);var m=Math.floor(s/60);var ss=s%60;document.getElementById('recTimer').textContent=(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss},500);
-toast('Gravando...','info')}catch(e){toast('Microfone não disponível: '+e.message,'erro')}}
+function initSpeechRecognition(){
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){console.log('[speech] API não suportada neste navegador');return null}
+var rec=new SR();
+rec.lang='pt-BR';rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
+var finalText='';var inputEl=null;
+rec.onstart=function(){isListening=true;finalText='';
+var btn=document.getElementById('btnRec');if(btn)btn.classList.add('recording');
+var status=document.getElementById('recStatus');if(status)status.classList.add('visivel');
+inputEl=document.getElementById('diarioInput')};
 
-async function salvarAudioLog(blob,duration){
-var sectorSel=document.getElementById('diarioSector');var sector=sectorSel?sectorSel.value:'operacional';
-var audioId='aud_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
-var reader=new FileReader();reader.onload=async function(){
-var base64=reader.result;
-var audioData={audioId:audioId,property_id:State.selectedProperty,author_id:State.user.id,sector:sector,
-  blob64:base64,mimeType:blob.type,duration:duration,created_at:new Date().toISOString(),synced:false};
-await addPendingAudio(audioData);
-var logData={property_id:State.selectedProperty,author_id:State.user.id,
-  content:'[Áudio '+formatDuration(duration)+'] Gravação de voz pendente de transcrição.',
-  sector:sector,_audioId:audioId};
-if(navigator.onLine){
-try{var path=State.selectedProperty+'/'+audioId+'.webm';
-var uploadRes=await sb.storage.from('audio-logs').upload(path,blob,{contentType:blob.type,upsert:true});
-if(!uploadRes.error){audioData.synced=true;audioData.storagePath=path;await addPendingAudio(audioData);
-logData.content='[Áudio '+formatDuration(duration)+'] Gravação de voz enviada — aguardando transcrição.'}
-var r=await sb.from('field_logs').insert(logData).select('id').single();if(r.error)throw r.error;
-var logId=r.data.id;
-if(!uploadRes.error&&logId){triggerTranscription(logId,path)}
-toast('Áudio enviado — transcrição em andamento...','ok')}catch(e){
-logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();
-await addPendingLog(logData);toast('Áudio salvo localmente','info')}
-}else{logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();
-await addPendingLog(logData);toast('Áudio salvo offline','info')}
-if(State.selectedProperty)loadTimeline(State.selectedProperty)};reader.readAsDataURL(blob)}
+rec.onresult=function(e){var interim='';var final='';
+for(var i=e.resultIndex;i<e.results.length;i++){var t=e.results[i][0].transcript;if(e.results[i].isFinal){final+=t}else{interim+=t}}
+if(final)finalText+=final;
+if(inputEl){inputEl.value=finalText+(interim?' '+interim:'');inputEl.style.height='auto';inputEl.style.height=Math.min(inputEl.scrollHeight,120)+'px'}};
 
-function formatDuration(s){var m=Math.floor(s/60);var ss=s%60;return(m>0?m+'min ':'')+(ss>0?ss+'s':'')}
+rec.onerror=function(e){console.error('[speech] Error:',e.error);
+if(e.error==='not-allowed'){toast('Permissão de microfone negada','erro')}
+else if(e.error==='no-speech'){toast('Nenhuma fala detectada — tente novamente','info')}
+else if(e.error!=='aborted'){toast('Erro de reconhecimento: '+e.error,'erro')}
+stopListening()};
 
-async function triggerTranscription(logId,storagePath){
-try{var r=await sb.functions.invoke('transcribe-audio',{body:{log_id:logId,storage_path:storagePath}});
-if(r.error)throw r.error;
-var data=typeof r.data==='string'?JSON.parse(r.data):r.data;
-if(data.status==='transcribed'){toast('Áudio transcrito pela I.A.!','ok');if(State.selectedProperty)loadTimeline(State.selectedProperty)}
-else{console.log('[transcribe] Response:',data)}}catch(e){console.error('[transcribe] Trigger failed:',e)}}
+rec.onend=function(){if(isListening){stopListening()}};
+return rec}
 
-function renderAudioPlayer(audioId,duration,synced){
-var bars='';for(var i=0;i<20;i++){var h=4+Math.floor(Math.random()*16);bars+='<div class="audio-wave-bar" style="height:'+h+'px"></div>'}
-return'<div class="audio-player" data-audio-id="'+audioId+'"><button class="audio-play-btn" onclick="playAudio(\''+audioId+'\')">&#9654;</button><div class="audio-wave">'+bars+'</div><span class="audio-time">'+formatDuration(duration)+'</span></div>'+(synced?'':'<div class="audio-pending">Aguardando conexão para envio</div>')}
+function toggleRecording(){
+if(isListening){stopListening();return}
+if(!speechRec){speechRec=initSpeechRecognition()}
+if(!speechRec){toast('Reconhecimento de voz não disponível neste navegador','erro');return}
+var existing=document.getElementById('diarioInput');
+if(existing&&existing.value.trim()){speechRec._prefix=existing.value.trim()+' '}else{speechRec._prefix=''}
+try{speechRec.start();toast('Fale agora...','info')}catch(e){
+if(e.message&&e.message.indexOf('already started')>=0){speechRec.stop();setTimeout(function(){try{speechRec.start()}catch(x){}},200)}
+else{toast('Erro ao iniciar microfone: '+e.message,'erro')}}}
 
-async function playAudio(audioId){
-var data=await getPendingAudio(audioId);if(!data||!data.blob64){toast('Áudio não encontrado localmente','info');return}
-var audio=new Audio(data.blob64);audio.play();
-var container=document.querySelector('[data-audio-id="'+audioId+'"]');if(container){
-var bars=container.querySelectorAll('.audio-wave-bar');var idx=0;
-var iv=setInterval(function(){bars.forEach(function(b){b.classList.remove('active')});if(idx<bars.length)bars[idx].classList.add('active');idx++;if(idx>bars.length){clearInterval(iv);bars.forEach(function(b){b.classList.remove('active')})}},audio.duration*1000/bars.length||150)}}
+function stopListening(){isListening=false;
+try{if(speechRec)speechRec.stop()}catch(e){}
+var btn=document.getElementById('btnRec');if(btn)btn.classList.remove('recording');
+var status=document.getElementById('recStatus');if(status)status.classList.remove('visivel');
+var input=document.getElementById('diarioInput');
+if(input&&input.value.trim()){toast('Texto capturado — revise e clique Enviar','ok')}}
 
 /* ========== PWA INSTALL ========== */
 var deferredPrompt=null;
@@ -1120,7 +1088,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.playAudio=playAudio;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none'}
 })();
 </script>
