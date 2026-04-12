@@ -123,28 +123,33 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .perfil p{font-size:.88rem;color:#A89E90;line-height:1.7}
 
 /* === MISSION HUD === */
-.mission{position:relative;padding:100px 0 80px;overflow:hidden;text-align:center;min-height:600px}
-.mission-bg{position:absolute;inset:0;z-index:0;
+.mission{position:relative;padding:0;overflow:hidden;text-align:center}
+/* NASA satellite image background */
+.mission-hero{position:relative;min-height:520px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.mission-hero-img{position:absolute;inset:0;z-index:0;background:url('https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/91000/91360/iss052e016508_lrg.jpg') center center/cover no-repeat;background-attachment:fixed}
+.mission-hero-img::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 45%,rgba(15,31,15,.25) 0%,rgba(15,31,15,.7) 60%,#0F1F0F 100%);z-index:1}
+.mission-hero-content{position:relative;z-index:10;padding:80px 20px 40px;max-width:700px}
+.mission h2{font-size:clamp(1.4rem,4vw,2.4rem);color:#F5F0E8;margin-bottom:14px;text-shadow:0 2px 30px rgba(0,0,0,.8);line-height:1.15}
+.mission-sub{font-size:clamp(.88rem,1.8vw,1.05rem);color:#D4D0C8;max-width:540px;margin:0 auto 10px;line-height:1.7;text-shadow:0 1px 12px rgba(0,0,0,.7)}
+.mission-credit{font-size:.6rem;color:rgba(168,158,144,.5);margin-top:8px}
+/* Satellite — hero element */
+.sat-orbit{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden}
+.sat{position:absolute;animation:satOrbit 16s linear infinite;filter:drop-shadow(0 0 20px rgba(74,144,164,.4))}
+@keyframes satOrbit{0%{left:-100px;top:55%}20%{top:35%}50%{left:55%;top:18%}80%{top:40%}100%{left:calc(100% + 100px);top:55%}}
+.sat-beam{position:absolute;top:76px;left:50%;transform:translateX(-50%);width:60px;height:350px;background:linear-gradient(to bottom,rgba(74,144,164,.18),rgba(74,144,164,.04) 40%,transparent 100%);clip-path:polygon(38% 0%,62% 0%,100% 100%,0% 100%);pointer-events:none}
+/* Scan line effect */
+.mission-scan{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(74,144,164,.3),rgba(74,144,164,.6),rgba(74,144,164,.3),transparent);z-index:6;animation:scanLine 8s ease-in-out infinite;opacity:.7}
+@keyframes scanLine{0%{top:10%}50%{top:85%}100%{top:10%}}
+/* Crosshair grid overlay */
+.mission-grid{position:absolute;inset:0;z-index:3;pointer-events:none;
   background:
-    radial-gradient(circle 90px at 22% 35%, rgba(74,140,92,.28) 58%, transparent 60%),
-    radial-gradient(circle 70px at 58% 50%, rgba(74,140,92,.22) 58%, transparent 60%),
-    radial-gradient(circle 50px at 40% 72%, rgba(74,140,92,.18) 58%, transparent 60%),
-    radial-gradient(circle 80px at 78% 28%, rgba(74,140,92,.14) 58%, transparent 60%),
-    radial-gradient(circle 40px at 85% 68%, rgba(74,140,92,.20) 58%, transparent 60%),
-    radial-gradient(circle 55px at 12% 65%, rgba(74,140,92,.12) 58%, transparent 60%),
-    linear-gradient(160deg, #2A1F0F 0%, #1A2E1A 35%, #0F1F0F 100%);
-  background-attachment:fixed}
-.mission-bg::before{content:'';position:absolute;inset:0;
-  background:
-    linear-gradient(32deg, transparent 49.5%, rgba(197,165,114,.03) 49.5%, rgba(197,165,114,.03) 50.2%, transparent 50.2%),
-    linear-gradient(-25deg, transparent 49.5%, rgba(197,165,114,.02) 49.5%, rgba(197,165,114,.02) 50.2%, transparent 50.2%),
-    linear-gradient(65deg, transparent 49.5%, rgba(74,140,92,.03) 49.5%, rgba(74,140,92,.03) 50.1%, transparent 50.1%)}
-.mission-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,#0F1F0F 0%,rgba(15,31,15,.4) 40%,rgba(15,31,15,.15) 70%,rgba(15,31,15,.6) 100%);z-index:1}
-.mission .container{position:relative;z-index:10}
-.mission h2{font-size:clamp(1.2rem,3vw,1.8rem);color:#F5F0E8;margin-bottom:10px;text-shadow:0 2px 20px rgba(0,0,0,.6)}
-.mission-sub{font-size:.92rem;color:#A89E90;max-width:520px;margin:0 auto 48px;line-height:1.7;text-shadow:0 1px 8px rgba(0,0,0,.5)}
-.mission-hud{position:relative;max-width:900px;margin:0 auto;min-height:340px;display:grid;grid-template-columns:1.2fr 0.8fr;grid-template-rows:auto auto auto;gap:12px;align-items:start}
-.hud-card{background:rgba(15,31,15,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:14px;padding:20px;text-align:left;opacity:0;transform:translateY(16px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
+    linear-gradient(rgba(74,140,92,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(74,140,92,.04) 1px,transparent 1px);
+  background-size:60px 60px}
+/* HUD section below hero */
+.mission-data{position:relative;z-index:10;padding:48px 20px 80px;background:linear-gradient(to bottom,#0F1F0F,rgba(15,31,15,.97));max-width:960px;margin:0 auto}
+.mission-hud{display:grid;grid-template-columns:1.2fr 0.8fr;grid-template-rows:auto auto auto;gap:12px;align-items:start}
+.hud-card{background:rgba(26,46,26,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:14px;padding:20px;text-align:left;opacity:0;transform:translateY(16px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
 .hud-card.visible{opacity:1;transform:translateY(0)}
 .hud-card.hud-main{grid-row:1/3;border:1px solid rgba(74,140,92,.3)}
 .hud-card.hud-status{grid-column:1/-1;border:1px solid rgba(74,140,92,.15);padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;font-size:.78rem;color:#A89E90;order:-1}
@@ -174,19 +179,17 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .hud-dot{width:7px;height:7px;border-radius:50%;background:#4A8C5C;display:inline-block;animation:dotPulse 2s ease-in-out infinite;box-shadow:0 0 6px rgba(74,140,92,.5)}
 @keyframes dotPulse{0%,100%{opacity:1;box-shadow:0 0 6px rgba(74,140,92,.5)}50%{opacity:.6;box-shadow:0 0 12px rgba(74,140,92,.8)}}
 .hud-status-sep{color:#2E4A2E}
-/* Satellite orbit */
-.sat-orbit{position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none;overflow:hidden}
-.sat{position:absolute;animation:satOrbit 14s linear infinite}
-@keyframes satOrbit{0%{left:-60px;top:38%}25%{top:28%}50%{left:50%;top:22%}75%{top:32%}100%{left:calc(100% + 60px);top:38%}}
-.sat-beam{position:absolute;top:42px;left:50%;transform:translateX(-50%);width:30px;height:200px;background:linear-gradient(to bottom,rgba(74,144,164,.12),transparent 80%);clip-path:polygon(35% 0%,65% 0%,100% 100%,0% 100%);pointer-events:none}
-@media(prefers-reduced-motion:reduce){.sat,.hud-alert-icon,.hud-dot{animation:none}.hud-card{transition:none}}
+@media(prefers-reduced-motion:reduce){.sat,.hud-alert-icon,.hud-dot,.mission-scan{animation:none}.hud-card{transition:none}}
 @media(max-width:768px){
-  .mission{min-height:auto;padding:70px 0 60px}
-  .mission-bg{background-attachment:scroll}
-  .mission-hud{grid-template-columns:1fr;max-width:400px}
+  .mission-hero{min-height:420px}
+  .mission-hero-img{background-attachment:scroll}
+  .mission-hero-content{padding:60px 16px 32px}
+  .mission-data{padding:32px 16px 60px}
+  .mission-hud{grid-template-columns:1fr;max-width:400px;margin:0 auto}
   .hud-card.hud-main{grid-row:auto}
-  .sat{transform:scale(.7)}
-  .sat-beam{height:120px}
+  .sat svg{width:64px;height:64px}
+  .sat-beam{height:200px;width:40px}
+  .mission-grid{background-size:40px 40px}
 }
 
 /* === FAQ === */
@@ -497,26 +500,53 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 
 <!-- ===== MISSION HUD ===== -->
 <section class="mission">
-  <div class="mission-bg"></div>
-  <!-- Satellite orbit -->
-  <div class="sat-orbit">
-    <div class="sat">
-      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-        <rect x="20" y="14" width="8" height="20" rx="2" fill="#A89E90" stroke="#C5A572" stroke-width=".8"/>
-        <rect x="2" y="18" width="16" height="12" rx="1" fill="rgba(74,144,164,.4)" stroke="#4A90A4" stroke-width=".6"/>
-        <rect x="30" y="18" width="16" height="12" rx="1" fill="rgba(74,144,164,.4)" stroke="#4A90A4" stroke-width=".6"/>
-        <line x1="6" y1="22" x2="14" y2="22" stroke="#4A90A4" stroke-width=".4" opacity=".6"/>
-        <line x1="6" y1="26" x2="14" y2="26" stroke="#4A90A4" stroke-width=".4" opacity=".6"/>
-        <line x1="34" y1="22" x2="42" y2="22" stroke="#4A90A4" stroke-width=".4" opacity=".6"/>
-        <line x1="34" y1="26" x2="42" y2="26" stroke="#4A90A4" stroke-width=".4" opacity=".6"/>
-        <circle cx="24" cy="20" r="1.5" fill="#4A8C5C"/>
-      </svg>
-      <div class="sat-beam"></div>
+  <!-- HERO: NASA satellite image fullbleed -->
+  <div class="mission-hero">
+    <div class="mission-hero-img" role="img" aria-label="Foto real de satélite da NASA mostrando campos agrícolas no Brasil"></div>
+    <div class="mission-grid"></div>
+    <div class="mission-scan"></div>
+    <!-- Satellite — large, prominent -->
+    <div class="sat-orbit">
+      <div class="sat">
+        <svg width="88" height="72" viewBox="0 0 88 72" fill="none">
+          <!-- Solar panel left -->
+          <rect x="2" y="22" width="28" height="28" rx="2" fill="rgba(74,144,164,.3)" stroke="#4A90A4" stroke-width="1"/>
+          <line x1="9" y1="26" x2="9" y2="46" stroke="#4A90A4" stroke-width=".5" opacity=".5"/>
+          <line x1="16" y1="26" x2="16" y2="46" stroke="#4A90A4" stroke-width=".5" opacity=".5"/>
+          <line x1="23" y1="26" x2="23" y2="46" stroke="#4A90A4" stroke-width=".5" opacity=".5"/>
+          <line x1="6" y1="30" x2="26" y2="30" stroke="#4A90A4" stroke-width=".4" opacity=".4"/>
+          <line x1="6" y1="36" x2="26" y2="36" stroke="#4A90A4" stroke-width=".4" opacity=".4"/>
+          <line x1="6" y1="42" x2="26" y2="42" stroke="#4A90A4" stroke-width=".4" opacity=".4"/>
+          <!-- Body -->
+          <rect x="32" y="18" width="24" height="36" rx="4" fill="#A89E90" stroke="#C5A572" stroke-width="1"/>
+          <rect x="36" y="24" width="16" height="10" rx="2" fill="rgba(15,31,15,.5)" stroke="#4A8C5C" stroke-width=".6"/>
+          <circle cx="44" cy="29" r="3" fill="#4A8C5C" opacity=".8"/>
+          <circle cx="44" cy="29" r="1.2" fill="#8FCF9F"/>
+          <rect x="38" y="40" width="12" height="4" rx="1" fill="rgba(197,165,114,.2)" stroke="#C5A572" stroke-width=".4"/>
+          <!-- Solar panel right -->
+          <rect x="58" y="22" width="28" height="28" rx="2" fill="rgba(74,144,164,.3)" stroke="#4A90A4" stroke-width="1"/>
+          <line x1="65" y1="26" x2="65" y2="46" stroke="#4A90A4" stroke-width=".5" opacity=".5"/>
+          <line x1="72" y1="26" x2="72" y2="46" stroke="#4A90A4" stroke-width=".5" opacity=".5"/>
+          <line x1="79" y1="26" x2="79" y2="46" stroke="#4A90A4" stroke-width=".5" opacity=".5"/>
+          <line x1="62" y1="30" x2="82" y2="30" stroke="#4A90A4" stroke-width=".4" opacity=".4"/>
+          <line x1="62" y1="36" x2="82" y2="36" stroke="#4A90A4" stroke-width=".4" opacity=".4"/>
+          <line x1="62" y1="42" x2="82" y2="42" stroke="#4A90A4" stroke-width=".4" opacity=".4"/>
+          <!-- Antenna -->
+          <line x1="44" y1="18" x2="44" y2="10" stroke="#C5A572" stroke-width=".8"/>
+          <circle cx="44" cy="8" r="2" fill="none" stroke="#C5A572" stroke-width=".6"/>
+        </svg>
+        <div class="sat-beam"></div>
+      </div>
+    </div>
+    <!-- Text over image -->
+    <div class="mission-hero-content">
+      <h2 class="reveal">Todas as suas fazendas. Uma tela.</h2>
+      <p class="mission-sub reveal reveal-d1">Dados de satélite da Agência Espacial Europeia processados para você — sem drone, sem sensor, sem visita.</p>
+      <p class="mission-credit">Imagem: ISS/NASA — Campos agrícolas, Maranhão, Brasil</p>
     </div>
   </div>
-  <div class="container">
-    <h2 class="reveal">Todas as suas fazendas. Uma tela.</h2>
-    <p class="mission-sub reveal reveal-d1">Dados de satélite da Agência Espacial Europeia processados para você — sem drone, sem sensor, sem visita.</p>
+  <!-- HUD data cards -->
+  <div class="mission-data">
     <div class="mission-hud">
       <!-- Status bar -->
       <div class="hud-card hud-status reveal">
