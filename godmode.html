@@ -224,11 +224,14 @@ window.gmLogin=async function(){
   var err=document.getElementById('gmErro');err.textContent='';
   if(email!==GOD_EMAIL){err.textContent='Acesso negado.';return}
   document.getElementById('gmBtn').disabled=true;
-  try{await sb.auth.signOut();
-  var r=await sb.auth.signInWithPassword({email:email,password:senha});if(r.error)throw r.error;
+  err.textContent='Conectando...';
+  try{await sb.auth.signOut()}catch(x){}
+  try{var r=await sb.auth.signInWithPassword({email:email,password:senha});
+  if(r.error){err.textContent='Erro: '+r.error.message;document.getElementById('gmBtn').disabled=false;return}
+  if(!r.data||!r.data.user){err.textContent='Erro: resposta vazia do servidor';document.getElementById('gmBtn').disabled=false;return}
   if(r.data.user.email!==GOD_EMAIL){await sb.auth.signOut();err.textContent='Acesso negado.';document.getElementById('gmBtn').disabled=false;return}
   initDash(r.data.user)}
-  catch(e){err.textContent=e.message==='Invalid login credentials'?'Credenciais inválidas.':e.message}
+  catch(e){err.textContent='Catch: '+(e.message||JSON.stringify(e))}
   document.getElementById('gmBtn').disabled=false};
 
 window.gmLogout=async function(){await sb.auth.signOut();location.reload()};
