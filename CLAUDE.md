@@ -78,6 +78,10 @@ Todas as tabelas têm Row Level Security. Propriedades e leituras filtradas por 
 | `index.html` | Redirect para landing | Produção |
 | `manifest.json` | PWA manifest | Produção |
 | `preview-obrigado.html` | Preview da tela de confirmação pós-lead | Referência |
+| `landing-en.html` | Landing page em inglês (US) | Produção |
+| `landing-es.html` | Landing page em espanhol (LATAM) | Produção |
+| `godmode.html` | Painel admin CEO (chatsagrado@gmail.com only) | Produção |
+| `vercel.json` | Config de deploy Vercel (rewrites, headers, security) | Produção |
 
 ## Design tokens
 

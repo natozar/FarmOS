@@ -408,6 +408,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         <button class="header-user" id="btnUser" onclick="toggleUserMenu()"><span id="userName">Usuário</span> ▾</button>
         <div class="user-menu" id="userMenu">
           <button class="user-menu-item" onclick="navegarPara('perfil')">👤 Meu perfil</button>
+          <div class="user-menu-item" style="display:flex;align-items:center;gap:6px;cursor:default">🌐 <select id="langSelect" style="background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:.78rem;padding:3px 6px;font-family:inherit;cursor:pointer" onchange="setLang(this.value)"><option value="pt-BR">Português</option><option value="en-US">English</option><option value="es-MX">Español</option></select></div>
           <button class="user-menu-item" onclick="forcarAtualizacao()">🔄 Atualizar app</button>
           <button class="user-menu-item danger" onclick="fazerLogout()">Sair</button>
         </div>
@@ -504,6 +505,86 @@ var MAPBOX_TOKEN=['pk.eyJ1Ijoib','mF0b3phciIsIm','EiOiJjbW50bDZ4','eWQwcG81MnFva
 
 var sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
 mapboxgl.accessToken=MAPBOX_TOKEN;
+
+/* ========== i18n ========== */
+var I18N={
+'pt-BR':{lang:'pt-BR',speechLang:'pt-BR',currency:'R$',areaUnit:'ha',areaLabel:'hectares',areaFactor:1,
+  login:'Entrar',createAccount:'Criar conta',teamAccess:'Acesso Equipe',email:'Email',password:'Senha',
+  minChars:'Mínimo 6 caracteres',fullName:'Nome completo',phone:'Telefone',
+  myProperties:'Minhas Propriedades',noProperties:'Nenhuma propriedade cadastrada',
+  registerFirst:'Cadastre sua primeira propriedade para começar o monitoramento por satélite.',
+  registerProperty:'+ Cadastrar Propriedade',satellite:'Satélite',diary:'Diário',supplies:'Insumos',team:'Equipe',
+  healthy:'Saudável',moderate:'Moderado',stressed:'Estressado',critical:'Crítico',noData:'Sem dados',
+  waitingSatellite:'Aguardando satélite',monitoring:'Monitorando',pending:'Pendente',
+  projectedRisk:'Risco projetado',totalRisk:'Risco total estimado',sortedByLoss:'Ordenado por prejuízo decrescente',
+  whatHappened:'O que aconteceu hoje na fazenda?',send:'Enviar',record:'Gravar',listening:'Ouvindo... fale agora',
+  textCaptured:'Texto capturado — revise e clique Enviar',savedOk:'Registro salvo',savedOffline:'Salvo offline — será enviado quando conectar',
+  waitingConnection:'Aguardando conexão',synced:'Sincronizado',noConnection:'Sem conexão — registros serão enviados quando a internet voltar',
+  alerts:'Alertas',noAlerts:'Nenhum alerta pendente',allClear:'Todas as propriedades estão em dia.',resolve:'Resolver',
+  inviteProf:'Convidar Profissional',selectSector:'Selecione o setor',invite:'Convidar',cancel:'Cancelar',
+  stock:'Estoque / Galpão',registerSupply:'+ Cadastrar Insumo',supplyName:'Nome do insumo',category:'Categoria',
+  quantity:'Quantidade',unit:'Unidade',unitCost:'Custo unitário',save:'Salvar',
+  esgReport:'Emitir Laudo do Banco (ESG)',generating:'Gerando laudo...',
+  updateApp:'Atualizar app',logout:'Sair',profile:'Meu perfil',language:'Idioma',
+  riskEstimate:'Estimativa de Risco',lowRisk:'Baixo',mediumRisk:'Médio',highRisk:'Alto',
+  healthyVeg:'Vegetação saudável — sem área de risco significativa.',
+  areaAtRisk:'Área em risco',ofProperty:'% da propriedade',valueAtRisk:'Valor sob risco',crop:'Cultura',
+  ndviEvolution:'Evolução NDVI',dictatedByVoice:'Ditado por voz',
+  today:'hoje',yesterday:'ontem',daysAgo:'dias atrás',now:'agora',minAgo:'min atrás',hAgo:'h atrás'},
+'en-US':{lang:'en-US',speechLang:'en-US',currency:'$',areaUnit:'ac',areaLabel:'acres',areaFactor:2.47105,
+  login:'Sign In',createAccount:'Create Account',teamAccess:'Team Access',email:'Email',password:'Password',
+  minChars:'Minimum 6 characters',fullName:'Full name',phone:'Phone',
+  myProperties:'My Properties',noProperties:'No properties registered',
+  registerFirst:'Register your first property to start satellite monitoring.',
+  registerProperty:'+ Register Property',satellite:'Satellite',diary:'Diary',supplies:'Supplies',team:'Team',
+  healthy:'Healthy',moderate:'Moderate',stressed:'Stressed',critical:'Critical',noData:'No data',
+  waitingSatellite:'Awaiting satellite',monitoring:'Monitoring',pending:'Pending',
+  projectedRisk:'Projected risk',totalRisk:'Total estimated risk',sortedByLoss:'Sorted by projected loss',
+  whatHappened:'What happened on the farm today?',send:'Send',record:'Record',listening:'Listening... speak now',
+  textCaptured:'Text captured — review and click Send',savedOk:'Record saved',savedOffline:'Saved offline — will sync when connected',
+  waitingConnection:'Waiting for connection',synced:'Synced',noConnection:'No connection — records will be sent when internet returns',
+  alerts:'Alerts',noAlerts:'No pending alerts',allClear:'All properties are in good shape.',resolve:'Resolve',
+  inviteProf:'Invite Professional',selectSector:'Select area',invite:'Invite',cancel:'Cancel',
+  stock:'Warehouse / Stock',registerSupply:'+ Register Supply',supplyName:'Supply name',category:'Category',
+  quantity:'Quantity',unit:'Unit',unitCost:'Unit cost',save:'Save',
+  esgReport:'Generate Bank Report (ESG)',generating:'Generating report...',
+  updateApp:'Update app',logout:'Sign out',profile:'My profile',language:'Language',
+  riskEstimate:'Risk Estimate',lowRisk:'Low',mediumRisk:'Medium',highRisk:'High',
+  healthyVeg:'Healthy vegetation — no significant risk area.',
+  areaAtRisk:'Area at risk',ofProperty:'% of property',valueAtRisk:'Value at risk',crop:'Crop',
+  ndviEvolution:'NDVI Evolution',dictatedByVoice:'Dictated by voice',
+  today:'today',yesterday:'yesterday',daysAgo:'days ago',now:'now',minAgo:'min ago',hAgo:'h ago'},
+'es-MX':{lang:'es-MX',speechLang:'es-MX',currency:'MXN $',areaUnit:'ha',areaLabel:'hectáreas',areaFactor:1,
+  login:'Iniciar sesión',createAccount:'Crear cuenta',teamAccess:'Acceso Equipo',email:'Correo',password:'Contraseña',
+  minChars:'Mínimo 6 caracteres',fullName:'Nombre completo',phone:'Teléfono',
+  myProperties:'Mis Propiedades',noProperties:'Ninguna propiedad registrada',
+  registerFirst:'Registre su primera propiedad para comenzar el monitoreo satelital.',
+  registerProperty:'+ Registrar Propiedad',satellite:'Satélite',diary:'Diario',supplies:'Insumos',team:'Equipo',
+  healthy:'Saludable',moderate:'Moderado',stressed:'Estresado',critical:'Crítico',noData:'Sin datos',
+  waitingSatellite:'Esperando satélite',monitoring:'Monitoreando',pending:'Pendiente',
+  projectedRisk:'Riesgo proyectado',totalRisk:'Riesgo total estimado',sortedByLoss:'Ordenado por pérdida proyectada',
+  whatHappened:'¿Qué pasó hoy en la finca?',send:'Enviar',record:'Grabar',listening:'Escuchando... hable ahora',
+  textCaptured:'Texto capturado — revise y presione Enviar',savedOk:'Registro guardado',savedOffline:'Guardado offline — se enviará al conectar',
+  waitingConnection:'Esperando conexión',synced:'Sincronizado',noConnection:'Sin conexión — los registros se enviarán cuando vuelva el internet',
+  alerts:'Alertas',noAlerts:'Sin alertas pendientes',allClear:'Todas las propiedades están en orden.',resolve:'Resolver',
+  inviteProf:'Invitar Profesional',selectSector:'Seleccione el área',invite:'Invitar',cancel:'Cancelar',
+  stock:'Almacén / Inventario',registerSupply:'+ Registrar Insumo',supplyName:'Nombre del insumo',category:'Categoría',
+  quantity:'Cantidad',unit:'Unidad',unitCost:'Costo unitario',save:'Guardar',
+  esgReport:'Generar Reporte Bancario (ESG)',generating:'Generando reporte...',
+  updateApp:'Actualizar app',logout:'Salir',profile:'Mi perfil',language:'Idioma',
+  riskEstimate:'Estimación de Riesgo',lowRisk:'Bajo',mediumRisk:'Medio',highRisk:'Alto',
+  healthyVeg:'Vegetación saludable — sin área de riesgo significativa.',
+  areaAtRisk:'Área en riesgo',ofProperty:'% de la propiedad',valueAtRisk:'Valor en riesgo',crop:'Cultivo',
+  ndviEvolution:'Evolución NDVI',dictatedByVoice:'Dictado por voz',
+  today:'hoy',yesterday:'ayer',daysAgo:'días atrás',now:'ahora',minAgo:'min atrás',hAgo:'h atrás'}
+};
+var currentLang=localStorage.getItem('agruai_lang')||'pt-BR';
+function t(key){return(I18N[currentLang]&&I18N[currentLang][key])||I18N['pt-BR'][key]||key}
+function setLang(lang){if(!I18N[lang])return;currentLang=lang;localStorage.setItem('agruai_lang',lang);
+if(speechRec){speechRec=null}
+if(State.tela==='login'){renderLoginTexts()}else{navegarPara(State.tela)}}
+function fmtArea(ha){if(!ha)return'—';var v=currentLang==='en-US'?ha*2.47105:ha;return formatarNumero(Math.round(v))+' '+t('areaUnit')}
+function fmtCurrency(val){if(!val&&val!==0)return'—';return t('currency')+' '+formatarNumero(val)}
 
 /* ========== STATE ========== */
 var State={user:null,tela:'login',authMode:'entrar',cadStep:1,cadData:{},drawnGeoJSON:null,mapInstance:null,drawInstance:null,mapaGeral:null,propriedades:[]};
@@ -959,7 +1040,9 @@ map.on('mouseleave','prop-fill',function(){map.getCanvas().style.cursor=''})}
 if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14})})}
 
 /* ========== INIT ========== */
-async function iniciarApp(){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];document.getElementById('userName').textContent=nome;navegarPara('propriedades');updateOfflineBar();setTimeout(verificarInstall,3000);setTimeout(syncPendingLogs,1500)}
+async function iniciarApp(){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];document.getElementById('userName').textContent=nome;
+var ls=document.getElementById('langSelect');if(ls)ls.value=currentLang;
+navegarPara('propriedades');updateOfflineBar();setTimeout(verificarInstall,3000);setTimeout(syncPendingLogs,1500)}
 
 async function checkSession(){showLoading('Verificando sessão...');
 var r=await sb.auth.getSession();if(r.data.session){State.user=r.data.session.user;hideLoading();iniciarApp()}else{hideLoading()}}
@@ -1029,7 +1112,7 @@ function initSpeechRecognition(){
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(!SR){console.log('[speech] API não suportada neste navegador');return null}
 var rec=new SR();
-rec.lang='pt-BR';rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
+rec.lang=t('speechLang');rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
 var finalText='';var inputEl=null;
 rec.onstart=function(){isListening=true;finalText='';
 var btn=document.getElementById('btnRec');if(btn)btn.classList.add('recording');
@@ -1088,7 +1171,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none'}
 })();
 </script>
