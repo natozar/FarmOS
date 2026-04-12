@@ -313,7 +313,12 @@ window.killProp=async function(pid,btn){
 function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
 
 // Auto-login check
-(async function(){var r=await sb.auth.getSession();if(r.data.session){var u=r.data.session.user;if(u.email===GOD_EMAIL){initDash(u)}else{await sb.auth.signOut();window.location.href='index.html'}}})();
+(async function(){
+  localStorage.removeItem('sb-kyvbnntoxslrtrsiejzc-auth-token');
+  if('caches' in window){var keys=await caches.keys();await Promise.all(keys.map(function(k){return caches.delete(k)}))}
+  var r=await sb.auth.getSession();
+  if(r.data.session){var u=r.data.session.user;if(u.email===GOD_EMAIL){initDash(u)}else{await sb.auth.signOut();window.location.href='index.html'}}
+})();
 })();
 </script>
 </body>
