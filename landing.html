@@ -127,7 +127,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 /* NASA Brazil at Night — hero image */
 .mission-hero{position:relative;min-height:70vh;min-height:70dvh;max-height:680px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#020304}
 .mission-hero-img{position:absolute;inset:0;z-index:0;
-  background:url('https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/83000/83857/brazil_vir_20130804_lrg.jpg') center center/cover no-repeat}
+  background:url('https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/144000/144898/BlackMarble_2016_B2.jpg') 52% 38%/cover no-repeat}
 .mission-hero-img::after{content:'';position:absolute;inset:0;
   background:
     radial-gradient(ellipse 65% 55% at 50% 50%,transparent 0%,rgba(2,3,4,.4) 55%,rgba(2,3,4,.95) 100%),
@@ -216,13 +216,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   .mission-text{padding:32px 16px 8px}
   .mission-data{padding:24px 16px 50px}
   .mission-hud{grid-template-columns:1fr;max-width:400px;margin:0 auto}
-  .sat-wrap svg{width:120px;height:65px}
+  .sat-wrap svg{width:140px;height:78px}
   .sat-cone,.sat-cone2,.sat-cone3{border-left-width:30px;border-right-width:30px;border-top-width:140px}
   .sat-ground,.sat-ground2,.sat-ground3{top:140px;width:80px;height:25px}
   .mission-grid{background-size:50px 50px}
 @media(max-width:480px){
   .mission-hero{min-height:50vh;min-height:50dvh;max-height:420px}
-  .sat-wrap svg{width:100px;height:54px}
+  .sat-wrap svg{width:120px;height:67px}
 }
 }
 
@@ -538,95 +538,147 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   <div class="mission-hero">
     <div class="mission-hero-img" role="img" aria-label="Brasil visto do espaço à noite — imagem real NASA/Suomi NPP"></div>
     <div class="mission-grid"></div>
-    <p class="mission-credit">NASA/Suomi NPP — VIIRS</p>
+    <p class="mission-credit">NASA Earth Observatory — Black Marble 2016</p>
     <!-- Satellite — centered, always visible, no text overlay -->
     <div style="position:relative;z-index:10;display:flex;align-items:center;justify-content:center;width:100%;height:100%;position:absolute;inset:0">
       <div class="sat-orbit">
         <div class="sat-wrap">
-          <svg width="160" height="86" viewBox="0 0 160 86" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="180" height="100" viewBox="0 0 180 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <linearGradient id="panelL" x1="0" y1="0" x2=".3" y2="1"><stop offset="0%" stop-color="#1e4470"/><stop offset="50%" stop-color="#2a6098"/><stop offset="100%" stop-color="#1a3a5c"/></linearGradient>
-              <linearGradient id="panelR" x1=".7" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a3a5c"/><stop offset="50%" stop-color="#2a6098"/><stop offset="100%" stop-color="#1e4470"/></linearGradient>
-              <linearGradient id="bodyG" x1="0" y1="0" x2=".5" y2="1"><stop offset="0%" stop-color="#D0C8B8"/><stop offset="30%" stop-color="#B8AE9E"/><stop offset="70%" stop-color="#A89E90"/><stop offset="100%" stop-color="#887E70"/></linearGradient>
-              <linearGradient id="goldT" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#D4B87A"/><stop offset="50%" stop-color="#C5A572"/><stop offset="100%" stop-color="#A08550"/></linearGradient>
-              <linearGradient id="lensG" x1=".3" y1=".2" x2=".7" y2=".9"><stop offset="0%" stop-color="#1a1a3e"/><stop offset="100%" stop-color="#0a0a1e"/></linearGradient>
-              <radialGradient id="lensFlare" cx=".35" cy=".35"><stop offset="0%" stop-color="rgba(255,255,255,.12)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+              <linearGradient id="pnlL" x1="0" y1=".1" x2=".4" y2=".9"><stop offset="0%" stop-color="#0e2e52"/><stop offset="30%" stop-color="#1a4a7a"/><stop offset="60%" stop-color="#2868a8"/><stop offset="100%" stop-color="#163c62"/></linearGradient>
+              <linearGradient id="pnlR" x1=".6" y1=".1" x2="1" y2=".9"><stop offset="0%" stop-color="#163c62"/><stop offset="40%" stop-color="#2868a8"/><stop offset="70%" stop-color="#1a4a7a"/><stop offset="100%" stop-color="#0e2e52"/></linearGradient>
+              <linearGradient id="bdy" x1=".1" y1="0" x2=".8" y2="1"><stop offset="0%" stop-color="#DDD6C6"/><stop offset="18%" stop-color="#C8BEA8"/><stop offset="45%" stop-color="#B0A692"/><stop offset="75%" stop-color="#98907E"/><stop offset="100%" stop-color="#807868"/></linearGradient>
+              <linearGradient id="gld" x1="0" y1=".5" x2="1" y2=".5"><stop offset="0%" stop-color="#DCBE7A"/><stop offset="35%" stop-color="#C5A562"/><stop offset="65%" stop-color="#B89855"/><stop offset="100%" stop-color="#A08545"/></linearGradient>
+              <linearGradient id="kap" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(220,190,122,.30)"/><stop offset="50%" stop-color="rgba(197,165,98,.20)"/><stop offset="100%" stop-color="rgba(160,133,69,.28)"/></linearGradient>
+              <linearGradient id="lns" x1=".2" y1=".1" x2=".8" y2=".95"><stop offset="0%" stop-color="#141428"/><stop offset="40%" stop-color="#0c0c20"/><stop offset="100%" stop-color="#060612"/></linearGradient>
+              <radialGradient id="lfl" cx=".32" cy=".30"><stop offset="0%" stop-color="rgba(255,255,255,.14)"/><stop offset="40%" stop-color="rgba(200,220,255,.04)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+              <radialGradient id="lgl" cx=".5" cy=".5"><stop offset="0%" stop-color="rgba(74,144,164,.18)"/><stop offset="60%" stop-color="rgba(74,144,164,.06)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+              <linearGradient id="arm" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9E9688"/><stop offset="50%" stop-color="#887E70"/><stop offset="100%" stop-color="#706858"/></linearGradient>
+              <filter id="glow"><feGaussianBlur stdDeviation="1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             </defs>
-            <!-- === LEFT SOLAR PANEL === -->
-            <rect x="1" y="21" width="50" height="44" rx="2" fill="url(#panelL)" stroke="#4A90A4" stroke-width=".8"/>
-            <!-- Panel cells 4x3 grid -->
-            <rect x="3" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.45)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="15.5" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.4)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="28" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="40.5" y="23" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="3" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.4)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="15.5" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="28" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="40.5" y="37" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.25)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="3" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="15.5" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="28" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.25)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="40.5" y="51" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.2)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <!-- Shimmer highlight -->
-            <rect x="3" y="23" width="22" height="6" rx=".5" fill="rgba(255,255,255,.04)" class="sat-panel-shimmer"/>
-            <!-- Arm left -->
-            <rect x="51" y="37" width="8" height="12" rx="1.5" fill="#887E70" stroke="#A89E90" stroke-width=".5"/>
-            <line x1="55" y1="39" x2="55" y2="47" stroke="rgba(197,165,114,.2)" stroke-width=".4"/>
-            <!-- === BODY === -->
-            <rect x="59" y="12" width="42" height="62" rx="5" fill="url(#bodyG)" stroke="url(#goldT)" stroke-width="1.2"/>
-            <!-- Gold Kapton foil bands -->
-            <rect x="59" y="14" width="42" height="8" rx="1.5" fill="rgba(197,165,114,.22)"/>
-            <rect x="59" y="64" width="42" height="8" rx="1.5" fill="rgba(197,165,114,.18)"/>
-            <!-- Radiator lines -->
-            <line x1="62" y1="16" x2="98" y2="16" stroke="rgba(197,165,114,.1)" stroke-width=".3"/>
-            <line x1="62" y1="18" x2="98" y2="18" stroke="rgba(197,165,114,.08)" stroke-width=".3"/>
-            <!-- Sensor array -->
-            <rect x="64" y="26" width="32" height="5" rx="1" fill="rgba(10,10,25,.5)" stroke="#555" stroke-width=".4"/>
-            <rect x="66" y="27.5" width="4" height="2" rx=".3" fill="rgba(74,144,164,.2)"/>
-            <rect x="72" y="27.5" width="4" height="2" rx=".3" fill="rgba(74,144,164,.15)"/>
-            <rect x="78" y="27.5" width="4" height="2" rx=".3" fill="rgba(74,144,164,.2)"/>
-            <rect x="84" y="27.5" width="4" height="2" rx=".3" fill="rgba(74,144,164,.15)"/>
-            <rect x="90" y="27.5" width="4" height="2" rx=".3" fill="rgba(74,144,164,.1)"/>
+            <!-- ======= LEFT SOLAR ARRAY ======= -->
+            <rect x="1" y="22" width="56" height="50" rx="2" fill="url(#pnlL)" stroke="#3A7AAA" stroke-width=".7"/>
+            <!-- Wiring bus bars -->
+            <line x1="1" y1="34.5" x2="57" y2="34.5" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="1" y1="47" x2="57" y2="47" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="1" y1="59.5" x2="57" y2="59.5" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="14.5" y1="22" x2="14.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <line x1="28.5" y1="22" x2="28.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <line x1="42.5" y1="22" x2="42.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <!-- Cell rows -->
+            <rect x="2.5" y="23" width="11" height="11" rx=".4" fill="rgba(30,85,145,.5)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="15.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.45)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="29.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="43.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="2.5" y="36" width="11" height="10" rx=".4" fill="rgba(30,85,145,.45)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="15.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="29.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="43.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="2.5" y="48" width="11" height="10" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="15.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="29.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="43.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.25)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="2.5" y="60" width="11" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="15.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="29.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.25)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="43.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.2)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <!-- Sun reflection shimmer -->
+            <rect x="2.5" y="23" width="24" height="8" rx=".4" fill="rgba(255,255,255,.035)" class="sat-panel-shimmer"/>
+            <!-- ======= LEFT ARM (yoke) ======= -->
+            <rect x="57" y="39" width="9" height="16" rx="2" fill="url(#arm)" stroke="#A09888" stroke-width=".5"/>
+            <line x1="61.5" y1="41" x2="61.5" y2="53" stroke="rgba(197,165,114,.15)" stroke-width=".3"/>
+            <rect x="58" y="42" width="7" height="2" rx=".5" fill="rgba(0,0,0,.08)"/>
+            <rect x="58" y="49" width="7" height="2" rx=".5" fill="rgba(0,0,0,.06)"/>
+            <!-- ======= SATELLITE BODY ======= -->
+            <rect x="66" y="10" width="48" height="74" rx="5" fill="url(#bdy)" stroke="url(#gld)" stroke-width="1.3"/>
+            <!-- Kapton thermal blanket bands -->
+            <rect x="66" y="12" width="48" height="10" rx="2" fill="url(#kap)"/>
+            <rect x="66" y="72" width="48" height="10" rx="2" fill="url(#kap)"/>
+            <!-- Thermal stripe details -->
+            <line x1="69" y1="14" x2="111" y2="14" stroke="rgba(220,190,122,.08)" stroke-width=".3"/>
+            <line x1="69" y1="16.5" x2="111" y2="16.5" stroke="rgba(220,190,122,.06)" stroke-width=".3"/>
+            <line x1="69" y1="19" x2="111" y2="19" stroke="rgba(220,190,122,.05)" stroke-width=".3"/>
+            <!-- Side radiator panel -->
+            <rect x="67" y="24" width="4" height="48" rx=".5" fill="rgba(200,195,185,.15)" stroke="rgba(160,150,130,.12)" stroke-width=".3"/>
+            <line x1="69" y1="28" x2="69" y2="68" stroke="rgba(160,150,130,.08)" stroke-width=".2"/>
+            <!-- Sensor module -->
+            <rect x="73" y="26" width="34" height="6" rx="1.2" fill="rgba(8,8,22,.55)" stroke="#555" stroke-width=".4"/>
+            <rect x="75" y="27.5" width="5" height="3" rx=".4" fill="rgba(74,144,164,.18)" stroke="rgba(74,144,164,.12)" stroke-width=".2"/>
+            <rect x="81.5" y="27.5" width="5" height="3" rx=".4" fill="rgba(74,144,164,.14)" stroke="rgba(74,144,164,.1)" stroke-width=".2"/>
+            <rect x="88" y="27.5" width="5" height="3" rx=".4" fill="rgba(74,144,164,.18)" stroke="rgba(74,144,164,.12)" stroke-width=".2"/>
+            <rect x="94.5" y="27.5" width="5" height="3" rx=".4" fill="rgba(74,144,164,.12)" stroke="rgba(74,144,164,.08)" stroke-width=".2"/>
+            <rect x="101" y="27.5" width="4" height="3" rx=".4" fill="rgba(74,144,164,.10)"/>
             <!-- Status LEDs -->
-            <circle cx="66" cy="36" r="1.5" fill="#4A8C5C" style="animation:ledBlink 2s infinite"/>
-            <circle cx="71" cy="36" r="1.2" fill="#C45A4A" style="animation:ledRed 5s infinite"/>
-            <circle cx="76" cy="36" r="1.2" fill="#4A90A4" opacity=".5"/>
-            <!-- Label text -->
-            <text x="84" y="37.5" font-size="3.5" fill="rgba(197,165,114,.35)" font-family="monospace">S-2A</text>
-            <!-- === CAMERA LENS === -->
-            <circle cx="80" cy="52" r="11" fill="url(#lensG)" stroke="#444" stroke-width="1.2"/>
-            <circle cx="80" cy="52" r="9" fill="none" stroke="#333" stroke-width=".6"/>
-            <circle cx="80" cy="52" r="8" fill="none" stroke="rgba(74,144,164,.3)" stroke-width=".4"/>
-            <circle cx="80" cy="52" r="5.5" fill="rgba(74,144,164,.08)" stroke="rgba(74,144,164,.35)" stroke-width=".5"/>
-            <circle cx="80" cy="52" r="3" fill="rgba(74,144,164,.12)" stroke="rgba(74,144,164,.2)" stroke-width=".3"/>
-            <circle cx="80" cy="52" r="1.2" fill="rgba(120,180,220,.15)"/>
-            <!-- Lens flare -->
-            <circle cx="80" cy="52" r="9" fill="url(#lensFlare)"/>
-            <circle cx="76" cy="48" r="1.2" fill="rgba(255,255,255,.08)"/>
-            <circle cx="77.5" cy="49" r=".5" fill="rgba(255,255,255,.15)"/>
-            <!-- Arm right -->
-            <rect x="101" y="37" width="8" height="12" rx="1.5" fill="#887E70" stroke="#A89E90" stroke-width=".5"/>
-            <line x1="105" y1="39" x2="105" y2="47" stroke="rgba(197,165,114,.2)" stroke-width=".4"/>
-            <!-- === RIGHT SOLAR PANEL === -->
-            <rect x="109" y="21" width="50" height="44" rx="2" fill="url(#panelR)" stroke="#4A90A4" stroke-width=".8"/>
-            <rect x="111" y="23" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="121.5" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="134" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.4)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="146.5" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.45)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="111" y="37" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.25)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="121.5" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="134" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="146.5" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.4)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="111" y="51" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.2)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="121.5" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.25)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="134" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <rect x="146.5" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
-            <!-- Shimmer highlight right -->
-            <rect x="135" y="23" width="22" height="6" rx=".5" fill="rgba(255,255,255,.04)" class="sat-panel-shimmer"/>
-            <!-- === ANTENNA === -->
-            <line x1="80" y1="12" x2="80" y2="3" stroke="#C5A572" stroke-width=".8"/>
-            <ellipse cx="80" cy="2" rx="3" ry="1.5" fill="none" stroke="#C5A572" stroke-width=".5"/>
-            <circle cx="80" cy="2" r=".7" fill="#D4B87A"/>
+            <circle cx="76" cy="38" r="1.6" fill="#3A7A4C" filter="url(#glow)" style="animation:ledBlink 2s infinite"/>
+            <circle cx="81.5" cy="38" r="1.3" fill="#9E3A2A" opacity=".3" style="animation:ledRed 5s infinite"/>
+            <circle cx="86.5" cy="38" r="1.3" fill="#3A6A8A" opacity=".45"/>
+            <!-- Data label -->
+            <text x="93" y="39.5" font-size="3.8" fill="rgba(197,165,114,.3)" font-family="'Space Grotesk',monospace" font-weight="600">S-2A</text>
+            <!-- Star tracker -->
+            <rect x="109" y="34" width="3.5" height="7" rx="1" fill="rgba(20,20,40,.4)" stroke="#555" stroke-width=".3"/>
+            <circle cx="110.8" cy="37.5" r="1" fill="rgba(100,150,200,.15)"/>
+            <!-- ======= MSI CAMERA TELESCOPE ======= -->
+            <circle cx="90" cy="56" r="14" fill="url(#lns)" stroke="#3a3a50" stroke-width="1.4"/>
+            <!-- Outer barrel ring -->
+            <circle cx="90" cy="56" r="13" fill="none" stroke="#2a2a3e" stroke-width=".7"/>
+            <!-- Anti-reflection coating rings -->
+            <circle cx="90" cy="56" r="11" fill="none" stroke="rgba(74,144,164,.2)" stroke-width=".35"/>
+            <circle cx="90" cy="56" r="9.5" fill="none" stroke="rgba(74,144,164,.12)" stroke-width=".25"/>
+            <!-- Primary optic -->
+            <circle cx="90" cy="56" r="8" fill="rgba(74,144,164,.06)" stroke="rgba(74,144,164,.3)" stroke-width=".5"/>
+            <!-- Secondary mirror -->
+            <circle cx="90" cy="56" r="5" fill="rgba(74,144,164,.08)" stroke="rgba(74,144,164,.18)" stroke-width=".35"/>
+            <!-- Iris blades hint -->
+            <circle cx="90" cy="56" r="3.2" fill="rgba(50,80,110,.1)" stroke="rgba(74,144,164,.12)" stroke-width=".25"/>
+            <!-- Focal point -->
+            <circle cx="90" cy="56" r="1.5" fill="rgba(100,170,200,.12)"/>
+            <circle cx="90" cy="56" r=".6" fill="rgba(180,220,240,.15)"/>
+            <!-- Lens flare & reflections -->
+            <circle cx="90" cy="56" r="12" fill="url(#lfl)"/>
+            <circle cx="90" cy="56" r="8" fill="url(#lgl)"/>
+            <circle cx="85.5" cy="51" r="1.6" fill="rgba(255,255,255,.06)"/>
+            <circle cx="87" cy="52.5" r=".6" fill="rgba(255,255,255,.12)"/>
+            <circle cx="94" cy="60" r=".4" fill="rgba(200,220,255,.08)"/>
+            <!-- ======= RIGHT ARM (yoke) ======= -->
+            <rect x="114" y="39" width="9" height="16" rx="2" fill="url(#arm)" stroke="#A09888" stroke-width=".5"/>
+            <line x1="118.5" y1="41" x2="118.5" y2="53" stroke="rgba(197,165,114,.15)" stroke-width=".3"/>
+            <rect x="115" y="42" width="7" height="2" rx=".5" fill="rgba(0,0,0,.08)"/>
+            <rect x="115" y="49" width="7" height="2" rx=".5" fill="rgba(0,0,0,.06)"/>
+            <!-- ======= RIGHT SOLAR ARRAY ======= -->
+            <rect x="123" y="22" width="56" height="50" rx="2" fill="url(#pnlR)" stroke="#3A7AAA" stroke-width=".7"/>
+            <line x1="123" y1="34.5" x2="179" y2="34.5" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="123" y1="47" x2="179" y2="47" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="123" y1="59.5" x2="179" y2="59.5" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="136.5" y1="22" x2="136.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <line x1="150.5" y1="22" x2="150.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <line x1="164.5" y1="22" x2="164.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <rect x="124.5" y="23" width="11" height="11" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="137.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="151.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.45)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="165.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.5)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="124.5" y="36" width="11" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="137.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="151.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="165.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.45)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="124.5" y="48" width="11" height="10" rx=".4" fill="rgba(30,85,145,.25)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="137.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="151.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="165.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="124.5" y="60" width="11" height="10" rx=".4" fill="rgba(30,85,145,.2)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="137.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.25)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="151.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="165.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="153" y="23" width="24" height="8" rx=".4" fill="rgba(255,255,255,.035)" class="sat-panel-shimmer"/>
+            <!-- ======= X-BAND ANTENNA ======= -->
+            <line x1="90" y1="10" x2="90" y2="2.5" stroke="#C5A572" stroke-width=".9" stroke-linecap="round"/>
+            <ellipse cx="90" cy="2" rx="4" ry="1.8" fill="none" stroke="url(#gld)" stroke-width=".6"/>
+            <ellipse cx="90" cy="2" rx="2.5" ry="1" fill="none" stroke="rgba(197,165,114,.3)" stroke-width=".3"/>
+            <circle cx="90" cy="2" r=".8" fill="#D4B87A"/>
+            <!-- Thruster nozzles -->
+            <rect x="67.5" y="75" width="3" height="4" rx=".8" fill="rgba(80,75,65,.4)" stroke="#706858" stroke-width=".3"/>
+            <rect x="109.5" y="75" width="3" height="4" rx=".8" fill="rgba(80,75,65,.4)" stroke="#706858" stroke-width=".3"/>
+            <!-- Body edge highlight (light source top-left) -->
+            <rect x="66" y="10" width="48" height="74" rx="5" fill="none" stroke="rgba(255,255,255,.03)" stroke-width="1"/>
           </svg>
           <!-- Flash effects below satellite -->
           <div class="sat-flash-wrap">
