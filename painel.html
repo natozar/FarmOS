@@ -197,6 +197,15 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .sector-badge.s-operacional{background:rgba(197,165,114,.12);color:var(--gold)}
 .sector-badge.s-financeiro{background:rgba(168,158,144,.12);color:var(--muted)}
 .sector-badge.s-satelite{background:rgba(196,90,74,.12);color:var(--red)}
+/* Offline sync status */
+.sync-status{font-size:.58rem;font-weight:600;padding:1px 7px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;margin-left:4px}
+.sync-status.pending{background:rgba(168,158,144,.12);color:var(--muted)}
+.sync-status.synced{background:rgba(74,140,92,.12);color:var(--green);animation:syncFade 2s ease forwards}
+@keyframes syncFade{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+.offline-bar{position:fixed;top:0;left:0;right:0;z-index:500;padding:6px 16px;background:rgba(196,90,74,.9);color:#fff;font-size:.75rem;font-weight:600;text-align:center;display:none;backdrop-filter:blur(8px)}
+.offline-bar.visivel{display:block;animation:fadeIn .3s ease}
+.timeline-item.pending{opacity:.7}
+.timeline-item.pending .timeline-text{font-style:italic}
 .timeline-text{font-size:.85rem;color:var(--text);line-height:1.5;word-break:break-word}
 .timeline-time{font-size:.68rem;color:var(--muted);margin-top:4px}
 .timeline-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:.85rem}
@@ -392,6 +401,9 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
   <a class="bnav" href="#" onclick="event.preventDefault();navegarPara('cadastro')"><span class="bnav-icon">➕</span>Cadastrar</a>
 </nav>
 
+<!-- OFFLINE BAR -->
+<div class="offline-bar" id="offlineBar">Sem conexão — registros serão enviados quando a internet voltar</div>
+
 <!-- TOAST -->
 <div class="toast-wrap" id="toastWrap"></div>
 
@@ -586,15 +598,30 @@ async function loadTimeline(pid){var el=document.getElementById('timelineContain
 try{var r=await sb.rpc('get_property_timeline',{p_property_id:pid,p_limit:30});
 if(r.error){el.innerHTML=renderFieldLogsOnly(pid);return}
 var items=r.data||[];if(items.length===0){el.innerHTML='<div class="timeline-empty">Nenhum registro ainda.<br>Use o campo acima para registrar o que aconteceu na fazenda.</div>';return}
-el.innerHTML=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var icon=isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
-return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div><div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('')}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
+var remoteHtml=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var icon=isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
+return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div><div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
+var pendingLogs=await getAllPendingLogs();var pendingHtml=pendingLogs.filter(function(l){return l.property_id===pid}).map(function(l){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];return'<div class="timeline-item pending" data-local-id="'+l.localId+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(l.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(l.content)+'</div><div class="timeline-time">'+formatarDataHora(l.created_at)+'</div></div></div>'}).join('');
+el.innerHTML=pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
 
 function renderFieldLogsOnly(pid){return'<div class="timeline-empty">Timeline indisponível. Execute o SQL de field_logs no Supabase.</div>'}
 
 async function enviarLog(){var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content)return;if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
 var btn=document.getElementById('btnDiarioSend');btn.disabled=true;
 var sectorSel=document.getElementById('diarioSector');var sector=sectorSel?sectorSel.value:'operacional';
-try{var r=await sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,content:content,sector:sector});if(r.error)throw r.error;input.value='';toast('Registro salvo','ok');loadTimeline(State.selectedProperty)}catch(e){toast('Erro: '+e.message,'erro')}btn.disabled=false}
+var logData={property_id:State.selectedProperty,author_id:State.user.id,content:content,sector:sector};
+if(navigator.onLine){
+try{var r=await sb.from('field_logs').insert(logData);if(r.error)throw r.error;input.value='';toast('Registro salvo','ok');loadTimeline(State.selectedProperty)}catch(e){
+logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();
+await addPendingLog(logData);input.value='';toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
+}else{
+logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();
+await addPendingLog(logData);input.value='';toast('Salvo offline — será enviado quando conectar','info');renderPendingInTimeline(logData)}
+btn.disabled=false}
+
+function renderPendingInTimeline(log){var el=document.getElementById('timelineContainer');if(!el)return;
+var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];
+var html='<div class="timeline-item pending" data-local-id="'+log.localId+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(log.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(log.content)+'</div><div class="timeline-time">agora</div></div></div>';
+var empty=el.querySelector('.timeline-empty');if(empty)el.innerHTML='';el.insertAdjacentHTML('afterbegin',html)}
 
 async function deletarLog(id){try{var r=await sb.from('field_logs').delete().eq('id',id).eq('author_id',State.user.id);if(r.error)throw r.error;toast('Registro excluído','ok');if(State.selectedProperty)loadTimeline(State.selectedProperty)}catch(e){toast('Erro ao excluir','erro')}}
 
@@ -712,13 +739,46 @@ map.on('mouseleave','prop-fill',function(){map.getCanvas().style.cursor=''})}
 if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14})})}
 
 /* ========== INIT ========== */
-async function iniciarApp(){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];document.getElementById('userName').textContent=nome;navegarPara('propriedades');setTimeout(verificarInstall,3000)}
+async function iniciarApp(){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];document.getElementById('userName').textContent=nome;navegarPara('propriedades');updateOfflineBar();setTimeout(verificarInstall,3000);setTimeout(syncPendingLogs,1500)}
 
 async function checkSession(){showLoading('Verificando sessão...');
 var r=await sb.auth.getSession();if(r.data.session){State.user=r.data.session.user;hideLoading();iniciarApp()}else{hideLoading()}}
 
 sb.auth.onAuthStateChange(function(event,session){if(event==='SIGNED_IN'&&session){State.user=session.user;iniciarApp()}});
 checkSession();
+
+/* ========== OFFLINE QUEUE (IndexedDB) ========== */
+var offlineDB=null;
+function openOfflineDB(){return new Promise(function(resolve,reject){
+if(offlineDB){resolve(offlineDB);return}
+var req=indexedDB.open('agruai_offline',1);
+req.onupgradeneeded=function(e){var db=e.target.result;if(!db.objectStoreNames.contains('pending_logs')){db.createObjectStore('pending_logs',{keyPath:'localId'})}};
+req.onsuccess=function(e){offlineDB=e.target.result;resolve(offlineDB)};
+req.onerror=function(){reject(req.error)}})}
+
+function addPendingLog(log){return openOfflineDB().then(function(db){return new Promise(function(resolve,reject){
+var tx=db.transaction('pending_logs','readwrite');tx.objectStore('pending_logs').put(log);
+tx.oncomplete=function(){resolve()};tx.onerror=function(){reject(tx.error)}})})}
+
+function getAllPendingLogs(){return openOfflineDB().then(function(db){return new Promise(function(resolve,reject){
+var tx=db.transaction('pending_logs','readonly');var req=tx.objectStore('pending_logs').getAll();
+req.onsuccess=function(){resolve(req.result||[])};req.onerror=function(){reject(req.error)}})})}
+
+function removePendingLog(localId){return openOfflineDB().then(function(db){return new Promise(function(resolve,reject){
+var tx=db.transaction('pending_logs','readwrite');tx.objectStore('pending_logs').delete(localId);
+tx.oncomplete=function(){resolve()};tx.onerror=function(){reject(tx.error)}})})}
+
+function updateOfflineBar(){var bar=document.getElementById('offlineBar');if(bar)bar.classList.toggle('visivel',!navigator.onLine)}
+window.addEventListener('online',function(){updateOfflineBar();syncPendingLogs()});
+window.addEventListener('offline',function(){updateOfflineBar()});
+
+async function syncPendingLogs(){try{var logs=await getAllPendingLogs();if(logs.length===0)return;
+for(var i=0;i<logs.length;i++){var l=logs[i];
+try{var r=await sb.from('field_logs').insert({property_id:l.property_id,author_id:l.author_id,content:l.content,sector:l.sector});
+if(r.error)throw r.error;
+await removePendingLog(l.localId);
+var el=document.querySelector('[data-local-id="'+l.localId+'"]');if(el){el.classList.remove('pending');var badge=el.querySelector('.sync-status');if(badge){badge.className='sync-status synced';badge.textContent='Sincronizado'}}}catch(e){console.error('Sync failed for log',l.localId,e);break}}
+if(State.selectedProperty)loadTimeline(State.selectedProperty)}catch(e){console.error('syncPendingLogs error',e)}}
 
 /* ========== PWA INSTALL ========== */
 var deferredPrompt=null;
