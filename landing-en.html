@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="AgrUAI — Satellite farm monitoring for multi-property owners. See vegetation health, receive alerts and make decisions remotely. Free early access.">
+<meta property="og:title" content="AgrUAI — Suas fazendas vistas do espaço">
+<meta property="og:description" content="Você administra fazendas em mais de um estado? Veja a saúde de todas pelo celular — com dados de satélite. Acesso antecipado gratuito para 10 produtores.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://agruai.com">
+<meta property="og:image" content="https://agruai.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="AgrUAI">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AgrUAI — Suas fazendas vistas do espaço">
+<meta name="twitter:description" content="Monitoramento por satélite para quem administra múltiplas propriedades rurais. 10 vagas gratuitas.">
+<meta name="twitter:image" content="https://agruai.com/og-image.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"AgrUAI","description":"Inteligência rural por satélite para proprietários de múltiplas fazendas","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL","description":"Programa de Acesso Antecipado gratuito"},"author":{"@type":"Organization","name":"AgrUAI","url":"https://agruai.com"}}</script>
+<meta name="theme-color" content="#0F1F0F">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>AgrUAI — Satellite Intelligence for Agriculture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:'Inter',-apple-system,sans-serif;background:#0F1F0F;color:#F5F0E8;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Space Grotesk','Inter',sans-serif;font-weight:600;letter-spacing:-.02em}
+img,svg{display:block}
+a{color:inherit;text-decoration:none}
+.container{width:100%;max-width:1100px;margin:0 auto;padding:0 24px}
+@media(min-width:640px){.container{padding:0 40px}}
+@media(min-width:1024px){.container{padding:0 24px}}
+
+/* GRAIN OVERLAY */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:.1s}.reveal-d2{transition-delay:.2s}.reveal-d3{transition-delay:.3s}.reveal-d4{transition-delay:.4s}
+
+/* === HERO === */
+.hero{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(170deg,#0F1F0F 0%,#162916 40%,#1A2E1A 70%,#0F1F0F 100%)}
+.hero-topo{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.hero-topo svg{position:absolute;width:140%;height:140%;left:-20%;top:-20%;opacity:.06;will-change:transform}
+.hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(197,165,114,.06) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.hero-content{position:relative;z-index:2;padding:40px 24px}
+.hero-content>*{opacity:0;transform:translateY(20px);animation:heroIn .8s cubic-bezier(.4,0,.2,1) forwards}
+.hero-content>*:nth-child(1){animation-delay:.2s}
+.hero-content>*:nth-child(2){animation-delay:.5s}
+.hero-content>*:nth-child(3){animation-delay:.7s}
+.hero-content>*:nth-child(4){animation-delay:.9s}
+@keyframes heroIn{to{opacity:1;transform:translateY(0)}}
+.logo{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.8rem,6vw,4.5rem);font-weight:700;letter-spacing:-.04em;line-height:1}
+.logo-agr{color:#F5F0E8}
+.logo-uai{color:#C5A572;position:relative}
+.logo-uai::after{content:'';position:absolute;bottom:-4px;left:0;width:100%;height:2px;background:linear-gradient(90deg,#C5A572,transparent);opacity:.5}
+.hero h1{margin-top:1.5rem;font-size:clamp(1.25rem,3vw,2.1rem);font-weight:600;color:#F5F0E8;line-height:1.3;max-width:620px;margin-left:auto;margin-right:auto}
+.hero-sub{margin-top:1rem;font-size:clamp(.9rem,1.5vw,1.15rem);color:#A89E90;font-weight:400;line-height:1.6}
+.btn-cta{display:inline-flex;align-items:center;gap:10px;margin-top:2.5rem;padding:18px 44px;background:linear-gradient(135deg,#C5A572,#B8945A);color:#0F1F0F;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;border:none;border-radius:8px;cursor:pointer;transition:all .25s ease;letter-spacing:.02em;box-shadow:0 4px 24px rgba(197,165,114,.2),0 0 0 0 rgba(197,165,114,0);position:relative;overflow:hidden}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(197,165,114,.3),0 0 0 1px rgba(197,165,114,.15)}
+.btn-cta:active{transform:translateY(0) scale(.98)}
+.btn-cta::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);opacity:0;transition:opacity .25s}
+.btn-cta:hover::before{opacity:1}
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);opacity:.4;animation:bounceHint 2.5s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes bounceHint{0%,100%{transform:translateX(-50%) translateY(0);opacity:.4}50%{transform:translateX(-50%) translateY(10px);opacity:.7}}
+
+/* === PROBLEMA === */
+.problema{padding:100px 0 60px;background:#0F1F0F;text-align:center;position:relative}
+.problema h2{font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;max-width:700px;margin:0 auto;line-height:1.35}
+.problema p{margin-top:28px;font-size:1.05rem;color:#D1C9BC;line-height:1.85;max-width:580px;margin-left:auto;margin-right:auto}
+.sep{margin:70px auto 0;max-width:240px;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.25),transparent)}
+
+/* === O QUE É === */
+.oque{padding:100px 0;background:#1A2E1A;position:relative;overflow:hidden}
+.oque::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.oque h2{text-align:center;font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:56px;line-height:1.35}
+.blocos{display:flex;flex-wrap:wrap;gap:20px;max-width:960px;margin:0 auto;justify-content:center}
+.bloco{flex:1 1 100%;min-width:0}
+@media(min-width:640px){.blocos{gap:24px}.bloco{flex:1 1 calc(33.333% - 16px);max-width:calc(33.333% - 16px)}}
+.bloco{background:rgba(15,31,15,.6);border:1px solid rgba(197,165,114,.08);border-radius:16px;padding:36px 28px;position:relative;transition:all .3s ease;overflow:hidden}
+.bloco::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--bloco-cor,#C5A572),transparent);opacity:0;transition:opacity .3s}
+.bloco:hover{border-color:rgba(197,165,114,.2);transform:translateY(-4px);box-shadow:0 12px 40px rgba(15,31,15,.5)}
+.bloco:hover::before{opacity:1}
+.bloco-icon{width:52px;height:52px;margin-bottom:20px;padding:10px;background:rgba(197,165,114,.06);border-radius:12px;display:flex;align-items:center;justify-content:center}
+.bloco-icon svg{width:32px;height:32px}
+.bloco h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.1rem;color:#C5A572;margin-bottom:12px;letter-spacing:-.01em}
+.bloco p{font-size:.92rem;color:#D1C9BC;line-height:1.75}
+.bloco:first-child{--bloco-cor:#4A90A4}
+.bloco:first-child .bloco-icon{background:rgba(74,144,164,.08)}
+.bloco:first-child h3{color:#5DA8BE}
+
+/* === COMO FUNCIONA === */
+.como-funciona{padding:100px 0;background:#0F1F0F;position:relative}
+.como-funciona::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.como-funciona h2{text-align:center;font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:56px;line-height:1.35}
+.passos{display:grid;grid-template-columns:1fr;gap:24px;max-width:960px;margin:0 auto}
+@media(min-width:768px){.passos{grid-template-columns:1fr 1fr 1fr;gap:20px}}
+.passo{background:rgba(26,46,26,.5);border:1px solid rgba(197,165,114,.08);border-radius:16px;padding:32px 24px;text-align:center;position:relative;transition:all .3s ease}
+.passo:hover{border-color:rgba(197,165,114,.2);transform:translateY(-4px);box-shadow:0 12px 40px rgba(15,31,15,.5)}
+.passo-num{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(197,165,114,.1);color:#C5A572;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:16px;border:1px solid rgba(197,165,114,.2)}
+.passo-icon{width:56px;height:56px;margin:0 auto 16px;padding:12px;background:rgba(74,144,164,.06);border-radius:14px;display:flex;align-items:center;justify-content:center}
+.passo-icon svg{width:32px;height:32px}
+.passo h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.05rem;color:#C5A572;margin-bottom:10px}
+.passo p{font-size:.88rem;color:#D1C9BC;line-height:1.7}
+.passo-arrow{display:none;position:absolute;right:-14px;top:50%;transform:translateY(-50%);color:rgba(197,165,114,.25);font-size:1.2rem}
+@media(min-width:768px){.passo-arrow{display:block}}
+
+/* === PARA QUEM === */
+.para-quem{padding:100px 0;background:#1A2E1A;position:relative}
+.para-quem::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.para-quem h2{text-align:center;font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:56px;line-height:1.35}
+.perfis{display:grid;grid-template-columns:1fr;gap:20px;max-width:800px;margin:0 auto}
+@media(min-width:640px){.perfis{grid-template-columns:1fr 1fr}}
+.perfil{background:rgba(15,31,15,.5);border:1px solid rgba(197,165,114,.06);border-radius:16px;padding:28px 24px;transition:all .3s ease}
+.perfil:hover{border-color:rgba(197,165,114,.2);box-shadow:0 8px 32px rgba(15,31,15,.4)}
+.perfil-icon{font-size:2rem;margin-bottom:12px}
+.perfil h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1rem;color:#C5A572;margin-bottom:8px}
+.perfil p{font-size:.88rem;color:#A89E90;line-height:1.7}
+
+/* === MISSION HUD === */
+.mission{position:relative;padding:0;overflow:hidden;text-align:center}
+/* NASA Brazil at Night — hero image */
+.mission-hero{position:relative;min-height:70vh;min-height:70dvh;max-height:680px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#020304}
+.mission-hero-img{position:absolute;inset:0;z-index:0;
+  background:url('https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/83000/83857/brazil_vir_20130804.jpg?w=1200&h=1200&fit=clip&crop=faces%2Cfocalpoint') center 40%/cover no-repeat}
+.mission-hero-img::after{content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 65% 55% at 50% 50%,transparent 0%,rgba(2,3,4,.4) 55%,rgba(2,3,4,.95) 100%),
+    linear-gradient(to bottom,rgba(2,3,4,.3) 0%,transparent 20%,transparent 80%,#0F1F0F 100%);z-index:1}
+.mission-credit{position:absolute;bottom:10px;right:16px;font-size:.55rem;color:rgba(168,158,144,.25);z-index:12}
+/* Text section — below hero */
+.mission-text{position:relative;z-index:10;padding:48px 20px 12px;background:#0F1F0F;text-align:center}
+.mission h2{font-size:clamp(1.4rem,4vw,2.2rem);color:#F5F0E8;margin-bottom:12px;line-height:1.15}
+.mission-sub{font-size:clamp(.86rem,1.6vw,1rem);color:#A89E90;max-width:520px;margin:0 auto 0;line-height:1.7}
+/* ---- Satellite ---- */
+.sat-orbit{position:relative;z-index:8;pointer-events:none;display:flex;align-items:center;justify-content:center;margin:0 auto;width:fit-content}
+.sat-wrap{position:relative;animation:satFloat 6s ease-in-out infinite;
+  filter:drop-shadow(0 0 30px rgba(74,144,164,.6)) drop-shadow(0 0 60px rgba(74,144,164,.2)) drop-shadow(0 0 120px rgba(74,144,164,.08))}
+@keyframes satFloat{0%,100%{transform:translateY(0) rotate(-1deg)}25%{transform:translateY(-12px) rotate(.5deg)}50%{transform:translateY(-4px) rotate(1deg)}75%{transform:translateY(-16px) rotate(-.5deg)}}
+/* Panel shimmer — sunlight reflection */
+.sat-panel-shimmer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:0;animation:shimmer 6s ease-in-out infinite}
+@keyframes shimmer{0%,100%{opacity:0}40%{opacity:0}50%{opacity:1}60%{opacity:0}}
+/* Camera flash */
+.sat-flash-wrap{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);width:1px;height:1px}
+.sat-flash{position:absolute;top:0;left:0;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff;
+  box-shadow:0 0 8px 4px rgba(255,255,255,.9),0 0 30px 12px rgba(74,144,164,.6),0 0 60px 24px rgba(74,144,164,.25),0 0 120px 48px rgba(74,144,164,.08);
+  opacity:0;animation:camFlash 4s ease-in-out infinite}
+@keyframes camFlash{0%,70%,100%{opacity:0;transform:scale(.2)}74%{opacity:1;transform:scale(1.5)}77%{opacity:.3;transform:scale(.6)}80%{opacity:1;transform:scale(1.2)}84%{opacity:.5;transform:scale(.8)}88%{opacity:0;transform:scale(.2)}}
+.sat-flash2{animation-delay:2s}
+.sat-flash3{animation-delay:3.2s}
+/* Flash light cone projection */
+.sat-cone{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:0;
+  border-left:60px solid transparent;border-right:60px solid transparent;
+  border-top:300px solid rgba(255,255,255,.012);
+  opacity:0;animation:coneFlash 4s ease-in-out infinite;pointer-events:none;filter:blur(4px)}
+@keyframes coneFlash{0%,70%,100%{opacity:0}74%,84%{opacity:1}88%{opacity:0}}
+.sat-cone2{animation-delay:2s}
+.sat-cone3{animation-delay:3.2s}
+/* Ground flash — light hitting the surface */
+.sat-ground{position:absolute;top:290px;left:50%;transform:translateX(-50%);width:140px;height:40px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(255,255,255,.06),transparent 70%);
+  opacity:0;animation:groundFlash 4s ease-in-out infinite;filter:blur(8px)}
+@keyframes groundFlash{0%,70%,100%{opacity:0}76%,82%{opacity:1}88%{opacity:0}}
+.sat-ground2{animation-delay:2s}
+.sat-ground3{animation-delay:3.2s}
+/* Status LED blink */
+@keyframes ledBlink{0%,40%,60%,100%{opacity:.25;fill:#4A8C5C}50%{opacity:1;fill:#8FCF9F}}
+@keyframes ledRed{0%,90%,100%{opacity:.2}95%{opacity:.7}}
+/* Grid overlay */
+.mission-grid{position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:
+    linear-gradient(rgba(74,144,164,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(74,144,164,.025) 1px,transparent 1px);
+  background-size:80px 80px}
+/* HUD cards */
+.mission-data{position:relative;z-index:10;padding:32px 20px 80px;background:#0F1F0F;max-width:960px;margin:0 auto}
+.mission-hud{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start}
+.hud-card{background:rgba(26,46,26,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:14px;padding:20px;text-align:left;opacity:0;transform:translateY(16px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
+.hud-card.visible{opacity:1;transform:translateY(0)}
+.hud-card.hud-main{border:1px solid rgba(74,140,92,.3)}
+.hud-card.hud-status{grid-column:1/-1;border:1px solid rgba(74,140,92,.15);padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;font-size:.78rem;color:#A89E90}
+.hud-card.hud-rain{border:1px solid rgba(74,144,164,.25)}
+.hud-card.hud-alert{border:1px solid rgba(196,90,74,.35)}
+.hud-label{font-size:.65rem;color:#A89E90;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:500}
+.hud-farm-name{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:700;color:#F5F0E8;margin-bottom:2px}
+.hud-farm-meta{font-size:.78rem;color:#A89E90;margin-bottom:16px}
+.hud-ndvi-bar{height:6px;border-radius:3px;background:linear-gradient(90deg,#C45A4A 0%,#D4A040 40%,#4A8C5C 70%,#2E6B3E 100%);position:relative;margin-bottom:6px}
+.hud-ndvi-marker{position:absolute;top:-4px;width:14px;height:14px;border-radius:50%;background:#F5F0E8;border:2px solid #4A8C5C;box-shadow:0 0 8px rgba(74,140,92,.5);transform:translateX(-50%)}
+.hud-ndvi-row{display:flex;align-items:baseline;gap:8px;margin-bottom:14px}
+.hud-ndvi-val{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;color:#4A8C5C}
+.hud-ndvi-label{font-size:.82rem;color:#4A8C5C;font-weight:500}
+.hud-spark{margin-top:4px}
+.hud-spark-label{font-size:.68rem;color:#A89E90;margin-top:4px}
+.hud-rain-title{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:600;color:#F5F0E8;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.hud-rain-val{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;color:#4A90A4;margin-bottom:10px}
+.hud-rain-bars{display:flex;align-items:flex-end;gap:4px;height:32px}
+.hud-rain-bar{flex:1;border-radius:2px 2px 0 0;background:linear-gradient(to top,rgba(74,144,164,.4),rgba(74,144,164,.7));min-width:0}
+.hud-rain-days{display:flex;justify-content:space-between;font-size:.55rem;color:#A89E90;margin-top:3px}
+.hud-alert-title{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:600;color:#C45A4A;display:flex;align-items:center;gap:6px}
+.hud-alert-icon{display:inline-flex;animation:alertPulse 2s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.hud-alert-msg{font-size:.82rem;color:#F5F0E8;margin:6px 0 2px;line-height:1.4}
+.hud-alert-farm{font-size:.75rem;color:#A89E90}
+.hud-alert-link{font-size:.75rem;color:#C5A572;font-weight:600;margin-top:8px;display:inline-block}
+.hud-dot{width:7px;height:7px;border-radius:50%;background:#4A8C5C;display:inline-block;animation:dotPulse 2s ease-in-out infinite;box-shadow:0 0 6px rgba(74,140,92,.5)}
+@keyframes dotPulse{0%,100%{opacity:1;box-shadow:0 0 6px rgba(74,140,92,.5)}50%{opacity:.6;box-shadow:0 0 12px rgba(74,140,92,.8)}}
+.hud-status-sep{color:#2E4A2E}
+@media(prefers-reduced-motion:reduce){.sat-wrap,.hud-alert-icon,.hud-dot,.sat-flash,.sat-cone,.sat-cone2,.sat-cone3,.sat-ground,.sat-ground2,.sat-ground3,.sat-panel-shimmer{animation:none}.hud-card{transition:none}}
+@media(max-width:768px){
+  .mission-hero{min-height:55vh;min-height:55dvh;max-height:500px}
+  .mission-text{padding:32px 16px 8px}
+  .mission-data{padding:24px 16px 50px}
+  .mission-hud{grid-template-columns:1fr;max-width:400px;margin:0 auto}
+  .sat-wrap svg{width:140px;height:78px}
+  .sat-cone,.sat-cone2,.sat-cone3{border-left-width:30px;border-right-width:30px;border-top-width:140px}
+  .sat-ground,.sat-ground2,.sat-ground3{top:140px;width:80px;height:25px}
+  .mission-grid{background-size:50px 50px}
+@media(max-width:480px){
+  .mission-hero{min-height:50vh;min-height:50dvh;max-height:420px}
+  .sat-wrap svg{width:120px;height:67px}
+}
+}
+
+/* === FAQ === */
+.faq{padding:80px 0;background:#0F1F0F;position:relative}
+.faq::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.faq h2{text-align:center;font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:48px}
+.faq-list{max-width:680px;margin:0 auto}
+.faq-list details{border-bottom:1px solid rgba(197,165,114,.06)}
+.faq-list summary{padding:20px 0;font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:1rem;color:#F5F0E8;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;transition:color .2s}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary::after{content:'+';font-size:1.3rem;color:#C5A572;transition:transform .2s;flex-shrink:0;margin-left:12px}
+.faq-list details[open] summary::after{content:'−'}
+.faq-list details[open] summary{color:#C5A572}
+.faq-answer{padding:0 0 20px;font-size:.9rem;color:#A89E90;line-height:1.75;max-width:600px}
+
+/* === PROVA === */
+.prova{padding:80px 0;background:#0F1F0F;text-align:center;position:relative}
+.prova::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.prova-cards{display:grid;grid-template-columns:1fr;gap:40px;max-width:860px;margin:0 auto}
+@media(min-width:640px){.prova-cards{grid-template-columns:1fr 1fr 1fr;gap:32px}}
+.prova-card{position:relative;padding:32px 16px}
+.prova-card .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.1;margin-bottom:12px}
+.prova-card .sub{font-size:.88rem;color:#A89E90;line-height:1.65;max-width:240px;margin-left:auto;margin-right:auto}
+@media(min-width:640px){.prova-card:not(:last-child)::after{content:'';position:absolute;right:0;top:20%;height:60%;width:1px;background:linear-gradient(180deg,transparent,rgba(197,165,114,.15),transparent)}}
+/* Vagas counter */
+.vagas-tag{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:6px 16px;border-radius:20px;background:rgba(197,165,114,.08);border:1px solid rgba(197,165,114,.15);font-size:.75rem;font-weight:500;color:#C5A572;letter-spacing:.03em}
+.vagas-dot{width:6px;height:6px;border-radius:50%;background:#C5A572;animation:vagasPulse 2s ease infinite}
+@keyframes vagasPulse{0%,100%{opacity:1}50%{opacity:.4}}
+.vagas-barra{width:100%;max-width:180px;height:4px;background:rgba(197,165,114,.12);border-radius:2px;margin:14px auto 0;overflow:hidden}
+.vagas-fill{height:100%;width:0%;background:linear-gradient(90deg,#C5A572,#D4B88A);border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.vagas-esgotadas .vagas-dot{background:#C45A4A;animation:none}
+.vagas-esgotadas .vagas-tag{border-color:rgba(196,90,74,.2);background:rgba(196,90,74,.08);color:#C45A4A}
+
+/* === FORMULARIO === */
+.formulario{padding:100px 0;background:#1A2E1A;position:relative;overflow:hidden}
+.formulario::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
+.formulario h2{text-align:center;font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:12px}
+.formulario .form-sub{text-align:center;font-size:.95rem;color:#D1C9BC;max-width:530px;margin:0 auto 48px;line-height:1.7}
+.form-wrap{max-width:460px;margin:0 auto;background:rgba(15,31,15,.4);border:1px solid rgba(197,165,114,.08);border-radius:20px;padding:40px 32px}
+@media(max-width:640px){.form-wrap{padding:32px 20px;border-radius:16px}}
+.form-group{margin-bottom:22px}
+.form-group label{display:block;font-size:.78rem;font-weight:500;color:#D1C9BC;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 16px;background:#0F1F0F;border:1.5px solid #2E4A2E;border-radius:8px;color:#F5F0E8;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:400;transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;-webkit-appearance:none;appearance:none}
+.form-group select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23A89E90' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
+.form-group input::placeholder,.form-group textarea::placeholder{color:#908880}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#C5A572;box-shadow:0 0 0 3px rgba(197,165,114,.12);background:#111F11}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-group .input-hint{font-size:.72rem;color:#908880;margin-top:4px}
+.btn-submit{width:100%;padding:18px;background:linear-gradient(135deg,#C5A572,#B8945A);color:#0F1F0F;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:1px;border:none;border-radius:8px;cursor:pointer;transition:all .25s ease;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(197,165,114,.15)}
+.btn-submit:hover{box-shadow:0 6px 28px rgba(197,165,114,.25);transform:translateY(-1px)}
+.btn-submit:active{transform:translateY(0) scale(.98)}
+.btn-submit.enviando{pointer-events:none;opacity:.8}
+.btn-submit.enviando::after{content:'';position:absolute;top:0;left:-100%;width:200%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:submitShine 1.2s ease infinite}
+@keyframes submitShine{to{left:100%}}
+.form-micro{text-align:center;margin-top:14px;font-size:.75rem;color:#908880;line-height:1.5}
+
+/* === OBRIGADO === */
+.obrigado{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px;min-height:400px;position:relative}
+.obrigado.visivel{display:flex;animation:obgIn .7s cubic-bezier(.4,0,.2,1)}
+@keyframes obgIn{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.obg-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.obg-bg svg{width:100%;height:100%;opacity:.04}
+.obg-scan{position:absolute;top:-2px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(74,144,164,.6),rgba(197,165,114,.4),transparent);animation:scanLine 4s ease-in-out infinite;z-index:1}
+@keyframes scanLine{0%{top:-2px;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+.confirm-card{position:relative;z-index:2;background:linear-gradient(165deg,rgba(26,46,26,.7) 0%,rgba(15,31,15,.6) 100%);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(197,165,114,.1);border-radius:28px;padding:44px 32px 36px;max-width:430px;width:100%;overflow:hidden;text-align:center}
+.confirm-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 5%,#4A90A4 25%,#C5A572 50%,#4A90A4 75%,transparent 95%);background-size:200% 100%;animation:borderShimmer 3s ease infinite}
+@keyframes borderShimmer{0%,100%{background-position:0% 0%}50%{background-position:200% 0%}}
+.confirm-card::after{content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(74,144,164,.05) 0%,transparent 70%);pointer-events:none}
+@media(max-width:480px){.confirm-card{padding:36px 20px 28px;border-radius:20px}}
+.sat-wrap{width:120px;height:120px;margin:0 auto 24px;position:relative}
+.sat-ring-outer{position:absolute;inset:0;border:1px solid rgba(197,165,114,.12);border-radius:50%}
+.sat-ring-mid{position:absolute;inset:12px;border:1px solid rgba(74,144,164,.14);border-radius:50%;transform:rotate(60deg)}
+.sat-ring-inner{position:absolute;inset:26px;border:1px dashed rgba(197,165,114,.08);border-radius:50%;transform:rotate(-30deg)}
+.sat-body{position:absolute;width:10px;height:10px;top:50%;left:50%;margin:-5px 0 0 -5px;animation:orbitSat 3.5s linear infinite}
+.sat-core{width:10px;height:10px;background:#C5A572;border-radius:50%;box-shadow:0 0 10px rgba(197,165,114,.7),0 0 24px rgba(197,165,114,.35),0 0 48px rgba(197,165,114,.12)}
+.sat-trail{position:absolute;top:50%;left:50%;width:32px;height:2px;background:linear-gradient(90deg,rgba(197,165,114,.5),transparent);transform:translate(-100%,-50%);border-radius:1px}
+@keyframes orbitSat{from{transform:rotate(0deg) translateY(-55px) rotate(0deg)}to{transform:rotate(360deg) translateY(-55px) rotate(-360deg)}}
+.sat-body-2{position:absolute;width:6px;height:6px;top:50%;left:50%;margin:-3px 0 0 -3px;animation:orbitSat2 5.2s linear infinite}
+.sat-core-2{width:6px;height:6px;background:#4A90A4;border-radius:50%;box-shadow:0 0 6px rgba(74,144,164,.6),0 0 16px rgba(74,144,164,.2)}
+.sat-trail-2{position:absolute;top:50%;left:50%;width:18px;height:1.5px;background:linear-gradient(90deg,rgba(74,144,164,.35),transparent);transform:translate(-100%,-50%);border-radius:1px}
+@keyframes orbitSat2{from{transform:rotate(120deg) translateY(-38px) rotate(-120deg)}to{transform:rotate(480deg) translateY(-38px) rotate(-480deg)}}
+.sat-center{position:absolute;inset:30px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(37,211,102,.06) 0%,rgba(37,211,102,.02) 50%,transparent 70%);border-radius:50%}
+.sat-center svg{width:32px;height:32px}
+.sat-center polyline{stroke:#25D366;stroke-width:2.8;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30;animation:drawSatCheck .5s ease .5s forwards}
+@keyframes drawSatCheck{to{stroke-dashoffset:0}}
+.sat-pulse{position:absolute;inset:22px;border:1px solid rgba(37,211,102,.15);border-radius:50%;animation:pulseRing 2.5s ease-out infinite}
+.sat-pulse-2{position:absolute;inset:22px;border:1px solid rgba(74,144,164,.1);border-radius:50%;animation:pulseRing 2.5s ease-out 1.2s infinite}
+@keyframes pulseRing{0%{transform:scale(1);opacity:.3}100%{transform:scale(1.6);opacity:0}}
+.confirm-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:24px;background:linear-gradient(135deg,rgba(74,144,164,.1),rgba(74,144,164,.05));border:1px solid rgba(74,144,164,.2);font-family:'Space Grotesk',sans-serif;font-size:.65rem;font-weight:600;color:#5DA8BE;letter-spacing:.08em;text-transform:uppercase;margin-bottom:22px}
+.confirm-badge-dot{width:6px;height:6px;border-radius:50%;background:#4A90A4;position:relative}
+.confirm-badge-dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(74,144,164,.3);animation:dotPing 2s ease infinite}
+@keyframes dotPing{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.5);opacity:0}}
+.confirm-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.6rem;color:#F5F0E8;margin-bottom:8px;letter-spacing:-.03em;line-height:1.2}
+.confirm-gold{color:#C5A572}
+.confirm-sub{font-size:.85rem;color:#A89E90;line-height:1.65;margin-bottom:30px;max-width:340px;margin-left:auto;margin-right:auto}
+.confirm-sub strong{color:#D1C9BC;font-weight:500}
+.confirm-info{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;padding:20px 8px;margin:0 -8px 28px;border-top:1px solid rgba(197,165,114,.06);border-bottom:1px solid rgba(197,165,114,.06);position:relative}
+.confirm-info::before{content:'';position:absolute;top:0;left:33.3%;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(197,165,114,.08),transparent)}
+.confirm-info::after{content:'';position:absolute;top:0;left:66.6%;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(197,165,114,.08),transparent)}
+.confirm-info-item{text-align:center}
+.confirm-info-label{font-size:.55rem;color:#908880;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-weight:500}
+.confirm-info-value{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;color:#F5F0E8;letter-spacing:-.01em}
+.confirm-info-value.gold{color:#C5A572}
+.confirm-info-value.blue{color:#5DA8BE}
+@media(max-width:360px){.confirm-info{gap:0;padding:16px 4px}.confirm-info-value{font-size:.92rem}}
+.confirm-wa{display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;border:1px solid rgba(37,211,102,.15);border-radius:14px;background:linear-gradient(135deg,rgba(37,211,102,.04),rgba(37,211,102,.02));cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);text-decoration:none;color:inherit;margin-bottom:20px;position:relative;overflow:hidden}
+.confirm-wa::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,211,102,.06),transparent);opacity:0;transition:opacity .3s}
+.confirm-wa:hover{border-color:rgba(37,211,102,.3);transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,211,102,.08)}
+.confirm-wa:hover::before{opacity:1}
+.confirm-wa-icon{width:40px;height:40px;border-radius:12px;background:rgba(37,211,102,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.confirm-wa-icon svg{width:20px;height:20px;fill:#25D366}
+.confirm-wa-text{text-align:left;flex:1}
+.confirm-wa-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.85rem;color:#25D366;margin-bottom:3px}
+.confirm-wa-hint{font-size:.7rem;color:#908880;line-height:1.45}
+.confirm-wa-arrow{color:#25D366;opacity:.4;font-size:1.1rem;transition:all .3s}
+.confirm-wa:hover .confirm-wa-arrow{opacity:.8;transform:translateX(3px)}
+.confirm-footer{display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid rgba(197,165,114,.04)}
+.confirm-footer-logo{font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:-.01em;color:#908880}
+.confirm-footer-logo .fl{color:#A89E90}
+.confirm-footer-logo .fg{color:rgba(197,165,114,.5)}
+.confirm-voltar{font-size:.72rem;color:#908880;cursor:pointer;background:none;border:none;font-family:'Inter',sans-serif;padding:6px 12px;transition:all .2s;border-radius:6px}
+.confirm-voltar:hover{color:#D1C9BC;background:rgba(197,165,114,.04)}
+
+/* === FOOTER === */
+.footer{padding:48px 0;background:#0F1F0F;text-align:center;position:relative}
+.footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.1),transparent)}
+.footer-logo{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;letter-spacing:-.02em;margin-bottom:12px;display:inline-flex;align-items:center;gap:10px}
+.footer-icon{opacity:.4}
+.footer p{font-size:.8rem;color:#908880;line-height:1.6}
+.footer .tagline{font-size:.75rem;color:#A89E90;margin-top:6px;letter-spacing:.03em}
+
+/* FOCUS VISIBLE */
+:focus-visible{outline:2px solid #C5A572;outline-offset:3px;border-radius:4px}
+@media(prefers-reduced-motion:reduce){
+.reveal,.hero-content>*{opacity:1;transform:none;transition:none;animation:none}
+.scroll-hint{animation:none}
+.btn-submit.enviando::after{animation:none}
+.obrigado.visivel{animation:none}
+.sat-body,.sat-body-2{animation:none;opacity:.5}
+.sat-pulse,.sat-pulse-2{animation:none;opacity:0}
+.sat-center polyline{animation:none;stroke-dashoffset:0}
+.confirm-badge-dot::after{animation:none}
+.obg-scan{animation:none;opacity:0}
+.confirm-card::before{animation:none}
+.pwa-popup-overlay{animation:none}
+.pwa-popup-card{animation:none}
+}
+
+/* === PWA POPUP === */
+.pwa-popup-overlay{position:fixed;inset:0;background:rgba(15,31,15,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .4s ease}
+.pwa-popup-overlay.visible{opacity:1}
+.pwa-popup-overlay.closing{opacity:0;transition:opacity .25s ease}
+.pwa-popup-card{max-width:360px;width:100%;background:#1A2E1A;border:1px solid rgba(197,165,114,.12);border-radius:20px;padding:40px 28px;text-align:center;transform:translateY(20px);transition:transform .4s ease;position:relative}
+.pwa-popup-overlay.visible .pwa-popup-card{transform:translateY(0)}
+.pwa-popup-overlay.closing .pwa-popup-card{transform:translateY(-10px)}
+.pwa-popup-icon{width:64px;height:64px;margin:0 auto 20px;background:rgba(74,144,164,.08);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.pwa-popup-icon svg{width:32px;height:32px}
+.pwa-popup-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;color:#F5F0E8;margin-bottom:12px;letter-spacing:-.02em}
+.pwa-popup-sub{font-size:.9rem;color:#A89E90;line-height:1.65;margin-bottom:28px}
+.pwa-install-btn{width:100%;padding:16px;background:linear-gradient(135deg,#C5A572,#B8945A);color:#0F1F0F;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;border:none;border-radius:8px;cursor:pointer;transition:all .25s;box-shadow:0 4px 20px rgba(197,165,114,.2);display:flex;align-items:center;justify-content:center;gap:8px}
+.pwa-install-btn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(197,165,114,.3)}
+.pwa-dismiss-btn{display:block;width:100%;margin-top:16px;padding:8px;background:none;border:none;color:#908880;font-size:.8rem;cursor:pointer;transition:color .2s;font-family:'Inter',sans-serif}
+.pwa-dismiss-btn:hover{color:#D1C9BC}
+.pwa-ios-hint{margin-top:16px;padding:14px;background:rgba(15,31,15,.6);border:1px solid rgba(197,165,114,.08);border-radius:10px;font-size:.8rem;color:#A89E90;line-height:1.6;display:none}
+.pwa-ios-hint strong{color:#F5F0E8}
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="topo">
+  <div class="hero-bg"></div>
+  <div class="hero-topo">
+    <svg viewBox="0 0 1400 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Topography lines -->
+      <path d="M-50 680 Q100 600 250 640 Q400 680 550 620 Q700 560 850 600 Q1000 640 1150 580 Q1300 520 1450 560" fill="none" stroke="#C5A572" stroke-width="1.2"/>
+      <path d="M-50 720 Q150 660 350 700 Q550 740 750 670 Q950 600 1150 650 Q1350 700 1450 660" fill="none" stroke="#C5A572" stroke-width="1"/>
+      <path d="M-50 760 Q200 710 400 740 Q600 770 800 720 Q1000 670 1200 710 Q1400 750 1450 730" fill="none" stroke="#C5A572" stroke-width=".8"/>
+      <path d="M-50 800 Q250 760 500 780 Q750 800 1000 760 Q1250 720 1450 750" fill="none" stroke="#C5A572" stroke-width=".6"/>
+      <path d="M-50 840 Q300 810 600 830 Q900 850 1200 820 Q1450 800 1450 800" fill="none" stroke="#C5A572" stroke-width=".4"/>
+      <!-- Orbit -->
+      <ellipse cx="1000" cy="220" rx="340" ry="130" fill="none" stroke="#C5A572" stroke-width=".7" stroke-dasharray="10 8" opacity=".4"/>
+      <ellipse cx="1000" cy="220" rx="240" ry="90" fill="none" stroke="#C5A572" stroke-width=".4" stroke-dasharray="6 6" opacity=".2"/>
+      <!-- Satellite -->
+      <circle cx="1180" cy="170" r="4" fill="#C5A572" opacity=".5"/>
+      <circle cx="1180" cy="170" r="8" fill="none" stroke="#C5A572" stroke-width=".5" opacity=".2"/>
+      <!-- Downlink -->
+      <line x1="1180" y1="178" x2="900" y2="600" stroke="#C5A572" stroke-width=".6" stroke-dasharray="4 6" opacity=".15"/>
+      <!-- Scan lines -->
+      <path d="M750 580 Q850 560 950 575 Q1050 590 1100 570" fill="none" stroke="#4A90A4" stroke-width=".5" stroke-dasharray="3 4" opacity=".15"/>
+    </svg>
+  </div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="logo"><span class="logo-agr">Agr</span><span class="logo-uai">UAI</span></div>
+    <h1>Você não administra fazendas. Administra um império.</h1>
+    <p class="hero-sub">Veja a saúde de todas as suas propriedades pelo celular. Dados de satélite, alertas automáticos, zero burocracia.</p>
+    <a href="#reserva" class="btn-cta">Monitor my farms — free</a>
+  </div>
+  <div class="scroll-hint" aria-hidden="true">
+    <svg width="24" height="14" viewBox="0 0 24 14" fill="none"><path d="M2 2l10 10L22 2" stroke="#C5A572" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+</section>
+
+<!-- ===== PROBLEMA ===== -->
+<section class="problema">
+  <div class="container">
+    <h2 class="reveal">O dono de 5 fazendas não tem tempo para 5 planilhas.</h2>
+    <p class="reveal reveal-d1">Quem administra múltiplas propriedades precisa de visão de conjunto — não de dados espalhados em WhatsApp, cadernos e promessas de gestor. A decisão certa depende da informação certa, na hora certa, vista de cima.</p>
+    <div class="sep"></div>
+  </div>
+</section>
+
+<!-- ===== O QUE É ===== -->
+<section class="oque">
+  <div class="container">
+    <h2 class="reveal">Your eyes in the sky. Your decisions on the ground.</h2>
+    <div class="blocos">
+
+      <div class="bloco reveal reveal-d1">
+        <div class="bloco-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="16" cy="10" rx="12" ry="5.5" stroke="#4A90A4" stroke-width="1.5" stroke-dasharray="3 2.5" opacity=".6"/>
+            <circle cx="25" cy="7" r="2.5" fill="#4A90A4"/>
+            <line x1="25" y1="9.5" x2="18" y2="23" stroke="#4A90A4" stroke-width="1.2" stroke-dasharray="2 2.5" opacity=".5"/>
+            <path d="M4 26 Q10 21 16 23 Q22 25 28 21" stroke="#4A90A4" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M4 29 Q12 25 18 27 Q24 29 28 26" stroke="#4A90A4" stroke-width="1" stroke-linecap="round" opacity=".4"/>
+          </svg>
+        </div>
+        <h3>Satellite Monitoring</h3>
+        <p>Real images of your properties, updated every 5 days. See pasture health, crop evolution and risk areas without leaving the office.</p>
+      </div>
+
+      <div class="bloco reveal reveal-d2">
+        <div class="bloco-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/>
+            <rect x="17.5" y="2" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/>
+            <rect x="2" y="17.5" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/>
+            <rect x="17.5" y="17.5" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/>
+            <path d="M5 10 Q7 6 10 9" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".45"/>
+            <path d="M20 10 Q22 6 26 9" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".45"/>
+            <path d="M5 25 Q7 21 10 24" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".45"/>
+            <path d="M20 25 Q22 21 26 24" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".45"/>
+          </svg>
+        </div>
+        <h3>Todas as fazendas. Uma tela.</h3>
+        <p>Unified dashboard for owners who think like portfolio managers. Compare properties and identify problems before they become losses.</p>
+      </div>
+
+      <div class="bloco reveal reveal-d3">
+        <div class="bloco-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="9" stroke="#C5A572" stroke-width="1.5"/>
+            <line x1="20.5" y1="20.5" x2="28" y2="28" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round"/>
+            <polyline points="8,17 11,12 15,15 20,9" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+        <h3>A.I. that speaks the language of the field</h3>
+        <p>Automatic alerts, predictive analytics and reports that translate satellite data into action: 'move cattle', 'irrigate lot 3', 'investigate north area'.</p>
+      </div>
+
+      <div class="bloco reveal reveal-d4">
+        <div class="bloco-icon" style="--bloco-cor:#C45A4A">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 8h20v16H6z" stroke="#C45A4A" stroke-width="1.5" rx="2"/>
+            <path d="M6 8l10 9 10-9" stroke="#C45A4A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="6" y1="24" x2="13" y2="17" stroke="#C45A4A" stroke-width="1" opacity=".4"/>
+            <line x1="26" y1="24" x2="19" y2="17" stroke="#C45A4A" stroke-width="1" opacity=".4"/>
+            <line x1="14" y1="14" x2="18" y2="14" stroke="#C45A4A" stroke-width="2.5" stroke-linecap="round" opacity=".6"/>
+          </svg>
+        </div>
+        <h3>The end of WhatsApp in operations</h3>
+        <p>Ditch the chaos of WhatsApp groups. Centralize your team's field reports on the exact map area — even without internet signal on the pasture. When they're back at HQ, everything syncs automatically.</p>
+      </div>
+
+      <div class="bloco reveal reveal-d4">
+        <div class="bloco-icon" style="--bloco-cor:#C45A4A">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 26 L10 14 L16 18 L22 8 L28 12" stroke="#C45A4A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="22" cy="8" r="2.5" fill="none" stroke="#C45A4A" stroke-width="1.2"/>
+            <text x="21" y="10" font-size="5" fill="#C45A4A" font-weight="bold" font-family="sans-serif">$</text>
+            <line x1="4" y1="28" x2="28" y2="28" stroke="#C45A4A" stroke-width="1" opacity=".3"/>
+          </svg>
+        </div>
+        <h3>Losses translated into Dollars</h3>
+        <p>No more charts you don't understand. Our A.I. instantly translates the satellite data into a Financial Risk projection — in $ — straight to your bottom line. You know exactly how much you're losing and where to act first.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== COMO FUNCIONA ===== -->
+<section class="como-funciona">
+  <div class="container">
+    <h2 class="reveal">3 steps. From sign-up to alert.</h2>
+    <div class="passos">
+      <div class="passo reveal reveal-d1">
+        <div class="passo-num">1</div>
+        <div class="passo-icon"><svg viewBox="0 0 32 32" fill="none"><rect x="4" y="6" width="24" height="20" rx="3" stroke="#4A90A4" stroke-width="1.5"/><circle cx="16" cy="16" r="4" stroke="#C5A572" stroke-width="1.5"/><path d="M16 12v-2M16 20v2M20 16h2M12 16h-2" stroke="#C5A572" stroke-width="1" opacity=".5"/></svg></div>
+        <h3>Register your property</h3>
+        <p>Draw the perimeter on the map or enter the CAR code. In 2 minutes your farm is in the system.</p>
+        <span class="passo-arrow">→</span>
+      </div>
+      <div class="passo reveal reveal-d2">
+        <div class="passo-num">2</div>
+        <div class="passo-icon"><svg viewBox="0 0 32 32" fill="none"><ellipse cx="16" cy="12" rx="11" ry="5" stroke="#4A90A4" stroke-width="1.5" stroke-dasharray="3 2"/><circle cx="24" cy="9" r="2.5" fill="#C5A572"/><line x1="24" y1="11.5" x2="18" y2="24" stroke="#4A90A4" stroke-width="1" stroke-dasharray="2 2" opacity=".5"/><path d="M6 26 Q12 22 18 24 Q24 26 28 23" stroke="#4A90A4" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <h3>Satellite passes every 5 days</h3>
+        <p>Imagens do Sentinel-2 capturam índices de vegetação, umidade e anomalias — automaticamente.</p>
+        <span class="passo-arrow">→</span>
+      </div>
+      <div class="passo reveal reveal-d3">
+        <div class="passo-num">3</div>
+        <div class="passo-icon"><svg viewBox="0 0 32 32" fill="none"><rect x="6" y="4" width="20" height="24" rx="3" stroke="#C5A572" stroke-width="1.5"/><path d="M10 12h12M10 16h8M10 20h10" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".5"/><circle cx="22" cy="8" r="4" fill="#C45A4A" opacity=".8"/></svg></div>
+        <h3>Receba inteligência, não dados</h3>
+        <p>Alertas no celular quando algo muda. Relatórios que dizem "mover gado do lote 3" em vez de "NDVI caiu 0.12".</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PARA QUEM É ===== -->
+<section class="para-quem">
+  <div class="container">
+    <h2 class="reveal">Built for those who manage land, not spreadsheets.</h2>
+    <div class="perfis">
+      <div class="perfil reveal reveal-d1"><div class="perfil-icon">🏛️</div><h3>Multi-farm owner</h3><p>You own properties in 2+ states and depend on managers to know what's happening at each one.</p></div>
+      <div class="perfil reveal reveal-d2"><div class="perfil-icon">👨‍👧‍👦</div><h3>Heir who modernizes</h3><p>The family built the legacy. You want to protect with technology what generations built with sweat.</p></div>
+      <div class="perfil reveal reveal-d3"><div class="perfil-icon">📈</div><h3>Rural investor</h3><p>Bought land as an asset. Need to monitor without being there — and prove value to partners.</p></div>
+      <div class="perfil reveal reveal-d4"><div class="perfil-icon">🤝</div><h3>Group manager</h3><p>Manages third-party farms and needs to report with data, not guesswork.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MISSION HUD ===== -->
+<section class="mission">
+  <!-- HERO: NASA Brazil at Night + centered satellite only -->
+  <div class="mission-hero">
+    <div class="mission-hero-img" role="img" aria-label="Brasil visto do espaço à noite — imagem real NASA/Suomi NPP"></div>
+    <div class="mission-grid"></div>
+    <p class="mission-credit">NASA/Suomi NPP VIIRS — Brasil à noite</p>
+    <!-- Satellite — centered, always visible, no text overlay -->
+    <div style="position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding-bottom:12%">
+      <div class="sat-orbit">
+        <div class="sat-wrap">
+          <svg width="180" height="100" viewBox="0 0 180 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="pnlL" x1="0" y1=".1" x2=".4" y2=".9"><stop offset="0%" stop-color="#0e2e52"/><stop offset="30%" stop-color="#1a4a7a"/><stop offset="60%" stop-color="#2868a8"/><stop offset="100%" stop-color="#163c62"/></linearGradient>
+              <linearGradient id="pnlR" x1=".6" y1=".1" x2="1" y2=".9"><stop offset="0%" stop-color="#163c62"/><stop offset="40%" stop-color="#2868a8"/><stop offset="70%" stop-color="#1a4a7a"/><stop offset="100%" stop-color="#0e2e52"/></linearGradient>
+              <linearGradient id="bdy" x1=".1" y1="0" x2=".8" y2="1"><stop offset="0%" stop-color="#DDD6C6"/><stop offset="18%" stop-color="#C8BEA8"/><stop offset="45%" stop-color="#B0A692"/><stop offset="75%" stop-color="#98907E"/><stop offset="100%" stop-color="#807868"/></linearGradient>
+              <linearGradient id="gld" x1="0" y1=".5" x2="1" y2=".5"><stop offset="0%" stop-color="#DCBE7A"/><stop offset="35%" stop-color="#C5A562"/><stop offset="65%" stop-color="#B89855"/><stop offset="100%" stop-color="#A08545"/></linearGradient>
+              <linearGradient id="kap" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(220,190,122,.30)"/><stop offset="50%" stop-color="rgba(197,165,98,.20)"/><stop offset="100%" stop-color="rgba(160,133,69,.28)"/></linearGradient>
+              <linearGradient id="lns" x1=".2" y1=".1" x2=".8" y2=".95"><stop offset="0%" stop-color="#141428"/><stop offset="40%" stop-color="#0c0c20"/><stop offset="100%" stop-color="#060612"/></linearGradient>
+              <radialGradient id="lfl" cx=".32" cy=".30"><stop offset="0%" stop-color="rgba(255,255,255,.14)"/><stop offset="40%" stop-color="rgba(200,220,255,.04)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+              <radialGradient id="lgl" cx=".5" cy=".5"><stop offset="0%" stop-color="rgba(74,144,164,.18)"/><stop offset="60%" stop-color="rgba(74,144,164,.06)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+              <linearGradient id="arm" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9E9688"/><stop offset="50%" stop-color="#887E70"/><stop offset="100%" stop-color="#706858"/></linearGradient>
+              <filter id="glow"><feGaussianBlur stdDeviation="1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <!-- ======= LEFT SOLAR ARRAY ======= -->
+            <rect x="1" y="22" width="56" height="50" rx="2" fill="url(#pnlL)" stroke="#3A7AAA" stroke-width=".7"/>
+            <!-- Wiring bus bars -->
+            <line x1="1" y1="34.5" x2="57" y2="34.5" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="1" y1="47" x2="57" y2="47" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="1" y1="59.5" x2="57" y2="59.5" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="14.5" y1="22" x2="14.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <line x1="28.5" y1="22" x2="28.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <line x1="42.5" y1="22" x2="42.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <!-- Cell rows -->
+            <rect x="2.5" y="23" width="11" height="11" rx=".4" fill="rgba(30,85,145,.5)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="15.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.45)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="29.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="43.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="2.5" y="36" width="11" height="10" rx=".4" fill="rgba(30,85,145,.45)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="15.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="29.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="43.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="2.5" y="48" width="11" height="10" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="15.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="29.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="43.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.25)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="2.5" y="60" width="11" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="15.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="29.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.25)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="43.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.2)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <!-- Sun reflection shimmer -->
+            <rect x="2.5" y="23" width="24" height="8" rx=".4" fill="rgba(255,255,255,.035)" class="sat-panel-shimmer"/>
+            <!-- ======= LEFT ARM (yoke) ======= -->
+            <rect x="57" y="39" width="9" height="16" rx="2" fill="url(#arm)" stroke="#A09888" stroke-width=".5"/>
+            <line x1="61.5" y1="41" x2="61.5" y2="53" stroke="rgba(197,165,114,.15)" stroke-width=".3"/>
+            <rect x="58" y="42" width="7" height="2" rx=".5" fill="rgba(0,0,0,.08)"/>
+            <rect x="58" y="49" width="7" height="2" rx=".5" fill="rgba(0,0,0,.06)"/>
+            <!-- ======= SATELLITE BODY ======= -->
+            <rect x="66" y="10" width="48" height="74" rx="5" fill="url(#bdy)" stroke="url(#gld)" stroke-width="1.3"/>
+            <!-- Kapton thermal blanket bands -->
+            <rect x="66" y="12" width="48" height="10" rx="2" fill="url(#kap)"/>
+            <rect x="66" y="72" width="48" height="10" rx="2" fill="url(#kap)"/>
+            <!-- Thermal stripe details -->
+            <line x1="69" y1="14" x2="111" y2="14" stroke="rgba(220,190,122,.08)" stroke-width=".3"/>
+            <line x1="69" y1="16.5" x2="111" y2="16.5" stroke="rgba(220,190,122,.06)" stroke-width=".3"/>
+            <line x1="69" y1="19" x2="111" y2="19" stroke="rgba(220,190,122,.05)" stroke-width=".3"/>
+            <!-- Side radiator panel -->
+            <rect x="67" y="24" width="4" height="48" rx=".5" fill="rgba(200,195,185,.15)" stroke="rgba(160,150,130,.12)" stroke-width=".3"/>
+            <line x1="69" y1="28" x2="69" y2="68" stroke="rgba(160,150,130,.08)" stroke-width=".2"/>
+            <!-- Sensor module -->
+            <rect x="73" y="26" width="34" height="6" rx="1.2" fill="rgba(8,8,22,.55)" stroke="#555" stroke-width=".4"/>
+            <rect x="75" y="27.5" width="5" height="3" rx=".4" fill="rgba(74,144,164,.18)" stroke="rgba(74,144,164,.12)" stroke-width=".2"/>
+            <rect x="81.5" y="27.5" width="5" height="3" rx=".4" fill="rgba(74,144,164,.14)" stroke="rgba(74,144,164,.1)" stroke-width=".2"/>
+            <rect x="88" y="27.5" width="5" height="3" rx=".4" fill="rgba(74,144,164,.18)" stroke="rgba(74,144,164,.12)" stroke-width=".2"/>
+            <rect x="94.5" y="27.5" width="5" height="3" rx=".4" fill="rgba(74,144,164,.12)" stroke="rgba(74,144,164,.08)" stroke-width=".2"/>
+            <rect x="101" y="27.5" width="4" height="3" rx=".4" fill="rgba(74,144,164,.10)"/>
+            <!-- Status LEDs -->
+            <circle cx="76" cy="38" r="1.6" fill="#3A7A4C" filter="url(#glow)" style="animation:ledBlink 2s infinite"/>
+            <circle cx="81.5" cy="38" r="1.3" fill="#9E3A2A" opacity=".3" style="animation:ledRed 5s infinite"/>
+            <circle cx="86.5" cy="38" r="1.3" fill="#3A6A8A" opacity=".45"/>
+            <!-- Data label -->
+            <text x="93" y="39.5" font-size="3.8" fill="rgba(197,165,114,.3)" font-family="'Space Grotesk',monospace" font-weight="600">S-2A</text>
+            <!-- Star tracker -->
+            <rect x="109" y="34" width="3.5" height="7" rx="1" fill="rgba(20,20,40,.4)" stroke="#555" stroke-width=".3"/>
+            <circle cx="110.8" cy="37.5" r="1" fill="rgba(100,150,200,.15)"/>
+            <!-- ======= MSI CAMERA TELESCOPE ======= -->
+            <circle cx="90" cy="56" r="14" fill="url(#lns)" stroke="#3a3a50" stroke-width="1.4"/>
+            <!-- Outer barrel ring -->
+            <circle cx="90" cy="56" r="13" fill="none" stroke="#2a2a3e" stroke-width=".7"/>
+            <!-- Anti-reflection coating rings -->
+            <circle cx="90" cy="56" r="11" fill="none" stroke="rgba(74,144,164,.2)" stroke-width=".35"/>
+            <circle cx="90" cy="56" r="9.5" fill="none" stroke="rgba(74,144,164,.12)" stroke-width=".25"/>
+            <!-- Primary optic -->
+            <circle cx="90" cy="56" r="8" fill="rgba(74,144,164,.06)" stroke="rgba(74,144,164,.3)" stroke-width=".5"/>
+            <!-- Secondary mirror -->
+            <circle cx="90" cy="56" r="5" fill="rgba(74,144,164,.08)" stroke="rgba(74,144,164,.18)" stroke-width=".35"/>
+            <!-- Iris blades hint -->
+            <circle cx="90" cy="56" r="3.2" fill="rgba(50,80,110,.1)" stroke="rgba(74,144,164,.12)" stroke-width=".25"/>
+            <!-- Focal point -->
+            <circle cx="90" cy="56" r="1.5" fill="rgba(100,170,200,.12)"/>
+            <circle cx="90" cy="56" r=".6" fill="rgba(180,220,240,.15)"/>
+            <!-- Lens flare & reflections -->
+            <circle cx="90" cy="56" r="12" fill="url(#lfl)"/>
+            <circle cx="90" cy="56" r="8" fill="url(#lgl)"/>
+            <circle cx="85.5" cy="51" r="1.6" fill="rgba(255,255,255,.06)"/>
+            <circle cx="87" cy="52.5" r=".6" fill="rgba(255,255,255,.12)"/>
+            <circle cx="94" cy="60" r=".4" fill="rgba(200,220,255,.08)"/>
+            <!-- ======= RIGHT ARM (yoke) ======= -->
+            <rect x="114" y="39" width="9" height="16" rx="2" fill="url(#arm)" stroke="#A09888" stroke-width=".5"/>
+            <line x1="118.5" y1="41" x2="118.5" y2="53" stroke="rgba(197,165,114,.15)" stroke-width=".3"/>
+            <rect x="115" y="42" width="7" height="2" rx=".5" fill="rgba(0,0,0,.08)"/>
+            <rect x="115" y="49" width="7" height="2" rx=".5" fill="rgba(0,0,0,.06)"/>
+            <!-- ======= RIGHT SOLAR ARRAY ======= -->
+            <rect x="123" y="22" width="56" height="50" rx="2" fill="url(#pnlR)" stroke="#3A7AAA" stroke-width=".7"/>
+            <line x1="123" y1="34.5" x2="179" y2="34.5" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="123" y1="47" x2="179" y2="47" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="123" y1="59.5" x2="179" y2="59.5" stroke="rgba(74,144,164,.12)" stroke-width=".4"/>
+            <line x1="136.5" y1="22" x2="136.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <line x1="150.5" y1="22" x2="150.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <line x1="164.5" y1="22" x2="164.5" y2="72" stroke="rgba(74,144,164,.08)" stroke-width=".3"/>
+            <rect x="124.5" y="23" width="11" height="11" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="137.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="151.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.45)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="165.5" y="23" width="12" height="11" rx=".4" fill="rgba(30,85,145,.5)" stroke="rgba(58,122,170,.2)" stroke-width=".25"/>
+            <rect x="124.5" y="36" width="11" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="137.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="151.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="165.5" y="36" width="12" height="10" rx=".4" fill="rgba(30,85,145,.45)" stroke="rgba(58,122,170,.18)" stroke-width=".25"/>
+            <rect x="124.5" y="48" width="11" height="10" rx=".4" fill="rgba(30,85,145,.25)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="137.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="151.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="165.5" y="48" width="12" height="10" rx=".4" fill="rgba(30,85,145,.4)" stroke="rgba(58,122,170,.15)" stroke-width=".25"/>
+            <rect x="124.5" y="60" width="11" height="10" rx=".4" fill="rgba(30,85,145,.2)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="137.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.25)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="151.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.3)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="165.5" y="60" width="12" height="10" rx=".4" fill="rgba(30,85,145,.35)" stroke="rgba(58,122,170,.12)" stroke-width=".25"/>
+            <rect x="153" y="23" width="24" height="8" rx=".4" fill="rgba(255,255,255,.035)" class="sat-panel-shimmer"/>
+            <!-- ======= X-BAND ANTENNA ======= -->
+            <line x1="90" y1="10" x2="90" y2="2.5" stroke="#C5A572" stroke-width=".9" stroke-linecap="round"/>
+            <ellipse cx="90" cy="2" rx="4" ry="1.8" fill="none" stroke="url(#gld)" stroke-width=".6"/>
+            <ellipse cx="90" cy="2" rx="2.5" ry="1" fill="none" stroke="rgba(197,165,114,.3)" stroke-width=".3"/>
+            <circle cx="90" cy="2" r=".8" fill="#D4B87A"/>
+            <!-- Thruster nozzles -->
+            <rect x="67.5" y="75" width="3" height="4" rx=".8" fill="rgba(80,75,65,.4)" stroke="#706858" stroke-width=".3"/>
+            <rect x="109.5" y="75" width="3" height="4" rx=".8" fill="rgba(80,75,65,.4)" stroke="#706858" stroke-width=".3"/>
+            <!-- Body edge highlight (light source top-left) -->
+            <rect x="66" y="10" width="48" height="74" rx="5" fill="none" stroke="rgba(255,255,255,.03)" stroke-width="1"/>
+          </svg>
+          <!-- Flash effects below satellite -->
+          <div class="sat-flash-wrap">
+            <div class="sat-flash"></div>
+            <div class="sat-flash sat-flash2"></div>
+            <div class="sat-flash sat-flash3"></div>
+            <div class="sat-cone"></div>
+            <div class="sat-cone sat-cone2"></div>
+            <div class="sat-cone sat-cone3"></div>
+            <div class="sat-ground"></div>
+            <div class="sat-ground sat-ground2"></div>
+            <div class="sat-ground sat-ground3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Text below hero -->
+  <div class="mission-text">
+    <h2 class="reveal">All your farms. One screen.</h2>
+    <p class="mission-sub reveal reveal-d1">Satellite data from the European Space Agency processed for you — no drones, no sensors, no site visits.</p>
+  </div>
+  <!-- HUD data cards — 3 columns -->
+  <div class="mission-data">
+    <div class="hud-card hud-status reveal" style="margin-bottom:14px">
+      <span><span class="hud-dot"></span> Sentinel-2 ativo</span>
+      <span class="hud-status-sep">|</span>
+      <span>Passagem: 2 dias atrás</span>
+      <span class="hud-status-sep">|</span>
+      <span>Nuvens: 8%</span>
+      <span class="hud-status-sep">|</span>
+      <span style="font-variant-numeric:tabular-nums">3 propriedades</span>
+    </div>
+    <div class="mission-hud">
+      <!-- Card 1: NDVI -->
+      <div class="hud-card hud-main reveal reveal-d1">
+        <div class="hud-label">Propriedade monitorada</div>
+        <div class="hud-farm-name">Fazenda São Marcos</div>
+        <div class="hud-farm-meta">Uberaba, MG — 847 ha</div>
+        <div class="hud-ndvi-bar"><div class="hud-ndvi-marker" style="left:74%"></div></div>
+        <div class="hud-ndvi-row"><span class="hud-ndvi-val">0.74</span><span class="hud-ndvi-label">Saudável</span></div>
+        <div class="hud-spark">
+          <svg width="100%" height="40" viewBox="0 0 240 40" preserveAspectRatio="none">
+            <defs><linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4A8C5C" stop-opacity=".25"/><stop offset="100%" stop-color="#4A8C5C" stop-opacity="0"/></linearGradient></defs>
+            <polyline points="0,32 20,30 40,28 60,24 80,26 100,22 120,18 140,15 160,14 180,16 200,12 220,10 240,8" fill="none" stroke="#4A8C5C" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+            <polygon points="0,32 20,30 40,28 60,24 80,26 100,22 120,18 140,15 160,14 180,16 200,12 220,10 240,8 240,40 0,40" fill="url(#sparkFill)"/>
+            <line x1="0" y1="30" x2="240" y2="30" stroke="#C45A4A" stroke-width=".5" stroke-dasharray="4 3" opacity=".4"/>
+          </svg>
+          <div class="hud-spark-label">NDVI últimos 60 dias</div>
+        </div>
+      </div>
+      <!-- Card 2: Chuva -->
+      <div class="hud-card hud-rain reveal reveal-d2">
+        <div class="hud-rain-title"><span>🌧</span> Chuva 7 dias</div>
+        <div class="hud-rain-val">12mm</div>
+        <div class="hud-rain-bars">
+          <div class="hud-rain-bar" style="height:15%"></div>
+          <div class="hud-rain-bar" style="height:45%"></div>
+          <div class="hud-rain-bar" style="height:90%"></div>
+          <div class="hud-rain-bar" style="height:30%"></div>
+          <div class="hud-rain-bar" style="height:8%"></div>
+          <div class="hud-rain-bar" style="height:5%"></div>
+          <div class="hud-rain-bar" style="height:18%"></div>
+        </div>
+        <div class="hud-rain-days"><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span><span>D</span></div>
+      </div>
+      <!-- Card 3: Alerta -->
+      <div class="hud-card hud-alert reveal reveal-d3">
+        <div class="hud-alert-title"><span class="hud-alert-icon">⚡</span> 1 alerta ativo</div>
+        <div class="hud-alert-msg">NDVI caiu 12% em 5 days</div>
+        <div class="hud-alert-farm">Fazenda Bonanza — Talhão Norte</div>
+        <span class="hud-alert-link">→ Ver detalhes</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROVA SOCIAL ===== -->
+<section class="prova">
+  <div class="container">
+    <div class="prova-cards">
+      <div class="prova-card reveal reveal-d1">
+        <div class="num" style="color:#4A90A4">Sentinel-2</div>
+        <div class="sub">Data from the European Space Agency. Same source governments use to monitor deforestation. 10 meters per pixel resolution.</div>
+      </div>
+      <div class="prova-card reveal reveal-d2">
+        <div class="num" style="color:#C5A572">5 days</div>
+        <div class="sub">Two passes per week. You see the property evolution in near real-time — no drones, no sensors, no extra cost.</div>
+      </div>
+      <div class="prova-card reveal reveal-d3">
+        <div class="num" style="color:#F5F0E8"><span id="vagasNum">10</span> vagas</div>
+        <div class="sub" id="vagasSub">Programa de Acesso Antecipado. Parceiros que ajudam a construir a ferramenta.</div>
+        <div class="vagas-tag" id="vagasTag"><span class="vagas-dot"></span> <span id="vagasStatus">Vagas abertas</span></div>
+        <div class="vagas-barra" id="vagasBarra"><div class="vagas-fill" id="vagasFill"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FORMULÁRIO ===== -->
+<section class="formulario" id="reserva">
+  <div class="container">
+    <h2 class="reveal">Programa de Acesso Antecipado</h2>
+    <p class="form-sub reveal reveal-d1">10 proprietários vão ajudar a construir a plataforma definitiva de inteligência rural. Sem custo na fase pioneira.</p>
+
+    <div class="form-wrap reveal reveal-d2" id="formWrap">
+      <form id="leadForm" onsubmit="return enviarLead(event)">
+        <input type="text" name="_honey" id="honey" style="display:none" tabindex="-1" autocomplete="off">
+
+        <div class="form-group">
+          <label for="nome">Nome completo</label>
+          <input type="text" id="nome" name="nome" required placeholder="Como prefere ser chamado" autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label for="contato">WhatsApp ou telefone</label>
+          <input type="tel" id="contato" name="contato" required placeholder="(00) 00000-0000" autocomplete="tel" inputmode="numeric">
+          <div class="input-hint">Formato: (16) 99821-4430</div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" placeholder="Opcional, mas recomendado" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="propriedades">Quantas propriedades rurais possui?</label>
+          <select id="propriedades" name="propriedades" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="2-3">2 a 3 propriedades</option>
+            <option value="4-6">4 a 6 propriedades</option>
+            <option value="7-10">7 a 10 propriedades</option>
+            <option value="10+">Mais de 10 propriedades</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="regiao">Região principal das propriedades</label>
+          <select id="regiao" name="regiao" required>
+            <option value="" disabled selected>Selecione o estado</option>
+            <option value="SP">São Paulo</option>
+            <option value="MG">Minas Gerais</option>
+            <option value="MS">Mato Grosso do Sul</option>
+            <option value="MT">Mato Grosso</option>
+            <option value="GO">Goiás</option>
+            <option value="PR">Paraná</option>
+            <option value="BA">Bahia</option>
+            <option value="TO">Tocantins</option>
+            <option value="outro">Outro estado</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="atividade">Atividade principal</label>
+          <select id="atividade" name="atividade" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="pecuaria">Pecuária de corte</option>
+            <option value="pecuaria-leite">Pecuária de leite</option>
+            <option value="soja-milho">Soja / Milho</option>
+            <option value="cana">Cana-de-açúcar</option>
+            <option value="cafe">Café</option>
+            <option value="misto">Misto (pecuária + lavoura)</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="area_total">Área total aproximada (hectares)</label>
+          <select id="area_total" name="area_total">
+            <option value="" disabled selected>Selecione</option>
+            <option value="500-2000">500 a 2.000 ha</option>
+            <option value="2000-5000">2.000 a 5.000 ha</option>
+            <option value="5000-10000">5.000 a 10.000 ha</option>
+            <option value="10000+">Mais de 10.000 ha</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="desafio">What's your biggest challenge today?</label>
+          <textarea id="desafio" name="desafio" rows="3" placeholder="Ex: Não consigo acompanhar todas as fazendas à distância..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmit">Secure my spot</button>
+        <p class="form-micro">Seus dados são confidenciais. Entraremos em contato apenas para o programa.</p>
+      </form>
+    </div>
+
+    <!-- OBRIGADO -->
+    <div class="obrigado" id="obrigado">
+      <div class="obg-bg">
+        <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+          <defs><pattern id="obgGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0v40" fill="none" stroke="#C5A572" stroke-width=".3"/></pattern></defs>
+          <rect width="100%" height="100%" fill="url(#obgGrid)"/>
+          <circle cx="400" cy="300" r="120" fill="none" stroke="#4A90A4" stroke-width=".4" stroke-dasharray="4 6" opacity=".5"/>
+          <circle cx="400" cy="300" r="200" fill="none" stroke="#4A90A4" stroke-width=".3" stroke-dasharray="2 8" opacity=".3"/>
+          <circle cx="400" cy="300" r="280" fill="none" stroke="#C5A572" stroke-width=".2" stroke-dasharray="1 10" opacity=".2"/>
+          <line x1="0" y1="300" x2="800" y2="300" stroke="#4A90A4" stroke-width=".2" stroke-dasharray="4 12" opacity=".2"/>
+          <line x1="400" y1="0" x2="400" y2="600" stroke="#4A90A4" stroke-width=".2" stroke-dasharray="4 12" opacity=".2"/>
+        </svg>
+        <div class="obg-scan"></div>
+      </div>
+      <div class="confirm-card">
+        <div class="sat-wrap">
+          <div class="sat-ring-outer"></div>
+          <div class="sat-ring-mid"></div>
+          <div class="sat-ring-inner"></div>
+          <div class="sat-pulse"></div>
+          <div class="sat-pulse-2"></div>
+          <div class="sat-body"><div class="sat-core"></div><div class="sat-trail"></div></div>
+          <div class="sat-body-2"><div class="sat-core-2"></div><div class="sat-trail-2"></div></div>
+          <div class="sat-center"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><polyline points="9,19 15,25 27,12"/></svg></div>
+        </div>
+        <div class="confirm-badge"><span class="confirm-badge-dot"></span>Posição garantida</div>
+        <h3 class="confirm-title">Você está <span class="confirm-gold">dentro.</span></h3>
+        <p class="confirm-sub">Suas fazendas vão ser monitoradas por satélite antes de qualquer outro produtor no Brasil. <strong>Nós entramos em contato.</strong></p>
+        <div class="confirm-info">
+          <div class="confirm-info-item"><div class="confirm-info-label">Programa</div><div class="confirm-info-value">AgrUAI</div></div>
+          <div class="confirm-info-item"><div class="confirm-info-label">Restam</div><div class="confirm-info-value gold" id="obrigadoVagas">— de 10</div></div>
+          <div class="confirm-info-item"><div class="confirm-info-label">Status</div><div class="confirm-info-value blue">● Ativo</div></div>
+        </div>
+        <a class="confirm-wa" href="https://api.whatsapp.com/send?text=Estou%20testando%20uma%20plataforma%20de%20monitoramento%20por%20sat%C3%A9lite%20pra%20quem%20administra%20v%C3%A1rias%20fazendas.%20S%C3%B3%20t%C3%AAm%2010%20vagas%20e%20t%C3%A3o%20fechando.%20D%C3%A1%20uma%20olhada%3A%20https%3A%2F%2Fagruai.com" target="_blank" rel="noopener">
+          <div class="confirm-wa-icon"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
+          <div class="confirm-wa-text"><div class="confirm-wa-title">Indicar um produtor</div><div class="confirm-wa-hint">Conhece outro produtor que ia querer isso? Mande antes que feche.</div></div>
+          <span class="confirm-wa-arrow">›</span>
+        </a>
+        <div class="confirm-footer">
+          <div class="confirm-footer-logo"><span class="fl">Agr</span><span class="fg">UAI</span> · Inteligência Rural</div>
+          <button class="confirm-voltar" onclick="window.scrollTo({top:0,behavior:'smooth'});history.replaceState(null,null,' ');">← Voltar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="faq">
+  <div class="container">
+    <h2 class="reveal">Frequently asked questions</h2>
+    <div class="faq-list reveal reveal-d1">
+      <details><summary>How much does it cost?</summary><div class="faq-answer">During development, <strong>the cost is zero</strong>. You join as a founding partner and help us build the best tool for agriculture. After full implementation, pricing will be defined according to each operation's needs — number of properties, active features and support level. Our commitment is that the investment will always be proportional to the size of the problem we solve for you.</div></details>
+      <details><summary>Preciso instalar algo?</summary><div class="faq-answer">No. AgrUAI works directly in your phone or computer browser. It's a web app (PWA) — just access the link and save to home screen.</div></details>
+      <details><summary>Does it work in my region?</summary><div class="faq-answer">If the Sentinel-2 satellite covers it (and it covers all of Brazil and the Americas), it works. We don't depend on farm internet, sensors or drones. Everything comes from space.</div></details>
+      <details><summary>How does the satellite know my pasture is bad?</summary><div class="faq-answer">We measure NDVI — an index that calculates vegetation health by the color it reflects. Dark green = healthy. Yellow/brown = stress. The satellite sees what your eye can't from 200km away.</div></details>
+      <details><summary>Do you replace the farm manager?</summary><div class="faq-answer">No. We give the owner the same information the manager has — in real time, straight to the phone. It's intelligent oversight, not replacement.</div></details>
+      <details><summary>What if I have properties in different states?</summary><div class="faq-answer">Perfect — that's exactly what AgrUAI was built for. You see all properties on the same map, compare indicators side by side, receive unified alerts.</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-logo">
+      <svg class="footer-icon" width="20" height="20" viewBox="0 0 32 32" fill="none" style="display:inline"><ellipse cx="16" cy="10" rx="10" ry="5" stroke="#C5A572" stroke-width="1" stroke-dasharray="3 2" opacity=".4"/><circle cx="23" cy="8" r="2" fill="#C5A572" opacity=".4"/><path d="M6 24 Q12 20 18 22 Q24 24 28 20" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".4"/></svg>
+      <span><span style="color:#F5F0E8">Agr</span><span style="color:#C5A572">UAI</span></span>
+    </div>
+    <p class="tagline">Satellite Rural Intelligence</p>
+    <p>Feito em Ribeirão Preto, SP</p>
+    <p style="margin-top:8px"><a href="mailto:contato@agruai.com" style="color:#C5A572;text-decoration:none">contato@agruai.com</a></p>
+    <p style="margin-top:12px;font-size:.7rem;color:#908880">© 2026 AgrUAI. Todos os direitos reservados.</p>
+  </div>
+</footer>
+
+<script>
+/* === Reveal on scroll === */
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('visible')});return}
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.add('visible');obs.unobserve(entry.target)}})},{threshold:.12,rootMargin:'0px 0px -60px 0px'});
+  els.forEach(function(el){obs.observe(el)});
+})();
+
+/* === Phone mask === */
+(function(){
+  var tel=document.getElementById('contato');
+  if(!tel)return;
+  tel.addEventListener('input',function(e){
+    var v=e.target.value.replace(/\D/g,'');
+    if(v.length>11)v=v.slice(0,11);
+    if(v.length>6)v='('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7);
+    else if(v.length>2)v='('+v.slice(0,2)+') '+v.slice(2);
+    else if(v.length>0)v='('+v;
+    e.target.value=v;
+  });
+})();
+
+/* === Supabase config === */
+var SUPA_URL='https://kyvbnntoxslrtrsiejzc.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5dmJubnRveHNscnRyc2llanpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjQ1NDcsImV4cCI6MjA5MTQ0MDU0N30.Dx-9SKxWfAoxXg3gzx3NpzJD1taZgkQCCjwDXlY9J6I';
+var TOTAL_VAGAS=10;
+
+/* === Submit to Supabase === */
+function enviarLead(e){
+  e.preventDefault();
+  if(document.getElementById('honey').value)return false;
+  var btn=document.getElementById('btnSubmit');
+  var form=document.getElementById('leadForm');
+  btn.textContent='Enviando...';
+  btn.classList.add('enviando');
+
+  var dados={
+    nome:document.getElementById('nome').value.trim(),
+    contato:document.getElementById('contato').value.trim(),
+    email:document.getElementById('email').value.trim()||null,
+    propriedades:document.getElementById('propriedades').value,
+    regiao:document.getElementById('regiao').value,
+    atividade:document.getElementById('atividade').value,
+    area_total:document.getElementById('area_total').value||null,
+    desafio:document.getElementById('desafio').value.trim()||null,
+    origem:'landing-agruai-2026'
+  };
+
+  fetch(SUPA_URL+'/rest/v1/participantes',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'apikey':SUPA_KEY,
+      'Authorization':'Bearer '+SUPA_KEY,
+      'Prefer':'return=minimal'
+    },
+    body:JSON.stringify(dados)
+  }).then(function(res){
+    if(res.ok){mostrarObrigado()}
+    else{throw new Error('Erro '+res.status)}
+  }).catch(function(){
+    btn.textContent='Erro — tente novamente';
+    btn.classList.remove('enviando');
+    setTimeout(function(){btn.textContent='Secure my spot'},3000);
+  });
+  return false;
+}
+
+/* === Contador de vagas === */
+function atualizarVagas(preenchidas){
+  var restantes=Math.max(0,TOTAL_VAGAS-preenchidas);
+  var pct=Math.min(100,Math.round((preenchidas/TOTAL_VAGAS)*100));
+  var numEl=document.getElementById('vagasNum');
+  var subEl=document.getElementById('vagasSub');
+  var statusEl=document.getElementById('vagasStatus');
+  var fillEl=document.getElementById('vagasFill');
+  var tagEl=document.getElementById('vagasTag');
+  var btnEl=document.getElementById('btnSubmit');
+
+  if(numEl)numEl.textContent=restantes;
+  if(fillEl)setTimeout(function(){fillEl.style.width=pct+'%'},300);
+
+  if(restantes===0){
+    if(subEl)subEl.textContent='Todas as vagas da primeira turma foram preenchidas.';
+    if(statusEl)statusEl.textContent='Turma completa';
+    if(tagEl)tagEl.classList.add('vagas-esgotadas');
+    if(btnEl){btnEl.textContent='Entrar na lista de espera';btnEl.closest('form').dataset.espera='1'}
+  }else if(restantes<=3){
+    if(subEl)subEl.textContent=preenchidas+' de '+TOTAL_VAGAS+' vagas preenchidas. Restam apenas '+restantes+'.';
+    if(statusEl)statusEl.textContent='Últimas vagas';
+  }else{
+    if(subEl)subEl.textContent=preenchidas+' de '+TOTAL_VAGAS+' vagas preenchidas. Garanta a sua.';
+    if(statusEl)statusEl.textContent='Vagas abertas';
+  }
+}
+
+function carregarVagas(){
+  fetch(SUPA_URL+'/rest/v1/rpc/count_leads_agruai',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+  }).then(function(r){return r.json()}).then(function(n){
+    if(typeof n==='number')atualizarVagas(n);
+  }).catch(function(){});
+}
+carregarVagas();
+
+function mostrarObrigado(){
+  var f=document.getElementById('formWrap');
+  var o=document.getElementById('obrigado');
+  var s=document.querySelector('.form-sub');
+  if(f)f.style.display='none';
+  if(s)s.style.display='none';
+  if(o)o.classList.add('visivel');
+  history.replaceState(null,null,'#obrigado');
+  carregarVagas();
+  setTimeout(function(){var ov=document.getElementById('obrigadoVagas');if(ov){var vt=document.querySelector('.vagas-tag');if(vt){var nums=vt.textContent.match(/\d+/g);if(nums&&nums.length>=2)ov.textContent=nums[0]+' de '+nums[1];}}},500);
+  setTimeout(function(){if(window.mostrarPWAPopup)window.mostrarPWAPopup()},2000);
+}
+
+/* === Obrigado state (reload) === */
+(function(){
+  if(window.location.hash==='#obrigado')mostrarObrigado();
+  window.addEventListener('hashchange',function(){if(window.location.hash==='#obrigado')mostrarObrigado()});
+})();
+
+/* === Subtle parallax on hero topo === */
+(function(){
+  var topo=document.querySelector('.hero-topo svg');
+  if(!topo||window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var ticking=false;
+  window.addEventListener('scroll',function(){
+    if(!ticking){requestAnimationFrame(function(){
+      var y=window.pageYOffset;
+      if(y<window.innerHeight){topo.style.transform='translateY('+y*.08+'px)'}
+      ticking=false;
+    });ticking=true}
+  },{passive:true});
+})();
+
+/* === PWA Install Popup === */
+(function(){
+var deferredPrompt=null;var popupShown=false;
+var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e});
+window.mostrarPWAPopup=function(){
+  if(window.matchMedia('(display-mode:standalone)').matches)return;
+  if(window.navigator.standalone===true)return;
+  if(localStorage.getItem('agruai_pwa_dismissed'))return;
+  if(popupShown)return;
+  if(window.innerWidth>768&&!('ontouchstart' in window))return;
+  popupShown=true;
+  var ov=document.createElement('div');
+  ov.className='pwa-popup-overlay';
+  ov.setAttribute('role','dialog');
+  ov.setAttribute('aria-modal','true');
+  ov.setAttribute('aria-label','Instalar AgrUAI');
+  ov.innerHTML='<div class="pwa-popup-card">'+
+    '<div class="pwa-popup-icon"><svg viewBox="0 0 32 32" fill="none"><ellipse cx="16" cy="11" rx="10" ry="4.5" stroke="#4A90A4" stroke-width="1.5" stroke-dasharray="3 2"/><circle cx="23" cy="8" r="2.5" fill="#C5A572"/><line x1="23" y1="10.5" x2="17" y2="22" stroke="#4A90A4" stroke-width="1" stroke-dasharray="2 2" opacity=".5"/><path d="M5 25 Q11 21 17 23 Q23 25 27 22" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round"/></svg></div>'+
+    '<div class="pwa-popup-title">Instale o AgrUAI no seu celular</div>'+
+    '<p class="pwa-popup-sub">Você será o primeiro a saber quando o monitoramento da sua fazenda estiver ativo. Sem spam — apenas uma notificação quando estiver tudo pronto.</p>'+
+    '<button class="pwa-install-btn" aria-label="Instalar aplicativo">Instalar agora <span>📲</span></button>'+
+    '<div class="pwa-ios-hint" id="pwaIosHint"><strong>Como instalar no iPhone:</strong><br>Toque no ícone <strong>Compartilhar</strong> (⎙) na barra do Safari e depois em <strong>Adicionar à Tela de Início</strong>.</div>'+
+    '<button class="pwa-dismiss-btn" aria-label="Fechar">Agora não, obrigado</button>'+
+  '</div>';
+  document.body.appendChild(ov);
+  requestAnimationFrame(function(){ov.classList.add('visible')});
+  var installBtn=ov.querySelector('.pwa-install-btn');
+  installBtn.addEventListener('click',function(){
+    if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;fechar(ov)})}
+    else if(isIOS){installBtn.style.display='none';document.getElementById('pwaIosHint').style.display='block'}
+    else{fechar(ov)}
+  });
+  ov.querySelector('.pwa-dismiss-btn').addEventListener('click',function(){localStorage.setItem('agruai_pwa_dismissed','1');fechar(ov)});
+  ov.addEventListener('click',function(e){if(e.target===ov){localStorage.setItem('agruai_pwa_dismissed','1');fechar(ov)}});
+  document.addEventListener('keydown',function escHandler(e){if(e.key==='Escape'){localStorage.setItem('agruai_pwa_dismissed','1');fechar(ov);document.removeEventListener('keydown',escHandler)}});
+  installBtn.focus();
+};
+function fechar(ov){ov.classList.add('closing');setTimeout(function(){if(ov.parentNode)ov.parentNode.removeChild(ov)},300)}
+})();
+</script>
+</body>
+</html>
