@@ -254,6 +254,8 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .audio-wave-bar.active{opacity:1}
 .audio-time{font-size:.65rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:32px;text-align:right}
 .audio-pending{font-size:.6rem;color:var(--muted);font-style:italic;margin-top:2px}
+.ai-badge{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;font-weight:600;padding:2px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(197,165,114,.12),rgba(74,140,92,.08));border:1px solid rgba(197,165,114,.2);color:var(--gold);margin-top:4px}
+.ai-transcription{font-size:.82rem;color:var(--text);line-height:1.5;margin-top:6px;padding:8px 10px;background:rgba(15,31,15,.4);border-left:2px solid var(--gold);border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-style:italic}
 
 /* Offline sync status */
 .sync-status{font-size:.58rem;font-weight:600;padding:1px 7px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;margin-left:4px}
@@ -679,8 +681,10 @@ try{var r=await sb.rpc('get_property_timeline',{p_property_id:pid,p_limit:30});
 if(r.error){el.innerHTML=renderFieldLogsOnly(pid);return}
 var items=r.data||[];if(items.length===0){el.innerHTML='<div class="timeline-empty">Nenhum registro ainda.<br>Use o campo acima para registrar o que aconteceu na fazenda.</div>';return}
 var remoteHtml=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var isAudio=isLog&&item.content&&item.content.indexOf('[Áudio')===0;var icon=isAudio?'&#127908;':isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
-var audioHtml='';if(isAudio){var durMatch=item.content.match(/Áudio (\d+(?:min )?\d*s?)/);var dur=durMatch?durMatch[1]:'';audioHtml=renderAudioPlayer(item.id,0,true)}
-return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div>'+audioHtml+'<div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
+var audioHtml='';var isTranscribed=isLog&&item.content&&item.content.indexOf('Transcrito por I.A.')>=0;
+if(isAudio&&!isTranscribed){audioHtml=renderAudioPlayer(item.id,0,true)}
+var transcriptionHtml='';if(isTranscribed){var cleanText=item.content.replace(/^🎙️\s*/,'').replace(/\s*\[Transcrito por I\.A\.\]\s*$/,'');transcriptionHtml='<div class="ai-transcription">'+escapeHtml(cleanText)+'</div><span class="ai-badge">&#10024; Transcrito por I.A.</span>'}
+return'<div class="timeline-item"><div class="timeline-icon '+(isTranscribed?'log':iconClass)+'">'+(isTranscribed?'&#127908;':icon)+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+'</div>'+(isTranscribed?transcriptionHtml:'<div class="timeline-text">'+escapeHtml(item.content)+'</div>')+audioHtml+'<div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
 var pendingLogs=await getAllPendingLogs();var pendingHtml=pendingLogs.filter(function(l){return l.property_id===pid}).map(function(l){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];return'<div class="timeline-item pending" data-local-id="'+l.localId+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(l.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(l.content)+'</div><div class="timeline-time">'+formatarDataHora(l.created_at)+'</div></div></div>'}).join('');
 el.innerHTML=pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
 
@@ -1065,8 +1069,10 @@ try{var path=State.selectedProperty+'/'+audioId+'.webm';
 var uploadRes=await sb.storage.from('audio-logs').upload(path,blob,{contentType:blob.type,upsert:true});
 if(!uploadRes.error){audioData.synced=true;audioData.storagePath=path;await addPendingAudio(audioData);
 logData.content='[Áudio '+formatDuration(duration)+'] Gravação de voz enviada — aguardando transcrição.'}
-var r=await sb.from('field_logs').insert(logData);if(r.error)throw r.error;
-toast('Áudio enviado!','ok')}catch(e){
+var r=await sb.from('field_logs').insert(logData).select('id').single();if(r.error)throw r.error;
+var logId=r.data.id;
+if(!uploadRes.error&&logId){triggerTranscription(logId,path)}
+toast('Áudio enviado — transcrição em andamento...','ok')}catch(e){
 logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();
 await addPendingLog(logData);toast('Áudio salvo localmente','info')}
 }else{logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();
@@ -1074,6 +1080,13 @@ await addPendingLog(logData);toast('Áudio salvo offline','info')}
 if(State.selectedProperty)loadTimeline(State.selectedProperty)};reader.readAsDataURL(blob)}
 
 function formatDuration(s){var m=Math.floor(s/60);var ss=s%60;return(m>0?m+'min ':'')+(ss>0?ss+'s':'')}
+
+async function triggerTranscription(logId,storagePath){
+try{var r=await sb.functions.invoke('transcribe-audio',{body:{log_id:logId,storage_path:storagePath}});
+if(r.error)throw r.error;
+var data=typeof r.data==='string'?JSON.parse(r.data):r.data;
+if(data.status==='transcribed'){toast('Áudio transcrito pela I.A.!','ok');if(State.selectedProperty)loadTimeline(State.selectedProperty)}
+else{console.log('[transcribe] Response:',data)}}catch(e){console.error('[transcribe] Trigger failed:',e)}}
 
 function renderAudioPlayer(audioId,duration,synced){
 var bars='';for(var i=0;i<20;i++){var h=4+Math.floor(Math.random()*16);bars+='<div class="audio-wave-bar" style="height:'+h+'px"></div>'}
