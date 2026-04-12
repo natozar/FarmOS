@@ -2,7 +2,7 @@
   "name": "AgrUAI — Inteligência Rural por Satélite",
   "short_name": "AgrUAI",
   "description": "Plataforma de inteligência rural por satélite para gestão de múltiplas fazendas",
-  "start_url": "./app.html",
+  "start_url": "./painel.html",
   "scope": ".",
   "id": "/AgrUAI/",
   "display": "standalone",
@@ -32,13 +32,13 @@
     {
       "name": "Mapa Geral",
       "short_name": "Mapa",
-      "url": "./app.html#mapa",
+      "url": "./painel.html#mapa",
       "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
     },
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
-      "url": "./app.html#dashboard",
+      "url": "./painel.html#dashboard",
       "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
     }
   ]

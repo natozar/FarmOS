@@ -22,7 +22,7 @@ const MAP_CACHE_LIMIT = 500;
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_ASSETS))
+      .then(cache => Promise.allSettled(STATIC_ASSETS.map(url => cache.add(url).catch(() => console.warn('SW: failed to cache', url)))))
       .then(() => self.skipWaiting())
   );
 });
