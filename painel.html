@@ -634,11 +634,11 @@ try{var r=await sb.auth.signInWithOtp({email:email,options:{emailRedirectTo:wind
 document.querySelector('.magic-link-section').style.display='none';document.getElementById('magicSent').style.display='block';document.getElementById('magicSentEmail').textContent=email;toast('Link enviado!','ok')}catch(err){document.getElementById('loginErro').textContent=err.message;toast('Erro: '+err.message,'erro')}
 document.getElementById('btnMagic').disabled=false}
 
-async function loginGoogle(){try{var r=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});if(r.error)throw r.error}catch(err){toast('Google login não configurado. Use email/senha.','erro')}}
+async function loginGoogle(){try{var r=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});if(r.error)throw r.error}catch(err){var msg=err.message||'';if(msg.indexOf('not enabled')>=0||msg.indexOf('provider')>=0){toast('Google login não configurado ainda. Use email/senha.','erro')}else{toast('Erro no Google login: '+msg,'erro')}}}
 
 async function forcarAtualizacao(){toast('Atualizando...','info');try{if('serviceWorker' in navigator){var reg=await navigator.serviceWorker.getRegistration();if(reg){await reg.unregister()}}var keys=await caches.keys();await Promise.all(keys.map(function(k){return caches.delete(k)}));window.location.reload(true)}catch(e){window.location.reload(true)}}
 
-async function fazerLogout(){await sb.auth.signOut();State.user=null;navegarPara('login');toast('Desconectado','info')}
+async function fazerLogout(){try{await sb.auth.signOut()}catch(e){}State.user=null;navegarPara('login');toast('Desconectado','info')}
 
 function toggleUserMenu(){document.getElementById('userMenu').classList.toggle('aberto')}
 document.addEventListener('click',function(e){if(!e.target.closest('.header-right'))document.getElementById('userMenu').classList.remove('aberto')});
@@ -695,7 +695,9 @@ try{var r=await sb.rpc('get_dashboard_overview',{p_user_id:State.user.id});if(!r
 if(owned.length===0){try{var r2=await sb.rpc('get_properties_geojson',{p_user_id:State.user.id});if(!r2.error)owned=r2.data||[]}catch(e){}}
 if(owned.length===0){try{var r3=await sb.from('properties').select('id,nome,car_code,area_ha,municipio,estado,source,crop_type').eq('owner_id',State.user.id).eq('active',true).order('nome');if(!r3.error)owned=(r3.data||[]).map(function(p){p.property_id=p.id;return p})}catch(e){}}
 try{var rm=await sb.rpc('get_managed_properties',{p_user_email:State.user.email});if(!rm.error&&rm.data){managed=rm.data.map(function(p){p._managed=true;p._role=p.role;return p})}}catch(e){}
-State.propriedades=owned.concat(managed);State.isManager=managed.length>0&&owned.length===0;return State.propriedades}
+State.propriedades=owned.concat(managed);State.isManager=managed.length>0&&owned.length===0;
+if(owned.length===0&&managed.length===0&&!navigator.onLine){toast('Sem conexão — dados podem estar incompletos','info')}
+return State.propriedades}
 
 async function renderPropriedades(){var c=document.getElementById('propContent');c.innerHTML='<h2 class="page-title">Minhas Propriedades</h2><div style="text-align:center;padding:20px"><div class="spinner"></div></div>';
 var props=await carregarPropriedades();
@@ -1045,9 +1047,15 @@ var ls=document.getElementById('langSelect');if(ls)ls.value=currentLang;
 navegarPara('propriedades');updateOfflineBar();setTimeout(verificarInstall,3000);setTimeout(syncPendingLogs,1500)}
 
 async function checkSession(){showLoading('Verificando sessão...');
-var r=await sb.auth.getSession();if(r.data.session){State.user=r.data.session.user;hideLoading();iniciarApp()}else{hideLoading()}}
+try{
+var hash=window.location.hash;if(hash.indexOf('error')>=0){var params=new URLSearchParams(hash.replace('#',''));var errDesc=params.get('error_description')||params.get('error')||'Erro de autenticação';toast(decodeURIComponent(errDesc),'erro');window.location.hash=''}
+var r=await sb.auth.getSession();if(r.data.session){State.user=r.data.session.user;hideLoading();iniciarApp()}else{hideLoading()}
+}catch(e){hideLoading();toast('Erro ao verificar sessão. Recarregue a página.','erro')}}
 
-sb.auth.onAuthStateChange(function(event,session){if(event==='SIGNED_IN'&&session){State.user=session.user;iniciarApp()}});
+sb.auth.onAuthStateChange(function(event,session){
+if(event==='SIGNED_IN'&&session){State.user=session.user;iniciarApp()}
+if(event==='SIGNED_OUT'){State.user=null;State.propriedades=[];navegarPara('login')}
+if(event==='TOKEN_REFRESHED'&&session){State.user=session.user}});
 checkSession();
 
 /* ========== OFFLINE QUEUE (IndexedDB) ========== */
@@ -1110,7 +1118,7 @@ var speechRec=null;var isListening=false;
 
 function initSpeechRecognition(){
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(!SR){console.log('[speech] API não suportada neste navegador');return null}
+if(!SR){return null}
 var rec=new SR();
 rec.lang=t('speechLang');rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
 var finalText='';var inputEl=null;
@@ -1172,7 +1180,8 @@ function fecharInstall(){document.getElementById('installPopup').style.display='
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
 window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
-}catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none'}
+}catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
+var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();
 </script>
 </body>
