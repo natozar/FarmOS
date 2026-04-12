@@ -122,23 +122,72 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .perfil h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1rem;color:#C5A572;margin-bottom:8px}
 .perfil p{font-size:.88rem;color:#A89E90;line-height:1.7}
 
-/* === PREVIEW === */
-.preview{padding:100px 0;background:#0F1F0F;position:relative;text-align:center}
-.preview::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
-.preview h2{font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:12px}
-.preview-sub{font-size:.95rem;color:#A89E90;max-width:480px;margin:0 auto 48px;line-height:1.7}
-.phone-mock{max-width:340px;margin:0 auto;background:#1A2E1A;border:2px solid rgba(197,165,114,.12);border-radius:28px;padding:16px 12px 20px;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative;overflow:hidden}
-.phone-mock::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:60px;height:4px;border-radius:4px;background:rgba(197,165,114,.1)}
-.phone-header{display:flex;align-items:center;justify-content:space-between;padding:16px 8px 12px;font-size:.7rem;color:#A89E90}
-.phone-header strong{color:#C5A572;font-weight:600;font-family:'Space Grotesk',sans-serif;font-size:.8rem}
-.phone-map{height:140px;background:linear-gradient(135deg,#162916,#1A2E1A 40%,#0F1F0F);border-radius:12px;margin-bottom:12px;position:relative;overflow:hidden;border:1px solid rgba(74,144,164,.1)}
-.phone-poly{position:absolute;opacity:.6}
-.phone-poly svg{width:100%;height:100%}
-.phone-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.phone-stat{background:rgba(15,31,15,.6);border:1px solid rgba(197,165,114,.06);border-radius:8px;padding:10px 8px;text-align:center}
-.phone-stat-icon{font-size:.85rem;margin-bottom:2px}
-.phone-stat-val{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;color:#F5F0E8}
-.phone-stat-label{font-size:.58rem;color:#908880;margin-top:2px}
+/* === MISSION HUD === */
+.mission{position:relative;padding:100px 0 80px;overflow:hidden;text-align:center;min-height:600px}
+.mission-bg{position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(circle 90px at 22% 35%, rgba(74,140,92,.28) 58%, transparent 60%),
+    radial-gradient(circle 70px at 58% 50%, rgba(74,140,92,.22) 58%, transparent 60%),
+    radial-gradient(circle 50px at 40% 72%, rgba(74,140,92,.18) 58%, transparent 60%),
+    radial-gradient(circle 80px at 78% 28%, rgba(74,140,92,.14) 58%, transparent 60%),
+    radial-gradient(circle 40px at 85% 68%, rgba(74,140,92,.20) 58%, transparent 60%),
+    radial-gradient(circle 55px at 12% 65%, rgba(74,140,92,.12) 58%, transparent 60%),
+    linear-gradient(160deg, #2A1F0F 0%, #1A2E1A 35%, #0F1F0F 100%);
+  background-attachment:fixed}
+.mission-bg::before{content:'';position:absolute;inset:0;
+  background:
+    linear-gradient(32deg, transparent 49.5%, rgba(197,165,114,.03) 49.5%, rgba(197,165,114,.03) 50.2%, transparent 50.2%),
+    linear-gradient(-25deg, transparent 49.5%, rgba(197,165,114,.02) 49.5%, rgba(197,165,114,.02) 50.2%, transparent 50.2%),
+    linear-gradient(65deg, transparent 49.5%, rgba(74,140,92,.03) 49.5%, rgba(74,140,92,.03) 50.1%, transparent 50.1%)}
+.mission-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,#0F1F0F 0%,rgba(15,31,15,.4) 40%,rgba(15,31,15,.15) 70%,rgba(15,31,15,.6) 100%);z-index:1}
+.mission .container{position:relative;z-index:10}
+.mission h2{font-size:clamp(1.2rem,3vw,1.8rem);color:#F5F0E8;margin-bottom:10px;text-shadow:0 2px 20px rgba(0,0,0,.6)}
+.mission-sub{font-size:.92rem;color:#A89E90;max-width:520px;margin:0 auto 48px;line-height:1.7;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.mission-hud{position:relative;max-width:900px;margin:0 auto;min-height:340px;display:grid;grid-template-columns:1.2fr 0.8fr;grid-template-rows:auto auto auto;gap:12px;align-items:start}
+.hud-card{background:rgba(15,31,15,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:14px;padding:20px;text-align:left;opacity:0;transform:translateY(16px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
+.hud-card.visible{opacity:1;transform:translateY(0)}
+.hud-card.hud-main{grid-row:1/3;border:1px solid rgba(74,140,92,.3)}
+.hud-card.hud-status{grid-column:1/-1;border:1px solid rgba(74,140,92,.15);padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;font-size:.78rem;color:#A89E90;order:-1}
+.hud-card.hud-rain{border:1px solid rgba(74,144,164,.25)}
+.hud-card.hud-alert{border:1px solid rgba(196,90,74,.35)}
+.hud-label{font-size:.65rem;color:#A89E90;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:500}
+.hud-farm-name{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:700;color:#F5F0E8;margin-bottom:2px}
+.hud-farm-meta{font-size:.78rem;color:#A89E90;margin-bottom:16px}
+.hud-ndvi-bar{height:6px;border-radius:3px;background:linear-gradient(90deg,#C45A4A 0%,#D4A040 40%,#4A8C5C 70%,#2E6B3E 100%);position:relative;margin-bottom:6px}
+.hud-ndvi-marker{position:absolute;top:-4px;width:14px;height:14px;border-radius:50%;background:#F5F0E8;border:2px solid #4A8C5C;box-shadow:0 0 8px rgba(74,140,92,.5);transform:translateX(-50%)}
+.hud-ndvi-row{display:flex;align-items:baseline;gap:8px;margin-bottom:14px}
+.hud-ndvi-val{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;color:#4A8C5C}
+.hud-ndvi-label{font-size:.82rem;color:#4A8C5C;font-weight:500}
+.hud-spark{margin-top:4px}
+.hud-spark-label{font-size:.68rem;color:#A89E90;margin-top:4px}
+.hud-rain-title{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:600;color:#F5F0E8;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.hud-rain-val{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;color:#4A90A4;margin-bottom:10px}
+.hud-rain-bars{display:flex;align-items:flex-end;gap:4px;height:32px}
+.hud-rain-bar{flex:1;border-radius:2px 2px 0 0;background:linear-gradient(to top,rgba(74,144,164,.4),rgba(74,144,164,.7));min-width:0}
+.hud-rain-days{display:flex;justify-content:space-between;font-size:.55rem;color:#A89E90;margin-top:3px}
+.hud-alert-title{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:600;color:#C45A4A;display:flex;align-items:center;gap:6px}
+.hud-alert-icon{display:inline-flex;animation:alertPulse 2s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.hud-alert-msg{font-size:.82rem;color:#F5F0E8;margin:6px 0 2px;line-height:1.4}
+.hud-alert-farm{font-size:.75rem;color:#A89E90}
+.hud-alert-link{font-size:.75rem;color:#C5A572;font-weight:600;margin-top:8px;display:inline-block}
+.hud-dot{width:7px;height:7px;border-radius:50%;background:#4A8C5C;display:inline-block;animation:dotPulse 2s ease-in-out infinite;box-shadow:0 0 6px rgba(74,140,92,.5)}
+@keyframes dotPulse{0%,100%{opacity:1;box-shadow:0 0 6px rgba(74,140,92,.5)}50%{opacity:.6;box-shadow:0 0 12px rgba(74,140,92,.8)}}
+.hud-status-sep{color:#2E4A2E}
+/* Satellite orbit */
+.sat-orbit{position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none;overflow:hidden}
+.sat{position:absolute;animation:satOrbit 14s linear infinite}
+@keyframes satOrbit{0%{left:-60px;top:38%}25%{top:28%}50%{left:50%;top:22%}75%{top:32%}100%{left:calc(100% + 60px);top:38%}}
+.sat-beam{position:absolute;top:42px;left:50%;transform:translateX(-50%);width:30px;height:200px;background:linear-gradient(to bottom,rgba(74,144,164,.12),transparent 80%);clip-path:polygon(35% 0%,65% 0%,100% 100%,0% 100%);pointer-events:none}
+@media(prefers-reduced-motion:reduce){.sat,.hud-alert-icon,.hud-dot{animation:none}.hud-card{transition:none}}
+@media(max-width:768px){
+  .mission{min-height:auto;padding:70px 0 60px}
+  .mission-bg{background-attachment:scroll}
+  .mission-hud{grid-template-columns:1fr;max-width:400px}
+  .hud-card.hud-main{grid-row:auto}
+  .sat{transform:scale(.7)}
+  .sat-beam{height:120px}
+}
 
 /* === FAQ === */
 .faq{padding:80px 0;background:#0F1F0F;position:relative}
@@ -446,23 +495,77 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   </div>
 </section>
 
-<!-- ===== PREVIEW CONCEITUAL ===== -->
-<section class="preview">
+<!-- ===== MISSION HUD ===== -->
+<section class="mission">
+  <div class="mission-bg"></div>
+  <!-- Satellite orbit -->
+  <div class="sat-orbit">
+    <div class="sat">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <rect x="20" y="14" width="8" height="20" rx="2" fill="#A89E90" stroke="#C5A572" stroke-width=".8"/>
+        <rect x="2" y="18" width="16" height="12" rx="1" fill="rgba(74,144,164,.4)" stroke="#4A90A4" stroke-width=".6"/>
+        <rect x="30" y="18" width="16" height="12" rx="1" fill="rgba(74,144,164,.4)" stroke="#4A90A4" stroke-width=".6"/>
+        <line x1="6" y1="22" x2="14" y2="22" stroke="#4A90A4" stroke-width=".4" opacity=".6"/>
+        <line x1="6" y1="26" x2="14" y2="26" stroke="#4A90A4" stroke-width=".4" opacity=".6"/>
+        <line x1="34" y1="22" x2="42" y2="22" stroke="#4A90A4" stroke-width=".4" opacity=".6"/>
+        <line x1="34" y1="26" x2="42" y2="26" stroke="#4A90A4" stroke-width=".4" opacity=".6"/>
+        <circle cx="24" cy="20" r="1.5" fill="#4A8C5C"/>
+      </svg>
+      <div class="sat-beam"></div>
+    </div>
+  </div>
   <div class="container">
     <h2 class="reveal">Todas as suas fazendas. Uma tela.</h2>
-    <p class="preview-sub reveal reveal-d1">Dashboard que mostra saúde da vegetação, alertas e evolução — sem precisar visitar cada propriedade.</p>
-    <div class="phone-mock reveal reveal-d2">
-      <div class="phone-header"><strong>AgrUAI</strong><span>● 3 propriedades</span></div>
-      <div class="phone-map">
-        <div class="phone-poly" style="left:15%;top:20%;width:35%;height:45%"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="10,80 30,15 70,10 90,50 80,85 40,90" fill="rgba(74,140,92,.25)" stroke="#4A8C5C" stroke-width="1.5"/></svg></div>
-        <div class="phone-poly" style="left:55%;top:30%;width:30%;height:35%"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="15,70 25,20 75,15 85,60 60,85" fill="rgba(197,165,114,.15)" stroke="#C5A572" stroke-width="1.5"/></svg></div>
-        <div class="phone-poly" style="left:20%;top:60%;width:25%;height:30%"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="20,75 35,20 80,25 70,80" fill="rgba(74,144,164,.15)" stroke="#4A90A4" stroke-width="1.5"/></svg></div>
+    <p class="mission-sub reveal reveal-d1">Dados de satélite da Agência Espacial Europeia processados para você — sem drone, sem sensor, sem visita.</p>
+    <div class="mission-hud">
+      <!-- Status bar -->
+      <div class="hud-card hud-status reveal">
+        <span><span class="hud-dot"></span> Sentinel-2</span>
+        <span class="hud-status-sep">|</span>
+        <span>Passagem: 2 dias atrás</span>
+        <span class="hud-status-sep">|</span>
+        <span>Nuvens: 8%</span>
+        <span class="hud-status-sep">|</span>
+        <span style="font-variant-numeric:tabular-nums">3 propriedades ativas</span>
       </div>
-      <div class="phone-stats">
-        <div class="phone-stat"><div class="phone-stat-icon">📊</div><div class="phone-stat-val">NDVI 0.74</div><div class="phone-stat-label">Saúde média</div></div>
-        <div class="phone-stat"><div class="phone-stat-icon">🌧️</div><div class="phone-stat-val">12mm</div><div class="phone-stat-label">Chuva 7 dias</div></div>
-        <div class="phone-stat"><div class="phone-stat-icon">⚠️</div><div class="phone-stat-val">1 alerta</div><div class="phone-stat-label">Ação necessária</div></div>
-        <div class="phone-stat"><div class="phone-stat-icon">📈</div><div class="phone-stat-val">+3%</div><div class="phone-stat-label">vs 30 dias</div></div>
+      <!-- Main card -->
+      <div class="hud-card hud-main reveal reveal-d1">
+        <div class="hud-label">Propriedade monitorada</div>
+        <div class="hud-farm-name">Fazenda São Marcos</div>
+        <div class="hud-farm-meta">Uberaba, MG — 847 ha</div>
+        <div class="hud-ndvi-bar"><div class="hud-ndvi-marker" style="left:74%"></div></div>
+        <div class="hud-ndvi-row"><span class="hud-ndvi-val">0.74</span><span class="hud-ndvi-label">Saudável</span></div>
+        <div class="hud-spark">
+          <svg width="100%" height="40" viewBox="0 0 240 40" preserveAspectRatio="none">
+            <defs><linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4A8C5C" stop-opacity=".25"/><stop offset="100%" stop-color="#4A8C5C" stop-opacity="0"/></linearGradient></defs>
+            <polyline points="0,32 20,30 40,28 60,24 80,26 100,22 120,18 140,15 160,14 180,16 200,12 220,10 240,8" fill="none" stroke="#4A8C5C" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+            <polygon points="0,32 20,30 40,28 60,24 80,26 100,22 120,18 140,15 160,14 180,16 200,12 220,10 240,8 240,40 0,40" fill="url(#sparkFill)"/>
+            <line x1="0" y1="30" x2="240" y2="30" stroke="#C45A4A" stroke-width=".5" stroke-dasharray="4 3" opacity=".4"/>
+          </svg>
+          <div class="hud-spark-label">NDVI dos últimos 60 dias — linha vermelha = limiar de alerta</div>
+        </div>
+      </div>
+      <!-- Rain card -->
+      <div class="hud-card hud-rain reveal reveal-d2">
+        <div class="hud-rain-title"><span>🌧</span> Chuva 7 dias</div>
+        <div class="hud-rain-val">12mm</div>
+        <div class="hud-rain-bars">
+          <div class="hud-rain-bar" style="height:15%"></div>
+          <div class="hud-rain-bar" style="height:45%"></div>
+          <div class="hud-rain-bar" style="height:90%"></div>
+          <div class="hud-rain-bar" style="height:30%"></div>
+          <div class="hud-rain-bar" style="height:8%"></div>
+          <div class="hud-rain-bar" style="height:5%"></div>
+          <div class="hud-rain-bar" style="height:18%"></div>
+        </div>
+        <div class="hud-rain-days"><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span></div>
+      </div>
+      <!-- Alert card -->
+      <div class="hud-card hud-alert reveal reveal-d3">
+        <div class="hud-alert-title"><span class="hud-alert-icon">⚡</span> 1 alerta ativo</div>
+        <div class="hud-alert-msg">NDVI caiu 12% em 5 dias</div>
+        <div class="hud-alert-farm">Fazenda Bonanza — Talhão Norte</div>
+        <span class="hud-alert-link">→ Ver detalhes</span>
       </div>
     </div>
   </div>
