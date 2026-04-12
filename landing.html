@@ -135,19 +135,39 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .mission-sub{font-size:clamp(.88rem,1.8vw,1.05rem);color:#C8C4BC;max-width:540px;margin:0 auto 10px;line-height:1.7;text-shadow:0 2px 16px rgba(0,0,0,.8)}
 .mission-credit{font-size:.58rem;color:rgba(168,158,144,.35);margin-top:12px}
 /* ---- Satellite ---- */
-.sat-orbit{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden}
-.sat-wrap{position:absolute;animation:satOrbit 18s linear infinite;filter:drop-shadow(0 0 30px rgba(74,144,164,.5)) drop-shadow(0 0 80px rgba(74,144,164,.15))}
-@keyframes satOrbit{0%{left:-120px;top:58%}15%{top:38%}40%{left:42%;top:16%}65%{left:68%;top:28%}85%{top:45%}100%{left:calc(100% + 120px);top:58%}}
+.sat-orbit{position:absolute;inset:0;z-index:8;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.sat-wrap{position:relative;animation:satFloat 6s ease-in-out infinite;
+  filter:drop-shadow(0 0 30px rgba(74,144,164,.6)) drop-shadow(0 0 60px rgba(74,144,164,.2)) drop-shadow(0 0 120px rgba(74,144,164,.08))}
+@keyframes satFloat{0%,100%{transform:translateY(0) rotate(-1deg)}25%{transform:translateY(-12px) rotate(.5deg)}50%{transform:translateY(-4px) rotate(1deg)}75%{transform:translateY(-16px) rotate(-.5deg)}}
+/* Panel shimmer — sunlight reflection */
+.sat-panel-shimmer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:0;animation:shimmer 6s ease-in-out infinite}
+@keyframes shimmer{0%,100%{opacity:0}40%{opacity:0}50%{opacity:1}60%{opacity:0}}
 /* Camera flash */
-.sat-flash{position:absolute;top:60px;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 12px 6px rgba(255,255,255,.7),0 0 40px 15px rgba(74,144,164,.4),0 0 80px 30px rgba(74,144,164,.15);opacity:0;animation:camFlash 3s ease-in-out infinite}
-@keyframes camFlash{0%,85%,100%{opacity:0;transform:translateX(-50%) scale(.3)}88%{opacity:1;transform:translateX(-50%) scale(1.2)}92%{opacity:.6;transform:translateX(-50%) scale(.8)}95%{opacity:1;transform:translateX(-50%) scale(1)}98%{opacity:0;transform:translateX(-50%) scale(.4)}}
-.sat-flash2{animation-delay:1.5s}
-.sat-flash3{animation-delay:.7s;width:4px;height:4px;top:64px}
-/* Flash cone (subtle light projection) */
-.sat-cone{position:absolute;top:62px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:40px solid transparent;border-right:40px solid transparent;border-top:180px solid rgba(255,255,255,.015);opacity:0;animation:coneFlash 3s ease-in-out infinite;pointer-events:none}
-@keyframes coneFlash{0%,85%,100%{opacity:0}88%,95%{opacity:1}98%{opacity:0}}
+.sat-flash-wrap{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);width:1px;height:1px}
+.sat-flash{position:absolute;top:0;left:0;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff;
+  box-shadow:0 0 8px 4px rgba(255,255,255,.9),0 0 30px 12px rgba(74,144,164,.6),0 0 60px 24px rgba(74,144,164,.25),0 0 120px 48px rgba(74,144,164,.08);
+  opacity:0;animation:camFlash 4s ease-in-out infinite}
+@keyframes camFlash{0%,70%,100%{opacity:0;transform:scale(.2)}74%{opacity:1;transform:scale(1.5)}77%{opacity:.3;transform:scale(.6)}80%{opacity:1;transform:scale(1.2)}84%{opacity:.5;transform:scale(.8)}88%{opacity:0;transform:scale(.2)}}
+.sat-flash2{animation-delay:2s}
+.sat-flash3{animation-delay:3.2s}
+/* Flash light cone projection */
+.sat-cone{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:0;
+  border-left:60px solid transparent;border-right:60px solid transparent;
+  border-top:300px solid rgba(255,255,255,.012);
+  opacity:0;animation:coneFlash 4s ease-in-out infinite;pointer-events:none;filter:blur(4px)}
+@keyframes coneFlash{0%,70%,100%{opacity:0}74%,84%{opacity:1}88%{opacity:0}}
+.sat-cone2{animation-delay:2s}
+.sat-cone3{animation-delay:3.2s}
+/* Ground flash — light hitting the surface */
+.sat-ground{position:absolute;top:290px;left:50%;transform:translateX(-50%);width:140px;height:40px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(255,255,255,.06),transparent 70%);
+  opacity:0;animation:groundFlash 4s ease-in-out infinite;filter:blur(8px)}
+@keyframes groundFlash{0%,70%,100%{opacity:0}76%,82%{opacity:1}88%{opacity:0}}
+.sat-ground2{animation-delay:2s}
+.sat-ground3{animation-delay:3.2s}
 /* Status LED blink */
-@keyframes ledBlink{0%,45%,55%,100%{opacity:.3}50%{opacity:1}}
+@keyframes ledBlink{0%,40%,60%,100%{opacity:.25;fill:#4A8C5C}50%{opacity:1;fill:#8FCF9F}}
+@keyframes ledRed{0%,90%,100%{opacity:.2}95%{opacity:.7}}
 /* Grid overlay */
 .mission-grid{position:absolute;inset:0;z-index:3;pointer-events:none;
   background:
@@ -187,15 +207,16 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .hud-dot{width:7px;height:7px;border-radius:50%;background:#4A8C5C;display:inline-block;animation:dotPulse 2s ease-in-out infinite;box-shadow:0 0 6px rgba(74,140,92,.5)}
 @keyframes dotPulse{0%,100%{opacity:1;box-shadow:0 0 6px rgba(74,140,92,.5)}50%{opacity:.6;box-shadow:0 0 12px rgba(74,140,92,.8)}}
 .hud-status-sep{color:#2E4A2E}
-@media(prefers-reduced-motion:reduce){.sat-wrap,.hud-alert-icon,.hud-dot,.sat-flash,.sat-cone{animation:none}.hud-card{transition:none}}
+@media(prefers-reduced-motion:reduce){.sat-wrap,.hud-alert-icon,.hud-dot,.sat-flash,.sat-cone,.sat-cone2,.sat-cone3,.sat-ground,.sat-ground2,.sat-ground3,.sat-panel-shimmer{animation:none}.hud-card{transition:none}}
 @media(max-width:768px){
-  .mission-hero{min-height:480px}
-  .mission-hero-content{padding:70px 16px 36px}
+  .mission-hero{min-height:520px}
+  .mission-hero-content{padding:60px 16px 30px}
   .mission-data{padding:32px 16px 60px}
   .mission-hud{grid-template-columns:1fr;max-width:400px;margin:0 auto}
   .hud-card.hud-main{grid-row:auto}
-  .sat-wrap svg{width:80px;height:43px}
-  .sat-cone{border-left-width:25px;border-right-width:25px;border-top-width:120px}
+  .sat-wrap svg{width:110px;height:59px}
+  .sat-cone,.sat-cone2,.sat-cone3{border-left-width:35px;border-right-width:35px;border-top-width:180px}
+  .sat-ground,.sat-ground2,.sat-ground3{top:180px;width:90px}
   .mission-grid{background-size:50px 50px}
 }
 
@@ -507,77 +528,117 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 
 <!-- ===== MISSION HUD ===== -->
 <section class="mission">
-  <!-- HERO: NASA satellite image fullbleed -->
+  <!-- HERO: NASA Black Marble + centered satellite -->
   <div class="mission-hero">
-    <div class="mission-hero-img" role="img" aria-label="Foto real de satélite da NASA mostrando campos agrícolas no Brasil"></div>
+    <div class="mission-hero-img" role="img" aria-label="Brasil visto do espaço à noite — imagem real NASA Black Marble"></div>
     <div class="mission-grid"></div>
-    <!-- Satellite — hero element -->
-    <div class="sat-orbit">
-      <div class="sat-wrap">
-        <svg width="120" height="64" viewBox="0 0 120 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="panelGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a3a5c"/><stop offset="50%" stop-color="#2a5a8c"/><stop offset="100%" stop-color="#1a3a5c"/></linearGradient>
-            <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C8C0B0"/><stop offset="40%" stop-color="#A89E90"/><stop offset="100%" stop-color="#887E70"/></linearGradient>
-            <linearGradient id="goldTrim" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#C5A572"/><stop offset="100%" stop-color="#A08550"/></linearGradient>
-          </defs>
-          <!-- Solar panel LEFT -->
-          <rect x="1" y="16" width="38" height="32" rx="1.5" fill="url(#panelGrad)" stroke="#4A90A4" stroke-width=".8"/>
-          <rect x="3" y="18" width="8" height="13" rx=".5" fill="rgba(40,100,160,.4)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="13" y="18" width="8" height="13" rx=".5" fill="rgba(40,100,160,.35)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="23" y="18" width="8" height="13" rx=".5" fill="rgba(40,100,160,.3)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="33" y="18" width="4" height="13" rx=".5" fill="rgba(40,100,160,.25)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="3" y="33" width="8" height="13" rx=".5" fill="rgba(40,100,160,.35)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="13" y="33" width="8" height="13" rx=".5" fill="rgba(40,100,160,.3)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="23" y="33" width="8" height="13" rx=".5" fill="rgba(40,100,160,.25)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="33" y="33" width="4" height="13" rx=".5" fill="rgba(40,100,160,.2)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <!-- Arm left -->
-          <rect x="39" y="28" width="6" height="8" rx="1" fill="#887E70" stroke="#A89E90" stroke-width=".4"/>
-          <!-- BODY -->
-          <rect x="45" y="10" width="30" height="44" rx="4" fill="url(#bodyGrad)" stroke="url(#goldTrim)" stroke-width="1"/>
-          <!-- Gold foil band -->
-          <rect x="45" y="12" width="30" height="6" rx="1" fill="rgba(197,165,114,.25)"/>
-          <rect x="45" y="46" width="30" height="6" rx="1" fill="rgba(197,165,114,.2)"/>
-          <!-- Camera lens -->
-          <circle cx="60" cy="38" r="8" fill="#1a1a2e" stroke="#555" stroke-width="1"/>
-          <circle cx="60" cy="38" r="6" fill="#111128" stroke="#4A90A4" stroke-width=".5"/>
-          <circle cx="60" cy="38" r="3.5" fill="rgba(74,144,164,.15)" stroke="rgba(74,144,164,.4)" stroke-width=".3"/>
-          <circle cx="60" cy="38" r="1.5" fill="rgba(74,144,164,.3)"/>
-          <circle cx="57" cy="35" r=".8" fill="rgba(255,255,255,.2)"/>
-          <!-- Status LEDs -->
-          <circle cx="50" cy="28" r="1.2" fill="#4A8C5C" style="animation:ledBlink 2s infinite"/>
-          <circle cx="54" cy="28" r="1" fill="#C45A4A" opacity=".4"/>
-          <circle cx="58" cy="28" r="1" fill="#4A90A4" opacity=".5"/>
-          <!-- Sensor array top -->
-          <rect x="48" y="22" width="24" height="3" rx=".5" fill="rgba(15,15,30,.4)" stroke="#555" stroke-width=".3"/>
-          <!-- Arm right -->
-          <rect x="75" y="28" width="6" height="8" rx="1" fill="#887E70" stroke="#A89E90" stroke-width=".4"/>
-          <!-- Solar panel RIGHT -->
-          <rect x="81" y="16" width="38" height="32" rx="1.5" fill="url(#panelGrad)" stroke="#4A90A4" stroke-width=".8"/>
-          <rect x="83" y="18" width="4" height="13" rx=".5" fill="rgba(40,100,160,.25)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="89" y="18" width="8" height="13" rx=".5" fill="rgba(40,100,160,.3)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="99" y="18" width="8" height="13" rx=".5" fill="rgba(40,100,160,.35)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="109" y="18" width="8" height="13" rx=".5" fill="rgba(40,100,160,.4)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="83" y="33" width="4" height="13" rx=".5" fill="rgba(40,100,160,.2)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="89" y="33" width="8" height="13" rx=".5" fill="rgba(40,100,160,.25)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="99" y="33" width="8" height="13" rx=".5" fill="rgba(40,100,160,.3)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <rect x="109" y="33" width="8" height="13" rx=".5" fill="rgba(40,100,160,.35)" stroke="rgba(74,144,164,.3)" stroke-width=".3"/>
-          <!-- Antenna -->
-          <line x1="60" y1="10" x2="60" y2="2" stroke="#C5A572" stroke-width=".7"/>
-          <circle cx="60" cy="1.5" r="1.5" fill="none" stroke="#C5A572" stroke-width=".5"/>
-          <circle cx="60" cy="1.5" r=".5" fill="#C5A572"/>
-        </svg>
-        <!-- Camera flash effects -->
-        <div class="sat-flash"></div>
-        <div class="sat-flash sat-flash2"></div>
-        <div class="sat-flash sat-flash3"></div>
-        <div class="sat-cone"></div>
-      </div>
-    </div>
-    <!-- Text over image -->
+    <!-- Text on top -->
     <div class="mission-hero-content">
       <h2 class="reveal">Todas as suas fazendas. Uma tela.</h2>
       <p class="mission-sub reveal reveal-d1">Dados de satélite da Agência Espacial Europeia processados para você — sem drone, sem sensor, sem visita.</p>
-      <p class="mission-credit">Imagem: NASA Black Marble — Brasil visto do espaço à noite</p>
+      <!-- Satellite — centered, always visible -->
+      <div class="sat-orbit reveal reveal-d2">
+        <div class="sat-wrap">
+          <svg width="160" height="86" viewBox="0 0 160 86" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="panelL" x1="0" y1="0" x2=".3" y2="1"><stop offset="0%" stop-color="#1e4470"/><stop offset="50%" stop-color="#2a6098"/><stop offset="100%" stop-color="#1a3a5c"/></linearGradient>
+              <linearGradient id="panelR" x1=".7" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a3a5c"/><stop offset="50%" stop-color="#2a6098"/><stop offset="100%" stop-color="#1e4470"/></linearGradient>
+              <linearGradient id="bodyG" x1="0" y1="0" x2=".5" y2="1"><stop offset="0%" stop-color="#D0C8B8"/><stop offset="30%" stop-color="#B8AE9E"/><stop offset="70%" stop-color="#A89E90"/><stop offset="100%" stop-color="#887E70"/></linearGradient>
+              <linearGradient id="goldT" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#D4B87A"/><stop offset="50%" stop-color="#C5A572"/><stop offset="100%" stop-color="#A08550"/></linearGradient>
+              <linearGradient id="lensG" x1=".3" y1=".2" x2=".7" y2=".9"><stop offset="0%" stop-color="#1a1a3e"/><stop offset="100%" stop-color="#0a0a1e"/></linearGradient>
+              <radialGradient id="lensFlare" cx=".35" cy=".35"><stop offset="0%" stop-color="rgba(255,255,255,.12)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            </defs>
+            <!-- === LEFT SOLAR PANEL === -->
+            <rect x="1" y="21" width="50" height="44" rx="2" fill="url(#panelL)" stroke="#4A90A4" stroke-width=".8"/>
+            <!-- Panel cells 4x3 grid -->
+            <rect x="3" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.45)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="15.5" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.4)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="28" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="40.5" y="23" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="3" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.4)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="15.5" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="28" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="40.5" y="37" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.25)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="3" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="15.5" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="28" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.25)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="40.5" y="51" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.2)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <!-- Shimmer highlight -->
+            <rect x="3" y="23" width="22" height="6" rx=".5" fill="rgba(255,255,255,.04)" class="sat-panel-shimmer"/>
+            <!-- Arm left -->
+            <rect x="51" y="37" width="8" height="12" rx="1.5" fill="#887E70" stroke="#A89E90" stroke-width=".5"/>
+            <line x1="55" y1="39" x2="55" y2="47" stroke="rgba(197,165,114,.2)" stroke-width=".4"/>
+            <!-- === BODY === -->
+            <rect x="59" y="12" width="42" height="62" rx="5" fill="url(#bodyG)" stroke="url(#goldT)" stroke-width="1.2"/>
+            <!-- Gold Kapton foil bands -->
+            <rect x="59" y="14" width="42" height="8" rx="1.5" fill="rgba(197,165,114,.22)"/>
+            <rect x="59" y="64" width="42" height="8" rx="1.5" fill="rgba(197,165,114,.18)"/>
+            <!-- Radiator lines -->
+            <line x1="62" y1="16" x2="98" y2="16" stroke="rgba(197,165,114,.1)" stroke-width=".3"/>
+            <line x1="62" y1="18" x2="98" y2="18" stroke="rgba(197,165,114,.08)" stroke-width=".3"/>
+            <!-- Sensor array -->
+            <rect x="64" y="26" width="32" height="5" rx="1" fill="rgba(10,10,25,.5)" stroke="#555" stroke-width=".4"/>
+            <rect x="66" y="27.5" width="4" height="2" rx=".3" fill="rgba(74,144,164,.2)"/>
+            <rect x="72" y="27.5" width="4" height="2" rx=".3" fill="rgba(74,144,164,.15)"/>
+            <rect x="78" y="27.5" width="4" height="2" rx=".3" fill="rgba(74,144,164,.2)"/>
+            <rect x="84" y="27.5" width="4" height="2" rx=".3" fill="rgba(74,144,164,.15)"/>
+            <rect x="90" y="27.5" width="4" height="2" rx=".3" fill="rgba(74,144,164,.1)"/>
+            <!-- Status LEDs -->
+            <circle cx="66" cy="36" r="1.5" fill="#4A8C5C" style="animation:ledBlink 2s infinite"/>
+            <circle cx="71" cy="36" r="1.2" fill="#C45A4A" style="animation:ledRed 5s infinite"/>
+            <circle cx="76" cy="36" r="1.2" fill="#4A90A4" opacity=".5"/>
+            <!-- Label text -->
+            <text x="84" y="37.5" font-size="3.5" fill="rgba(197,165,114,.35)" font-family="monospace">S-2A</text>
+            <!-- === CAMERA LENS === -->
+            <circle cx="80" cy="52" r="11" fill="url(#lensG)" stroke="#444" stroke-width="1.2"/>
+            <circle cx="80" cy="52" r="9" fill="none" stroke="#333" stroke-width=".6"/>
+            <circle cx="80" cy="52" r="8" fill="none" stroke="rgba(74,144,164,.3)" stroke-width=".4"/>
+            <circle cx="80" cy="52" r="5.5" fill="rgba(74,144,164,.08)" stroke="rgba(74,144,164,.35)" stroke-width=".5"/>
+            <circle cx="80" cy="52" r="3" fill="rgba(74,144,164,.12)" stroke="rgba(74,144,164,.2)" stroke-width=".3"/>
+            <circle cx="80" cy="52" r="1.2" fill="rgba(120,180,220,.15)"/>
+            <!-- Lens flare -->
+            <circle cx="80" cy="52" r="9" fill="url(#lensFlare)"/>
+            <circle cx="76" cy="48" r="1.2" fill="rgba(255,255,255,.08)"/>
+            <circle cx="77.5" cy="49" r=".5" fill="rgba(255,255,255,.15)"/>
+            <!-- Arm right -->
+            <rect x="101" y="37" width="8" height="12" rx="1.5" fill="#887E70" stroke="#A89E90" stroke-width=".5"/>
+            <line x1="105" y1="39" x2="105" y2="47" stroke="rgba(197,165,114,.2)" stroke-width=".4"/>
+            <!-- === RIGHT SOLAR PANEL === -->
+            <rect x="109" y="21" width="50" height="44" rx="2" fill="url(#panelR)" stroke="#4A90A4" stroke-width=".8"/>
+            <rect x="111" y="23" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="121.5" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="134" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.4)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="146.5" y="23" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.45)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="111" y="37" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.25)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="121.5" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="134" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="146.5" y="37" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.4)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="111" y="51" width="9" height="12.5" rx=".5" fill="rgba(35,90,150,.2)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="121.5" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.25)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="134" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.3)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <rect x="146.5" y="51" width="11" height="12.5" rx=".5" fill="rgba(35,90,150,.35)" stroke="rgba(74,144,164,.25)" stroke-width=".3"/>
+            <!-- Shimmer highlight right -->
+            <rect x="135" y="23" width="22" height="6" rx=".5" fill="rgba(255,255,255,.04)" class="sat-panel-shimmer"/>
+            <!-- === ANTENNA === -->
+            <line x1="80" y1="12" x2="80" y2="3" stroke="#C5A572" stroke-width=".8"/>
+            <ellipse cx="80" cy="2" rx="3" ry="1.5" fill="none" stroke="#C5A572" stroke-width=".5"/>
+            <circle cx="80" cy="2" r=".7" fill="#D4B87A"/>
+          </svg>
+          <!-- Flash effects below satellite -->
+          <div class="sat-flash-wrap">
+            <div class="sat-flash"></div>
+            <div class="sat-flash sat-flash2"></div>
+            <div class="sat-flash sat-flash3"></div>
+            <div class="sat-cone"></div>
+            <div class="sat-cone sat-cone2"></div>
+            <div class="sat-cone sat-cone3"></div>
+            <div class="sat-ground"></div>
+            <div class="sat-ground sat-ground2"></div>
+            <div class="sat-ground sat-ground3"></div>
+          </div>
+        </div>
+      </div>
+      <p class="mission-credit reveal reveal-d3">Imagem: NASA Black Marble — Brasil visto do espaço</p>
     </div>
   </div>
   <!-- HUD data cards -->
