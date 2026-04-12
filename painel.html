@@ -135,10 +135,127 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .toast.erro{background:var(--red);color:#fff}
 .toast.info{background:var(--gold);color:var(--dark)}
 
+/* DETALHE TABS */
+.detalhe-tabs{display:flex;margin:0 0 20px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.detalhe-tab{flex:1;padding:11px;font-size:.82rem;font-weight:600;background:transparent;color:var(--muted);transition:all var(--transition);text-align:center}
+.detalhe-tab.ativo{background:var(--gold);color:var(--dark)}
+.tab-panel{display:none}
+.tab-panel.ativo{display:block;animation:fadeIn .2s ease}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.metric-card{background:rgba(15,31,15,.4);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center}
+.metric-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.metric-value{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700}
+.ndvi-chart{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;overflow:hidden}
+.ndvi-chart-title{font-size:.82rem;font-weight:600;margin-bottom:12px;color:var(--text)}
+
+/* NDVI ROW (cards) */
+.ndvi-row{display:flex;align-items:center;gap:10px;margin:10px 0 6px}
+.ndvi-bar-v{width:4px;height:36px;border-radius:2px}
+.ndvi-info{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+.ndvi-value{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.1rem}
+.ndvi-class{font-size:.78rem;font-weight:500}
+.ndvi-delta{font-size:.72rem;font-weight:600}
+.ndvi-delta.up{color:var(--green)}
+.ndvi-delta.down{color:var(--red)}
+.ndvi-date{font-size:.72rem;color:var(--muted);width:100%}
+.prop-alerts{font-size:.72rem;color:var(--amber);margin-left:8px}
+
+/* ALERTS */
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px}
+.alert-icon{font-size:1rem;min-width:24px;text-align:center}
+.alert-icon.critical{color:var(--red)}
+.alert-icon.warning{color:var(--amber)}
+.alert-text{flex:1;min-width:0}
+.alert-msg{font-size:.82rem;line-height:1.4}
+.alert-meta{font-size:.72rem;color:var(--muted);margin-top:2px}
+.alert-resolve{font-size:.72rem;color:var(--gold);font-weight:600;white-space:nowrap;padding:4px 10px;border:1px solid var(--gold);border-radius:var(--radius-sm);transition:all var(--transition)}
+.alert-resolve:hover{background:rgba(197,165,114,.1)}
+
+/* DIARIO DE CAMPO */
+.diario-input-wrap{display:flex;gap:8px;margin-bottom:20px;align-items:flex-end}
+.diario-input{flex:1;min-height:44px;max-height:120px;padding:12px 14px;background:rgba(15,31,15,.6);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.88rem;resize:vertical;line-height:1.4;transition:border-color var(--transition)}
+.diario-input:focus{border-color:var(--gold)}
+.diario-input::placeholder{color:var(--muted)}
+.diario-send{min-width:44px;min-height:44px;background:var(--gold);color:var(--dark);border-radius:var(--radius-sm);font-size:1.1rem;font-weight:700;transition:all var(--transition);display:flex;align-items:center;justify-content:center}
+.diario-send:hover{background:#B8945A}
+.diario-send:disabled{opacity:.4;cursor:not-allowed}
+
+.timeline-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid rgba(46,74,46,.4);position:relative}
+.timeline-item:last-child{border-bottom:none}
+.timeline-icon{min-width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+.timeline-icon.log{background:rgba(197,165,114,.12);color:var(--gold)}
+.timeline-icon.alert-sat{background:rgba(196,90,74,.12);color:var(--red)}
+.timeline-body{flex:1;min-width:0}
+.timeline-author{font-size:.72rem;font-weight:600;color:var(--gold);margin-bottom:2px}
+.timeline-text{font-size:.85rem;color:var(--text);line-height:1.5;word-break:break-word}
+.timeline-time{font-size:.68rem;color:var(--muted);margin-top:4px}
+.timeline-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:.85rem}
+.timeline-delete{position:absolute;top:12px;right:0;font-size:.68rem;color:var(--muted);padding:4px 8px;border-radius:4px;opacity:0;transition:opacity .2s}
+.timeline-item:hover .timeline-delete{opacity:1}
+.timeline-delete:hover{color:var(--red);background:rgba(196,90,74,.08)}
+
+/* MAGIC LINK */
+.magic-link-section{margin-top:4px}
+.magic-link-section .form-group{margin-bottom:14px}
+.magic-sent{text-align:center;padding:24px 0}
+.magic-sent-icon{font-size:2rem;margin-bottom:12px}
+.magic-sent-msg{font-size:.85rem;color:var(--muted);line-height:1.5}
+.magic-sent-email{color:var(--gold);font-weight:600}
+.login-tabs-3{display:flex;margin-bottom:20px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.login-tabs-3 .login-tab{flex:1;padding:10px;font-size:.75rem;font-weight:600;background:transparent;color:var(--muted);transition:all var(--transition);text-align:center;white-space:nowrap}
+.login-tabs-3 .login-tab.ativo{background:var(--gold);color:var(--dark)}
+
+/* GESTORES SECTION */
+.gestores-section{margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+.gestores-title{font-size:.92rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.btn-convidar{font-size:.75rem;padding:6px 14px;border-radius:var(--radius-sm);background:var(--gold);color:var(--dark);font-weight:600;transition:all var(--transition)}
+.btn-convidar:hover{background:#B8945A}
+.gestor-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(15,31,15,.4);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px}
+.gestor-avatar{min-width:32px;height:32px;border-radius:50%;background:rgba(197,165,114,.12);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700}
+.gestor-info{flex:1;min-width:0}
+.gestor-email{font-size:.82rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gestor-role{font-size:.68rem;color:var(--muted);text-transform:capitalize}
+.gestor-status{font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600}
+.gestor-status.aceito{background:rgba(74,140,92,.12);color:var(--green)}
+.gestor-status.pendente{background:rgba(168,158,144,.1);color:var(--muted)}
+.gestor-remove{font-size:.68rem;color:var(--muted);padding:4px 8px;border-radius:4px;transition:all .2s}
+.gestor-remove:hover{color:var(--red);background:rgba(196,90,74,.08)}
+
+/* CROP BADGE */
+.crop-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:12px;font-size:.72rem;font-weight:600;background:rgba(197,165,114,.08);color:var(--gold);border:1px solid rgba(197,165,114,.15)}
+.crop-badge-icon{font-size:.85rem}
+
+/* RISK CARD */
+.risk-card{background:linear-gradient(135deg,rgba(196,90,74,.08),rgba(196,90,74,.02));border:1px solid rgba(196,90,74,.2);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+.risk-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.risk-title{font-size:.82rem;font-weight:600;color:var(--text)}
+.risk-severity{font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:10px}
+.risk-severity.alto{background:rgba(196,90,74,.15);color:var(--red)}
+.risk-severity.medio{background:rgba(212,160,64,.15);color:var(--amber)}
+.risk-severity.baixo{background:rgba(74,140,92,.12);color:var(--green)}
+.risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.risk-metric{text-align:center;padding:10px;background:rgba(15,31,15,.3);border-radius:var(--radius-sm)}
+.risk-metric-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.risk-metric-value{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700}
+.risk-metric-value.danger{color:var(--red)}
+.risk-metric-value.money{color:var(--amber)}
+.risk-metric-value.area{color:#E07030}
+.risk-metric-value.ok{color:var(--green)}
+.risk-detail{font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.5;text-align:center}
+
+/* MODAL OVERLAY */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,31,15,.85);z-index:250;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;width:100%;max-width:380px;animation:fadeIn .2s ease}
+.modal-title{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:600;margin-bottom:16px}
+.modal-close{position:absolute;top:12px;right:16px;font-size:1.2rem;color:var(--muted);padding:8px}
+
 @media(max-width:480px){
   .login-card{padding:32px 20px}
   .content{padding:16px}
   .map-container{height:280px}
+  .login-tabs-3 .login-tab{font-size:.68rem;padding:9px 4px}
 }
 </style>
 </head>
@@ -151,21 +268,36 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <div class="login-card">
       <h1 class="login-logo"><span class="l1">Agr</span><span class="l2">UAI</span></h1>
       <div class="login-sub">Inteligência Rural por Satélite</div>
-      <div class="login-tabs">
+      <div class="login-tabs-3">
         <button class="login-tab ativo" id="tabEntrar" onclick="trocarTab('entrar')">Entrar</button>
         <button class="login-tab" id="tabCriar" onclick="trocarTab('criar')">Criar conta</button>
+        <button class="login-tab" id="tabEquipe" onclick="trocarTab('equipe')">Acesso Equipe</button>
       </div>
+      <!-- FORM: Entrar / Criar -->
       <form id="formLogin" onsubmit="return handleAuth(event)">
         <div id="camposCriar" style="display:none">
           <div class="form-group"><label class="form-label">Nome completo</label><input class="form-input" type="text" id="authNome" placeholder="Seu nome"></div>
           <div class="form-group"><label class="form-label">Telefone</label><input class="form-input" type="tel" id="authTel" placeholder="(00) 00000-0000"></div>
         </div>
         <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="authEmail" placeholder="seu@email.com" required></div>
-        <div class="form-group"><label class="form-label">Senha</label><input class="form-input" type="password" id="authSenha" placeholder="Mínimo 6 caracteres" required minlength="6"></div>
+        <div class="form-group" id="grupoSenha"><label class="form-label">Senha</label><input class="form-input" type="password" id="authSenha" placeholder="Mínimo 6 caracteres" required minlength="6"></div>
         <button class="btn-primary" type="submit" id="btnAuth">Entrar</button>
       </form>
-      <div class="login-divider">ou</div>
-      <button class="btn-google" onclick="loginGoogle()">
+      <!-- FORM: Magic Link (Equipe) -->
+      <div id="formMagicLink" style="display:none">
+        <div class="magic-link-section">
+          <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px;line-height:1.5">Acesso para gestores e equipe de campo. Digite seu email e receba um link de acesso direto — sem senha.</p>
+          <div class="form-group"><label class="form-label">Email da equipe</label><input class="form-input" type="email" id="magicEmail" placeholder="gestor@email.com"></div>
+          <button class="btn-primary" id="btnMagic" onclick="enviarMagicLink()">Enviar link de acesso</button>
+        </div>
+        <div id="magicSent" style="display:none" class="magic-sent">
+          <div class="magic-sent-icon">&#9993;</div>
+          <p class="magic-sent-msg">Link enviado para<br><span class="magic-sent-email" id="magicSentEmail"></span></p>
+          <p style="font-size:.78rem;color:var(--muted);margin-top:12px">Verifique sua caixa de entrada e clique no link para entrar.</p>
+        </div>
+      </div>
+      <div id="loginGoogleDivider" class="login-divider">ou</div>
+      <button class="btn-google" id="loginGoogleBtn" onclick="loginGoogle()">
         <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         Entrar com Google
       </button>
@@ -198,6 +330,15 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <div class="header-right"></div>
   </div>
   <div class="content" id="cadContent"></div>
+</div>
+
+<!-- DETALHE PROPRIEDADE -->
+<div class="screen" id="tela-detalhe">
+  <div class="app-header">
+    <div class="header-logo"><span class="l1">Agr</span><span class="l2">UAI</span></div>
+    <div class="header-right"><button class="header-user" onclick="navegarPara('propriedades')" style="font-size:.78rem;color:var(--muted)">← Voltar</button></div>
+  </div>
+  <div class="content" id="detalheContent"></div>
 </div>
 
 <!-- MAPA -->
@@ -255,15 +396,36 @@ document.querySelectorAll('.bnav').forEach(function(b){b.classList.remove('ativo
 var active=document.querySelector('.bnav[href="#'+tela+'"]');if(active)active.classList.add('ativo');
 if(tela==='propriedades')renderPropriedades();
 if(tela==='mapa')renderMapaGeral();
+if(tela==='detalhe')renderDetalhe(State.selectedProperty);
 if(tela==='cadastro'){State.cadStep=1;State.cadData={};State.drawnGeoJSON=null;renderCadastro()}}
 
 /* ========== AUTH ========== */
-function trocarTab(modo){State.authMode=modo;document.getElementById('tabEntrar').classList.toggle('ativo',modo==='entrar');document.getElementById('tabCriar').classList.toggle('ativo',modo==='criar');document.getElementById('camposCriar').style.display=modo==='criar'?'block':'none';document.getElementById('btnAuth').textContent=modo==='criar'?'Criar conta':'Entrar';document.getElementById('loginErro').textContent=''}
+function trocarTab(modo){State.authMode=modo;
+document.getElementById('tabEntrar').classList.toggle('ativo',modo==='entrar');
+document.getElementById('tabCriar').classList.toggle('ativo',modo==='criar');
+document.getElementById('tabEquipe').classList.toggle('ativo',modo==='equipe');
+var isEquipe=modo==='equipe';
+document.getElementById('formLogin').style.display=isEquipe?'none':'block';
+document.getElementById('formMagicLink').style.display=isEquipe?'block':'none';
+document.getElementById('loginGoogleDivider').style.display=isEquipe?'none':'flex';
+document.getElementById('loginGoogleBtn').style.display=isEquipe?'none':'flex';
+document.getElementById('magicSent').style.display='none';
+document.getElementById('camposCriar').style.display=modo==='criar'?'block':'none';
+document.getElementById('btnAuth').textContent=modo==='criar'?'Criar conta':'Entrar';
+var senhaGroup=document.getElementById('grupoSenha');
+if(senhaGroup){senhaGroup.style.display=isEquipe?'none':'block'}
+document.getElementById('loginErro').textContent=''}
 
 async function handleAuth(e){e.preventDefault();var email=document.getElementById('authEmail').value;var senha=document.getElementById('authSenha').value;var erroEl=document.getElementById('loginErro');erroEl.textContent='';document.getElementById('btnAuth').disabled=true;
 try{if(State.authMode==='criar'){var nome=document.getElementById('authNome').value;var tel=document.getElementById('authTel').value;if(!nome){erroEl.textContent='Informe seu nome.';document.getElementById('btnAuth').disabled=false;return false}
 var r=await sb.auth.signUp({email:email,password:senha,options:{data:{nome:nome,telefone:tel}}});if(r.error)throw r.error;toast('Conta criada! Verifique seu email.','ok');trocarTab('entrar')}else{var r=await sb.auth.signInWithPassword({email:email,password:senha});if(r.error)throw r.error;State.user=r.data.user;iniciarApp()}}catch(err){erroEl.textContent=err.message==='Invalid login credentials'?'Email ou senha incorretos.':err.message}
 document.getElementById('btnAuth').disabled=false;return false}
+
+async function enviarMagicLink(){var email=document.getElementById('magicEmail').value.trim();if(!email){toast('Informe o email','erro');return}
+document.getElementById('btnMagic').disabled=true;
+try{var r=await sb.auth.signInWithOtp({email:email,options:{emailRedirectTo:window.location.origin+window.location.pathname}});if(r.error)throw r.error;
+document.querySelector('.magic-link-section').style.display='none';document.getElementById('magicSent').style.display='block';document.getElementById('magicSentEmail').textContent=email;toast('Link enviado!','ok')}catch(err){document.getElementById('loginErro').textContent=err.message;toast('Erro: '+err.message,'erro')}
+document.getElementById('btnMagic').disabled=false}
 
 async function loginGoogle(){try{var r=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});if(r.error)throw r.error}catch(err){toast('Google login não configurado. Use email/senha.','erro')}}
 
@@ -278,9 +440,41 @@ function getNDVIColor(c){return c==='healthy'?'var(--green)':c==='moderate'?'var
 function getNDVIHex(c){return c==='healthy'?'#4A8C5C':c==='moderate'?'#D4A040':c==='stressed'?'#E07030':c==='critical'?'#C45A4A':'#A89E90'}
 function getNDVILabel(c){return c==='healthy'?'Saudável':c==='moderate'?'Moderado':c==='stressed'?'Estressado':c==='critical'?'Crítico':'Sem dados'}
 function diasAtras(d){if(!d)return'';var diff=Math.floor((Date.now()-new Date(d).getTime())/864e5);return diff===0?'hoje':diff===1?'ontem':'há '+diff+' dias'}
+function getCropMeta(val){return CROP_TYPES.find(function(c){return c.value===val})||null}
+function getCropIcon(val){var m=getCropMeta(val);return m?m.icon:'🌱'}
+function getCropLabel(val){var m=getCropMeta(val);return m?m.label:'—'}
+
+function buildRiskCard(p){
+var hasNDVI=p.last_ndvi!=null;if(!hasNDVI||!p.area_ha)return'';
+var ndvi=p.last_ndvi;var cls=p.last_classification||'';
+var isRisk=cls==='critical'||cls==='stressed';
+if(!isRisk)return'<div class="risk-card" style="border-color:rgba(74,140,92,.2);background:linear-gradient(135deg,rgba(74,140,92,.06),rgba(74,140,92,.01))"><div class="risk-header"><span class="risk-title">Estimativa de Risco</span><span class="risk-severity baixo">Baixo</span></div><div style="text-align:center;padding:8px 0;font-size:.85rem;color:var(--green)">Vegetação saudável — sem área de risco significativa.</div></div>';
+var riskPct=cls==='critical'?0.35:0.15;
+var areaRisco=Math.round(p.area_ha*riskPct*10)/10;
+var crop=getCropMeta(p.crop_type);
+var valorHtml='';var detailHtml='';
+if(crop&&crop.sacaValor>0){
+var valorRisco=Math.round(areaRisco*crop.prodHa*crop.sacaValor);
+valorHtml='<div class="risk-metric"><div class="risk-metric-label">Valor sob risco</div><div class="risk-metric-value money">R$ '+formatarNumero(valorRisco)+'</div></div>';
+detailHtml='<div class="risk-detail">Estimativa: '+crop.prodHa+' '+crop.sacaLabel+' × R$ '+formatarNumero(crop.sacaValor)+'/unid × '+areaRisco+' ha em risco</div>';
+}else if(crop&&crop.value==='pastagem'){
+valorHtml='<div class="risk-metric"><div class="risk-metric-label">Impacto</div><div class="risk-metric-value money">Lotação reduzida</div></div>';
+detailHtml='<div class="risk-detail">Biomassa comprometida pode exigir suplementação ou remanejamento do rebanho.</div>';
+}else{
+valorHtml='<div class="risk-metric"><div class="risk-metric-label">Valor sob risco</div><div class="risk-metric-value money">—</div></div>';
+detailHtml='<div class="risk-detail">Defina o tipo de cultura para estimar o impacto financeiro.</div>';
+}
+var sevClass=cls==='critical'?'alto':'medio';var sevLabel=cls==='critical'?'Alto':'Médio';
+return'<div class="risk-card"><div class="risk-header"><span class="risk-title">Estimativa de Risco</span><span class="risk-severity '+sevClass+'">'+sevLabel+'</span></div><div class="risk-grid"><div class="risk-metric"><div class="risk-metric-label">Área em risco</div><div class="risk-metric-value area">'+areaRisco+' ha</div></div><div class="risk-metric"><div class="risk-metric-label">% da propriedade</div><div class="risk-metric-value danger">'+Math.round(riskPct*100)+'%</div></div>'+valorHtml+'<div class="risk-metric"><div class="risk-metric-label">Cultura</div><div class="risk-metric-value">'+(crop?crop.icon+' '+crop.label:'🌱 Não definida')+'</div></div></div>'+detailHtml+'</div>';
+}
 
 /* ========== PROPRIEDADES ========== */
-async function carregarPropriedades(){try{var r=await sb.rpc('get_dashboard_overview',{p_user_id:State.user.id});if(r.error)throw r.error;State.propriedades=r.data||[];return State.propriedades}catch(e1){try{var r2=await sb.rpc('get_properties_geojson',{p_user_id:State.user.id});if(r2.error)throw r2.error;State.propriedades=r2.data||[];return State.propriedades}catch(e2){try{var r3=await sb.from('properties').select('id,nome,car_code,area_ha,municipio,estado,source').eq('owner_id',State.user.id).eq('active',true).order('nome');if(r3.error)throw r3.error;State.propriedades=(r3.data||[]).map(function(p){p.property_id=p.id;return p});return State.propriedades}catch(e3){toast('Erro ao carregar','erro');return[]}}}}
+async function carregarPropriedades(){var owned=[];var managed=[];
+try{var r=await sb.rpc('get_dashboard_overview',{p_user_id:State.user.id});if(!r.error)owned=r.data||[]}catch(e){}
+if(owned.length===0){try{var r2=await sb.rpc('get_properties_geojson',{p_user_id:State.user.id});if(!r2.error)owned=r2.data||[]}catch(e){}}
+if(owned.length===0){try{var r3=await sb.from('properties').select('id,nome,car_code,area_ha,municipio,estado,source,crop_type').eq('owner_id',State.user.id).eq('active',true).order('nome');if(!r3.error)owned=(r3.data||[]).map(function(p){p.property_id=p.id;return p})}catch(e){}}
+try{var rm=await sb.rpc('get_managed_properties',{p_user_email:State.user.email});if(!rm.error&&rm.data){managed=rm.data.map(function(p){p._managed=true;p._role=p.role;return p})}}catch(e){}
+State.propriedades=owned.concat(managed);State.isManager=managed.length>0&&owned.length===0;return State.propriedades}
 
 async function renderPropriedades(){var c=document.getElementById('propContent');c.innerHTML='<h2 class="page-title">Minhas Propriedades</h2><div style="text-align:center;padding:20px"><div class="spinner"></div></div>';
 var props=await carregarPropriedades();
@@ -289,12 +483,29 @@ var html='<h2 class="page-title">Minhas Propriedades</h2>';
 props.forEach(function(p){var pid=p.property_id||p.id;var areaStr=p.area_ha?formatarNumero(Math.round(p.area_ha))+' ha':'';var hasNDVI=p.last_ndvi!=null;var cls=p.last_classification||'';
 var ndviHTML='';if(hasNDVI){var delta='';if(p.prev_ndvi!=null){var d=p.last_ndvi-p.prev_ndvi;delta='<span class="ndvi-delta '+(d>=0?'up':'down')+'">'+(d>=0?'+':'')+d.toFixed(2)+'</span>'}ndviHTML='<div class="ndvi-row"><div class="ndvi-bar-v" style="background:'+getNDVIHex(cls)+'"></div><div class="ndvi-info"><span class="ndvi-value" style="color:'+getNDVIColor(cls)+'">'+p.last_ndvi.toFixed(2)+'</span> <span class="ndvi-class" style="color:'+getNDVIColor(cls)+'">'+getNDVILabel(cls)+'</span>'+delta+'<span class="ndvi-date">'+diasAtras(p.last_reading_date)+'</span></div></div>'}else{ndviHTML='<div class="ndvi-row"><div class="ndvi-bar-v" style="background:var(--muted)"></div><div class="ndvi-info"><span class="ndvi-value" style="color:var(--muted)">—</span> <span class="ndvi-class" style="color:var(--muted)">Aguardando satélite</span><span class="ndvi-date">Primeira leitura em até 5 dias</span></div></div>'}
 var alertBadge=p.pending_alerts>0?'<span class="prop-alerts">⚠️ '+p.pending_alerts+'</span>':'';var badge=hasNDVI?'<span class="prop-badge ok">🛰️ Monitorando</span>':'<span class="prop-badge pendente">⏳ Pendente</span>';
-html+='<div class="prop-card" onclick="State.selectedProperty=\''+pid+'\';navegarPara(\'detalhe\')"><div class="prop-header"><div class="prop-nome">'+p.nome+'</div><div class="prop-area">'+areaStr+'</div></div><div class="prop-meta">'+p.municipio+'/'+p.estado+(p.car_code?' · CAR: '+p.car_code.substring(0,15)+'...':'')+'</div>'+ndviHTML+badge+alertBadge+'</div>'});
+if(p._managed)badge+=' <span class="prop-badge pendente" style="color:var(--gold);background:rgba(197,165,114,.1)">Gestor'+(p._role&&p._role!=='gestor'?' · '+p._role:'')+'</span>';
+var cropBadge=p.crop_type?'<span class="crop-badge"><span class="crop-badge-icon">'+getCropIcon(p.crop_type)+'</span>'+getCropLabel(p.crop_type)+'</span> ':'';
+html+='<div class="prop-card" onclick="State.selectedProperty=\''+pid+'\';navegarPara(\'detalhe\')"><div class="prop-header"><div class="prop-nome">'+p.nome+'</div><div class="prop-area">'+areaStr+'</div></div><div class="prop-meta">'+p.municipio+'/'+p.estado+(p.car_code?' · CAR: '+p.car_code.substring(0,15)+'...':'')+'</div>'+ndviHTML+cropBadge+badge+alertBadge+'</div>'});
 html+='<button class="btn-primary" style="margin-top:16px" onclick="navegarPara(\'cadastro\')">+ Cadastrar Propriedade</button>';c.innerHTML=html}
 
 /* ========== DETALHE ========== */
 async function renderDetalhe(pid){var c=document.getElementById('detalheContent');if(!pid){navegarPara('propriedades');return}var p=State.propriedades.find(function(x){return(x.property_id||x.id)===pid});if(!p){navegarPara('propriedades');return}var hasNDVI=p.last_ndvi!=null;var cls=p.last_classification||'';
-c.innerHTML='<div class="cadastro-header"><button class="btn-back" onclick="navegarPara(\'propriedades\')">←</button><h2 style="font-size:1.15rem">'+p.nome+'</h2></div><div class="prop-meta" style="margin-bottom:16px">'+p.municipio+'/'+p.estado+(p.area_ha?' · '+formatarNumero(Math.round(p.area_ha))+' ha':'')+'</div><div class="metrics-grid"><div class="metric-card"><div class="metric-label">NDVI</div><div class="metric-value" style="color:'+(hasNDVI?getNDVIColor(cls):'var(--muted)')+'">'+(hasNDVI?p.last_ndvi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">EVI</div><div class="metric-value" style="color:var(--green)">'+(p.last_evi!=null?p.last_evi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">NDWI</div><div class="metric-value" style="color:#4A90A4">'+(p.last_ndwi!=null?p.last_ndwi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">Nuvens</div><div class="metric-value">'+(p.last_cloud_coverage!=null?Math.round(p.last_cloud_coverage)+'%':'—')+'</div></div></div><div class="ndvi-chart"><div class="ndvi-chart-title">Evolução NDVI</div><div id="chartSvg" style="text-align:center;padding:20px;color:var(--muted);font-size:.8rem">Carregando...</div></div><h3 style="font-size:1rem;margin:20px 0 12px">Alertas</h3><div id="detalheAlertas" style="color:var(--muted);font-size:.85rem">Carregando...</div>';loadHistory(pid);loadAlerts(pid)}
+var cropBadgeHTML=p.crop_type?'<span class="crop-badge" style="margin-left:8px"><span class="crop-badge-icon">'+getCropIcon(p.crop_type)+'</span>'+getCropLabel(p.crop_type)+'</span>':'';
+var riskHTML=buildRiskCard(p);
+c.innerHTML='<div class="prop-meta" style="margin-bottom:12px">'+p.municipio+'/'+p.estado+(p.area_ha?' · '+formatarNumero(Math.round(p.area_ha))+' ha':'')+cropBadgeHTML+'</div>'+
+'<div class="detalhe-tabs"><button class="detalhe-tab ativo" onclick="switchDetalheTab(\'satelite\')">Satélite</button><button class="detalhe-tab" onclick="switchDetalheTab(\'diario\')">Diário</button>'+(p._managed?'':'<button class="detalhe-tab" onclick="switchDetalheTab(\'equipe\')">Equipe</button>')+'</div>'+
+'<div class="tab-panel ativo" id="panelSatelite">'+
+'<div class="metrics-grid"><div class="metric-card"><div class="metric-label">NDVI</div><div class="metric-value" style="color:'+(hasNDVI?getNDVIColor(cls):'var(--muted)')+'">'+(hasNDVI?p.last_ndvi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">EVI</div><div class="metric-value" style="color:var(--green)">'+(p.last_evi!=null?p.last_evi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">NDWI</div><div class="metric-value" style="color:#4A90A4">'+(p.last_ndwi!=null?p.last_ndwi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">Nuvens</div><div class="metric-value">'+(p.last_cloud_coverage!=null?Math.round(p.last_cloud_coverage)+'%':'—')+'</div></div></div>'+
+riskHTML+
+'<div class="ndvi-chart"><div class="ndvi-chart-title">Evolução NDVI</div><div id="chartSvg" style="text-align:center;padding:20px;color:var(--muted);font-size:.8rem">Carregando...</div></div>'+
+'<h3 style="font-size:1rem;margin:20px 0 12px">Alertas</h3><div id="detalheAlertas" style="color:var(--muted);font-size:.85rem">Carregando...</div></div>'+
+'<div class="tab-panel" id="panelDiario">'+
+'<div class="diario-input-wrap"><textarea class="diario-input" id="diarioInput" placeholder="O que aconteceu hoje na fazenda?" rows="1" maxlength="1000"></textarea><button class="diario-send" id="btnDiarioSend" onclick="enviarLog()" title="Enviar">&#10148;</button></div>'+
+'<div id="timelineContainer"><div style="text-align:center;padding:20px"><div class="spinner"></div></div></div></div>'+
+(p._managed?'':'<div class="tab-panel" id="panelEquipe"><div class="gestores-title"><span>Gestores e Equipe</span><button class="btn-convidar" onclick="abrirModalConvite()">+ Convidar</button></div><div id="gestoresLista" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>');
+loadHistory(pid);loadAlerts(pid);loadTimeline(pid);if(!p._managed)loadGestores(pid)}
+
+function switchDetalheTab(tab){var tabs=['satelite','diario','equipe'];document.querySelectorAll('.detalhe-tab').forEach(function(t,i){t.classList.toggle('ativo',tabs[i]===tab)});document.getElementById('panelSatelite').classList.toggle('ativo',tab==='satelite');document.getElementById('panelDiario').classList.toggle('ativo',tab==='diario');var pe=document.getElementById('panelEquipe');if(pe)pe.classList.toggle('ativo',tab==='equipe')}
 
 async function loadHistory(pid){try{var r=await sb.rpc('get_satellite_history',{p_property_id:pid,p_limit:20});if(r.error)throw r.error;var data=r.data||[];if(data.length<2){document.getElementById('chartSvg').innerHTML='Aguardando leituras suficientes.';return}data.reverse();renderNDVIChart(data)}catch(e){document.getElementById('chartSvg').innerHTML='Gráfico indisponível.'}}
 
@@ -304,11 +515,60 @@ async function loadAlerts(pid){try{var r=await sb.rpc('get_property_alerts',{p_p
 
 async function resolverAlerta(id){try{await sb.from('alerts').update({resolved:true}).eq('id',id);toast('Alerta resolvido','ok');if(State.selectedProperty)loadAlerts(State.selectedProperty)}catch(e){toast('Erro','erro')}}
 
+/* ========== DIARIO DE CAMPO ========== */
+async function loadTimeline(pid){var el=document.getElementById('timelineContainer');if(!el)return;
+try{var r=await sb.rpc('get_property_timeline',{p_property_id:pid,p_limit:30});
+if(r.error){el.innerHTML=renderFieldLogsOnly(pid);return}
+var items=r.data||[];if(items.length===0){el.innerHTML='<div class="timeline-empty">Nenhum registro ainda.<br>Use o campo acima para registrar o que aconteceu na fazenda.</div>';return}
+el.innerHTML=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var icon=isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
+return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div><div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('')}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
+
+function renderFieldLogsOnly(pid){return'<div class="timeline-empty">Timeline indisponível. Execute o SQL de field_logs no Supabase.</div>'}
+
+async function enviarLog(){var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content)return;if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
+var btn=document.getElementById('btnDiarioSend');btn.disabled=true;
+try{var r=await sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,content:content});if(r.error)throw r.error;input.value='';toast('Registro salvo','ok');loadTimeline(State.selectedProperty)}catch(e){toast('Erro: '+e.message,'erro')}btn.disabled=false}
+
+async function deletarLog(id){try{var r=await sb.from('field_logs').delete().eq('id',id).eq('author_id',State.user.id);if(r.error)throw r.error;toast('Registro excluído','ok');if(State.selectedProperty)loadTimeline(State.selectedProperty)}catch(e){toast('Erro ao excluir','erro')}}
+
+function escapeHtml(str){var d=document.createElement('div');d.textContent=str;return d.innerHTML}
+
+function formatarDataHora(iso){if(!iso)return'';var d=new Date(iso);var agora=new Date();var diff=Math.floor((agora-d)/1000);if(diff<60)return'agora';if(diff<3600)return Math.floor(diff/60)+' min atrás';if(diff<86400)return Math.floor(diff/3600)+'h atrás';var dia=d.getDate().toString().padStart(2,'0');var mes=(d.getMonth()+1).toString().padStart(2,'0');var hora=d.getHours().toString().padStart(2,'0');var min=d.getMinutes().toString().padStart(2,'0');return dia+'/'+mes+' às '+hora+':'+min}
+
+/* ========== GESTORES (ADR-003) ========== */
+async function loadGestores(pid){var el=document.getElementById('gestoresLista');if(!el)return;
+try{var r=await sb.rpc('get_property_managers',{p_property_id:pid});if(r.error){el.innerHTML='<span style="font-size:.8rem;color:var(--muted)">Execute o SQL de property_managers no Supabase.</span>';return}
+var mgrs=r.data||[];if(mgrs.length===0){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:.85rem">Nenhum gestor convidado.<br>Clique em "+ Convidar" para adicionar sua equipe.</div>';return}
+el.innerHTML=mgrs.map(function(m){var initials=m.manager_email.substring(0,2).toUpperCase();var status=m.accepted_at?'<span class="gestor-status aceito">Ativo</span>':'<span class="gestor-status pendente">Pendente</span>';
+return'<div class="gestor-item"><div class="gestor-avatar">'+initials+'</div><div class="gestor-info"><div class="gestor-email">'+escapeHtml(m.manager_email)+'</div><div class="gestor-role">'+m.role+'</div></div>'+status+'<button class="gestor-remove" onclick="removerGestor(\''+m.id+'\')">remover</button></div>'}).join('')}catch(e){el.innerHTML='Indisponível.'}}
+
+function abrirModalConvite(){var overlay=document.createElement('div');overlay.className='modal-overlay';overlay.id='modalConvite';
+overlay.innerHTML='<div class="modal-box"><h3 class="modal-title">Convidar Gestor</h3><p style="font-size:.8rem;color:var(--muted);margin-bottom:16px;line-height:1.5">O gestor receberá acesso apenas a esta propriedade. Ele poderá entrar pelo link mágico sem criar senha.</p><div class="form-group"><label class="form-label">Email do gestor</label><input class="form-input" type="email" id="conviteEmail" placeholder="gestor@email.com"></div><div class="form-group"><label class="form-label">Função</label><select class="form-input" id="conviteRole"><option value="gestor">Gestor de Campo</option><option value="agronomo">Agrônomo</option><option value="tecnico">Técnico</option></select></div><div class="btn-row"><button class="btn-secondary" onclick="fecharModalConvite()">Cancelar</button><button class="btn-primary" onclick="salvarConvite()">Convidar</button></div></div>';
+overlay.addEventListener('click',function(e){if(e.target===overlay)fecharModalConvite()});
+document.body.appendChild(overlay)}
+
+function fecharModalConvite(){var m=document.getElementById('modalConvite');if(m)m.remove()}
+
+async function salvarConvite(){var email=document.getElementById('conviteEmail').value.trim().toLowerCase();var role=document.getElementById('conviteRole').value;
+if(!email){toast('Informe o email','erro');return}
+if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
+try{var r=await sb.from('property_managers').insert({property_id:State.selectedProperty,manager_email:email,role:role});if(r.error){if(r.error.message.includes('duplicate')||r.error.code==='23505'){toast('Este gestor já foi convidado','info')}else{throw r.error}}else{toast('Gestor convidado!','ok')}
+fecharModalConvite();loadGestores(State.selectedProperty)}catch(e){toast('Erro: '+e.message,'erro')}}
+
+async function removerGestor(id){try{var r=await sb.from('property_managers').delete().eq('id',id);if(r.error)throw r.error;toast('Gestor removido','ok');if(State.selectedProperty)loadGestores(State.selectedProperty)}catch(e){toast('Erro ao remover','erro')}}
+
 /* ========== ALERTAS ========== */
 async function renderAlertas(){var c=document.getElementById('alertasContent');c.innerHTML='<h2 class="page-title">Alertas</h2><div style="text-align:center;padding:20px"><div class="spinner"></div></div>';var props=State.propriedades.length?State.propriedades:await carregarPropriedades();var all=[];for(var i=0;i<props.length;i++){var pid=props[i].property_id||props[i].id;try{var r=await sb.rpc('get_property_alerts',{p_property_id:pid});if(!r.error&&r.data)r.data.forEach(function(a){a.fazenda=props[i].nome;all.push(a)})}catch(e){}}all.sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at)});var pending=all.filter(function(a){return!a.resolved});if(pending.length===0){c.innerHTML='<h2 class="page-title">Alertas</h2><div class="empty-state"><div class="empty-icon">✅</div><h3 class="empty-title">Nenhum alerta pendente</h3><p class="empty-desc">Todas as propriedades estão em dia.</p></div>';return}c.innerHTML='<h2 class="page-title">Alertas ('+pending.length+')</h2>'+pending.map(function(a){var ic=a.severity==='critical'?'critical':'warning';return'<div class="alert-item"><div class="alert-icon '+ic+'">'+(a.severity==='critical'?'🔴':'⚠️')+'</div><div class="alert-text"><div class="alert-msg"><strong>'+a.fazenda+'</strong> — '+a.message+'</div><div class="alert-meta">'+diasAtras(a.created_at)+'</div></div><button class="alert-resolve" onclick="resolverAlerta(\''+a.id+'\')">Resolver</button></div>'}).join('')}
 
 /* ========== CADASTRO ========== */
 var ESTADOS=['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
+var CROP_TYPES=[
+{value:'pastagem',label:'Pecuária / Pasto',icon:'🐄',sacaLabel:'@/ha',sacaValor:0,prodHa:0},
+{value:'soja_milho',label:'Soja / Milho',icon:'🌾',sacaLabel:'sc/ha',sacaValor:135,prodHa:55},
+{value:'cafe',label:'Café',icon:'☕',sacaLabel:'sc/ha',sacaValor:1400,prodHa:30},
+{value:'fruticultura',label:'Fruticultura',icon:'🍊',sacaLabel:'ton/ha',sacaValor:2800,prodHa:25},
+{value:'floresta',label:'Floresta / Silvicultura',icon:'🌲',sacaLabel:'m³/ha',sacaValor:120,prodHa:40}
+];
 
 function renderCadastro(){var c=document.getElementById('cadContent');
 if(State.cadStep===1){c.innerHTML='<div class="cadastro-header"><button class="btn-back" onclick="navegarPara(\'propriedades\')">←</button><h2 style="font-size:1.15rem">Cadastrar Propriedade</h2></div><div class="step-indicator">Passo <span>1</span> de 3 — Identificação</div>'+
@@ -316,6 +576,7 @@ if(State.cadStep===1){c.innerHTML='<div class="cadastro-header"><button class="b
 '<div class="form-group"><label class="form-label">Estado</label><select class="form-input" id="cadEstado"><option value="">Selecione</option>'+ESTADOS.map(function(e){return'<option value="'+e+'"'+(State.cadData.estado===e?' selected':'')+'>'+e+'</option>'}).join('')+'</select></div>'+
 '<div class="form-group"><label class="form-label">Município</label><input class="form-input" id="cadMunicipio" placeholder="Nome do município" value="'+(State.cadData.municipio||'')+'"></div>'+
 '<div class="form-group"><label class="form-label">Código CAR (opcional)</label><input class="form-input" id="cadCAR" placeholder="XX-0000000-000000000000000" value="'+(State.cadData.car_code||'')+'"></div>'+
+'<div class="form-group"><label class="form-label">Tipo de Cultura</label><select class="form-input" id="cadCropType"><option value="">Selecione a cultura principal</option>'+CROP_TYPES.map(function(ct){return'<option value="'+ct.value+'"'+(State.cadData.crop_type===ct.value?' selected':'')+'>'+ct.icon+' '+ct.label+'</option>'}).join('')+'</select></div>'+
 '<button class="btn-primary" onclick="cadProximo()">Próximo →</button>'}
 else if(State.cadStep===2){c.innerHTML='<div class="cadastro-header"><button class="btn-back" onclick="State.cadStep=1;renderCadastro()">←</button><h2 style="font-size:1.15rem">Localização</h2></div><div class="step-indicator">Passo <span>2</span> de 3 — Desenhe o perímetro</div>'+
 '<div class="map-container" id="mapaCadastro"></div>'+
@@ -323,11 +584,11 @@ else if(State.cadStep===2){c.innerHTML='<div class="cadastro-header"><button cla
 '<div class="area-display" id="areaDisplay">Área: desenhe o polígono</div>'+
 '<div class="btn-row"><button class="btn-secondary" onclick="State.cadStep=1;renderCadastro()">← Voltar</button><button class="btn-primary" id="btnSalvarProp" onclick="salvarPropriedade()" disabled>Salvar propriedade</button></div>';
 setTimeout(initMapaCadastro,200)}
-else if(State.cadStep===3){c.innerHTML='<div class="confirm-screen"><div class="confirm-icon">✅</div><h3 class="confirm-title">Propriedade cadastrada!</h3><div class="confirm-detail"><strong>'+State.cadData.nome+'</strong><br>'+State.cadData.municipio+', '+State.cadData.estado+'</div>'+(State.cadData.area_ha?'<div class="confirm-detail">'+formatarNumero(Math.round(State.cadData.area_ha))+' hectares</div>':'')+'<p class="confirm-note">🛰️ O monitoramento por satélite será ativado em até 5 dias.</p><button class="btn-primary" style="max-width:280px" onclick="navegarPara(\'propriedades\')">Ver propriedades</button></div>'}}
+else if(State.cadStep===3){var ct=getCropMeta(State.cadData.crop_type);c.innerHTML='<div class="confirm-screen"><div class="confirm-icon">✅</div><h3 class="confirm-title">Propriedade cadastrada!</h3><div class="confirm-detail"><strong>'+State.cadData.nome+'</strong><br>'+State.cadData.municipio+', '+State.cadData.estado+'</div>'+(State.cadData.area_ha?'<div class="confirm-detail">'+formatarNumero(Math.round(State.cadData.area_ha))+' hectares</div>':'')+(ct?'<div class="confirm-detail">'+ct.icon+' '+ct.label+'</div>':'')+'<p class="confirm-note">🛰️ O monitoramento por satélite será ativado em até 5 dias.</p><button class="btn-primary" style="max-width:280px" onclick="navegarPara(\'propriedades\')">Ver propriedades</button></div>'}}
 
-function cadProximo(){var nome=document.getElementById('cadNome').value.trim();var estado=document.getElementById('cadEstado').value;var mun=document.getElementById('cadMunicipio').value.trim();var car=document.getElementById('cadCAR').value.trim();
-if(!nome){toast('Informe o nome da propriedade','erro');return}if(!estado){toast('Selecione o estado','erro');return}if(!mun){toast('Informe o município','erro');return}
-State.cadData={nome:nome,estado:estado,municipio:mun,car_code:car};State.cadStep=2;renderCadastro()}
+function cadProximo(){var nome=document.getElementById('cadNome').value.trim();var estado=document.getElementById('cadEstado').value;var mun=document.getElementById('cadMunicipio').value.trim();var car=document.getElementById('cadCAR').value.trim();var cropType=document.getElementById('cadCropType').value;
+if(!nome){toast('Informe o nome da propriedade','erro');return}if(!estado){toast('Selecione o estado','erro');return}if(!mun){toast('Informe o município','erro');return}if(!cropType){toast('Selecione o tipo de cultura','erro');return}
+State.cadData={nome:nome,estado:estado,municipio:mun,car_code:car,crop_type:cropType};State.cadStep=2;renderCadastro()}
 
 function initMapaCadastro(){if(State.mapInstance){State.mapInstance.remove();State.mapInstance=null}
 var map=new mapboxgl.Map({container:'mapaCadastro',style:'mapbox://styles/mapbox/satellite-streets-v12',center:[-47.9,-15.7],zoom:4,attributionControl:false});
@@ -348,10 +609,10 @@ if(d.features&&d.features.length>0){var feat=d.features[0];draw.add(feat);State.
 async function salvarPropriedade(){if(!State.drawnGeoJSON){toast('Desenhe o perímetro primeiro','erro');return}
 showLoading('Salvando propriedade...');
 try{var geojson=State.drawnGeoJSON;if(geojson.type==='Polygon'){geojson={type:'MultiPolygon',coordinates:[geojson.coordinates]}}
-var r=await sb.rpc('insert_property',{p_owner_id:State.user.id,p_nome:State.cadData.nome,p_car_code:State.cadData.car_code||null,p_geojson:geojson,p_municipio:State.cadData.municipio,p_estado:State.cadData.estado,p_source:State.cadData.car_code?'car':'manual'});
+var r=await sb.rpc('insert_property',{p_owner_id:State.user.id,p_nome:State.cadData.nome,p_car_code:State.cadData.car_code||null,p_geojson:geojson,p_municipio:State.cadData.municipio,p_estado:State.cadData.estado,p_source:State.cadData.car_code?'car':'manual',p_crop_type:State.cadData.crop_type||null});
 if(r.error)throw r.error;hideLoading();State.cadStep=3;renderCadastro();toast('Propriedade cadastrada!','ok')}catch(err){hideLoading();
 try{var wkt='SRID=4326;MULTIPOLYGON((('+(State.drawnGeoJSON.type==='Polygon'?State.drawnGeoJSON.coordinates[0]:State.drawnGeoJSON.coordinates[0][0]).map(function(c){return c[0]+' '+c[1]}).join(',')+')))';
-var r2=await sb.from('properties').insert({owner_id:State.user.id,nome:State.cadData.nome,car_code:State.cadData.car_code||null,geometry:wkt,municipio:State.cadData.municipio,estado:State.cadData.estado,source:State.cadData.car_code?'car':'manual'});
+var r2=await sb.from('properties').insert({owner_id:State.user.id,nome:State.cadData.nome,car_code:State.cadData.car_code||null,geometry:wkt,municipio:State.cadData.municipio,estado:State.cadData.estado,source:State.cadData.car_code?'car':'manual',crop_type:State.cadData.crop_type||null});
 if(r2.error)throw r2.error;State.cadStep=3;renderCadastro();toast('Propriedade cadastrada!','ok')}catch(err2){toast('Erro ao salvar: '+err2.message,'erro')}}}
 
 /* ========== MAPA GERAL ========== */
@@ -380,6 +641,6 @@ var r=await sb.auth.getSession();if(r.data.session){State.user=r.data.session.us
 sb.auth.onAuthStateChange(function(event,session){if(event==='SIGNED_IN'&&session){State.user=session.user;iniciarApp()}});
 checkSession();
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none'}
 })();

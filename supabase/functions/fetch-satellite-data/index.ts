@@ -5,6 +5,15 @@ const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const COPERNICUS_CLIENT_ID = Deno.env.get('COPERNICUS_CLIENT_ID')!
 const COPERNICUS_CLIENT_SECRET = Deno.env.get('COPERNICUS_CLIENT_SECRET')!
 
+const MAX_PROPERTIES_PER_RUN = 10
+const LOOKBACK_DAYS = 10
+const NDVI_ALERT_THRESHOLD = 0.3
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 async function getToken(): Promise<string> {
@@ -84,65 +93,87 @@ async function fetchNDVI(token: string, geojson: any, dateFrom: string, dateTo: 
   })
 
   if (!res.ok) {
-    console.error('Sentinel API error:', res.status, await res.text())
+    const errText = await res.text()
+    console.error(`Sentinel API error for property: ${res.status} ${errText}`)
     return null
   }
 
   return await res.json()
 }
 
-Deno.serve(async (_req) => {
+function classify(ndvi: number): string {
+  if (ndvi < 0.2) return 'critical'
+  if (ndvi < 0.4) return 'stressed'
+  if (ndvi < 0.6) return 'moderate'
+  return 'healthy'
+}
+
+function calcCloudCoverage(stats: any): number | null {
+  if (!stats.sampleCount || stats.sampleCount === 0) return null
+  const total = stats.sampleCount + (stats.noDataCount || 0)
+  return total > 0 ? ((stats.noDataCount || 0) / total) * 100 : null
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  const startTime = Date.now()
+  console.log(`[fetch-satellite-data] Pipeline started at ${new Date().toISOString()}`)
+
   try {
     const { data: properties, error } = await supabase
       .rpc('get_all_active_properties_for_satellite')
 
     if (error) throw error
     if (!properties || properties.length === 0) {
+      console.log('[fetch-satellite-data] No active properties found')
       return new Response(JSON.stringify({ message: 'No properties to process' }), {
-        status: 200, headers: { 'Content-Type': 'application/json' }
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
+    const batch = properties.slice(0, MAX_PROPERTIES_PER_RUN)
+    console.log(`[fetch-satellite-data] Processing ${batch.length}/${properties.length} properties`)
+
     const token = await getToken()
+    console.log('[fetch-satellite-data] Copernicus token acquired')
+
     const now = new Date()
     const dateTo = now.toISOString().split('T')[0] + 'T23:59:59Z'
-    const from = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000)
+    const from = new Date(now.getTime() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
     const dateFrom = from.toISOString().split('T')[0] + 'T00:00:00Z'
 
     let processed = 0
+    let skipped = 0
     let alerts_created = 0
+    const errors: string[] = []
 
-    for (const prop of properties) {
+    for (const prop of batch) {
       const geojson = prop.geojson
-      if (!geojson) continue
+      if (!geojson) { skipped++; continue }
 
       try {
         const stats = await fetchNDVI(token, geojson, dateFrom, dateTo)
-        if (!stats || !stats.data || stats.data.length === 0) continue
+        if (!stats || !stats.data || stats.data.length === 0) { skipped++; continue }
 
         const latest = stats.data[stats.data.length - 1]
         const ndviStats = latest.outputs?.ndvi?.bands?.B0?.stats
         const eviStats = latest.outputs?.evi?.bands?.B0?.stats
         const ndwiStats = latest.outputs?.ndwi?.bands?.B0?.stats
 
-        if (!ndviStats) continue
+        if (!ndviStats) { skipped++; continue }
 
         const ndvi_mean = ndviStats.mean
         const evi_mean = eviStats?.mean ?? null
         const ndwi_mean = ndwiStats?.mean ?? null
+        const classification = classify(ndvi_mean)
+        const cloud_coverage = calcCloudCoverage(ndviStats)
 
-        let classification = 'healthy'
-        if (ndvi_mean < 0.2) classification = 'critical'
-        else if (ndvi_mean < 0.4) classification = 'stressed'
-        else if (ndvi_mean < 0.6) classification = 'moderate'
-
-        const cloud_coverage = ndviStats.sampleCount > 0
-          ? (1 - ndviStats.sampleCount / (ndviStats.sampleCount + (ndviStats.noDataCount || 0))) * 100
-          : null
-
-        const { error: insertError } = await supabase
+        const { error: upsertError } = await supabase
           .from('satellite_readings')
-          .insert({
+          .upsert({
             property_id: prop.id,
             reading_date: latest.interval.from.split('T')[0],
             ndvi: ndvi_mean,
@@ -152,36 +183,56 @@ Deno.serve(async (_req) => {
             source: 'sentinel-2-l2a',
             classification,
             raw_data: latest
-          })
+          }, { onConflict: 'property_id,reading_date' })
 
-        if (!insertError) processed++
-        else console.error('Insert error for', prop.nome, insertError.message)
+        if (!upsertError) {
+          processed++
+          console.log(`[fetch-satellite-data] ${prop.nome}: NDVI=${ndvi_mean.toFixed(3)} (${classification})`)
+        } else {
+          errors.push(`${prop.nome}: ${upsertError.message}`)
+          console.error(`[fetch-satellite-data] Upsert error for ${prop.nome}:`, upsertError.message)
+        }
 
-        if (ndvi_mean < 0.3) {
-          await supabase.from('alerts').insert({
+        if (ndvi_mean < NDVI_ALERT_THRESHOLD) {
+          const { error: alertErr } = await supabase.from('alerts').insert({
             property_id: prop.id,
             type: 'ndvi_low',
             severity: ndvi_mean < 0.2 ? 'critical' : 'warning',
             message: `NDVI baixo (${ndvi_mean.toFixed(2)}) detectado em ${prop.nome}. Possível estresse na vegetação.`,
-            data: { ndvi: ndvi_mean, evi: evi_mean, date: latest.interval.from }
+            data: { ndvi: ndvi_mean, evi: evi_mean, ndwi: ndwi_mean, date: latest.interval.from }
           })
-          alerts_created++
+          if (!alertErr) alerts_created++
         }
       } catch (propErr) {
-        console.error('Error processing', prop.nome, propErr)
+        const msg = propErr instanceof Error ? propErr.message : String(propErr)
+        errors.push(`${prop.nome}: ${msg}`)
+        console.error(`[fetch-satellite-data] Error processing ${prop.nome}:`, msg)
       }
     }
 
-    return new Response(JSON.stringify({
+    const duration = ((Date.now() - startTime) / 1000).toFixed(1)
+    const result = {
       processed,
+      skipped,
       alerts_created,
-      total_properties: properties.length
-    }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      errors: errors.length,
+      total_properties: properties.length,
+      batch_size: batch.length,
+      duration_seconds: parseFloat(duration),
+      date_range: { from: dateFrom, to: dateTo }
+    }
+
+    console.log(`[fetch-satellite-data] Pipeline completed in ${duration}s:`, JSON.stringify(result))
+
+    return new Response(JSON.stringify(result), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
 
   } catch (err) {
-    console.error('Pipeline error:', err)
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500, headers: { 'Content-Type': 'application/json' }
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[fetch-satellite-data] Pipeline fatal error:', msg)
+    return new Response(JSON.stringify({ error: msg }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
   }
 })

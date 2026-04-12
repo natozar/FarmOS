@@ -25,9 +25,16 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 
 - `participantes` — leads da landing page (nome, email, telefone, desafio, origem)
 - `profiles` — extensão de auth.users (trigger auto-cria no signup)
-- `properties` — propriedades rurais com geometria PostGIS (MultiPolygon), CAR code, centroide, área
+- `properties` — propriedades rurais com geometria PostGIS (MultiPolygon), CAR code, centroide, área, crop_type (ADR-004)
 - `satellite_readings` — leituras de satélite (NDVI, EVI, NDWI) por propriedade
 - `alerts` — alertas automáticos baseados em leituras
+- `field_logs` — diário de campo (ADR-002): registros textuais por propriedade com author_id e photo_url
+- `property_managers` — relação proprietário→gestor (ADR-003): manager_email, manager_user_id (preenchido no primeiro login), role (gestor/agronomo/tecnico)
+
+### Colunas adicionadas (PROMPT-16)
+
+- `satellite_readings`: +`evi` (numeric), +`ndwi` (numeric), +`classification` (varchar), +`raw_data` (jsonb)
+- `alerts`: +`type` (varchar), +`severity` (varchar, default 'warning'), +`message` (text), +`data` (jsonb), +`resolved` (boolean, default false)
 
 ### RPCs
 
@@ -35,8 +42,27 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 - `get_properties_geojson(p_user_id)` — retorna propriedades com geometria como GeoJSON
 - `count_leads_agruai()` — conta participantes (badge da landing)
 - `get_dashboard_data(p_user_id)` — dados do dashboard
-- `handle_new_user()` — trigger que cria profile no signup
+- `get_all_active_properties_for_satellite()` — retorna propriedades ativas com geometria GeoJSON (SECURITY DEFINER, usada pela Edge Function)
+- `get_dashboard_overview(p_user_id)` — overview com último NDVI/EVI/NDWI, leitura anterior, alertas pendentes (SECURITY DEFINER)
+- `get_satellite_history(p_property_id, p_limit)` — histórico de leituras para gráficos (SECURITY DEFINER)
+- `get_property_alerts(p_property_id)` — alertas da propriedade (SECURITY DEFINER)
+- `handle_new_user()` — trigger que cria profile no signup (SECURITY DEFINER, SET search_path = public)
 - `calculate_centroid()` — trigger que calcula centroide e área da geometria
+- `get_field_logs(p_property_id, p_limit)` — logs do diário de campo com nome do autor (SECURITY DEFINER)
+- `get_property_timeline(p_property_id, p_limit)` — timeline mista: logs + alertas ordenados por data (SECURITY DEFINER)
+- `get_property_managers(p_property_id)` — lista gestores convidados de uma propriedade (SECURITY DEFINER)
+- `get_managed_properties(p_user_email)` — propriedades onde o email é gestor (SECURITY DEFINER)
+- `link_manager_on_login()` — trigger: vincula manager_user_id quando gestor cria conta (SECURITY DEFINER)
+
+### Extensões PostgreSQL
+
+- `postgis` — geometrias e funções geoespaciais
+- `pg_cron` — agendamento de jobs (habilitado em 2025-04-11)
+- `pg_net` — chamadas HTTP assíncronas de dentro do PostgreSQL (habilitado em 2025-04-11)
+
+### Edge Functions
+
+- `fetch-satellite-data` — busca dados Copernicus para propriedades ativas, grava em satellite_readings, gera alertas. Agendada via pg_cron diariamente às 10:00 UTC (07:00 BRT).
 
 ### RLS
 
@@ -99,19 +125,23 @@ Fontes: Space Grotesk (headings), Inter (body). Tema escuro.
 | PROMPT-11 | Fix API key + limpeza de arquivos obsoletos | Executado |
 | PROMPT-12 | Enriquecer LP (seções, FAQ, SEO, mockup) | Executado |
 | PROMPT-13 | Popup inteligente de instalação PWA na landing | Executado |
-| PROMPT-14 | Pipeline de satélite (Edge Function + Copernicus) | Criado (requer conta Copernicus) |
+| PROMPT-14 | Pipeline de satélite (Edge Function + Copernicus) | Executado |
 | PROMPT-15 | Exibir dados de satélite no painel (NDVI, gráficos, alertas) | Criado (depende do PROMPT-14) |
+| PROMPT-16 | Executar SQL (colunas, RPCs, pg_cron) | Executado |
+| PROMPT-17 | Teste completo de produção | Criado (próximo passo) |
+| PROMPT-18 | Fix trigger handle_new_user (signup 500) | Executado |
 
 Prompts executados e removidos do repo: 07 (migração Supabase), 09 (desativar clube-prime), 10 (fix API key).
 
 ## Histórico de incidentes
 
 - **API key com typo:** A anon key do Supabase tinha 1 caractere errado (posição 80 do JWT: `2` em vez de `v`), herdado de extração via Chrome que bloqueava JWTs. Corrigido no PROMPT-11. A versão deployada do painel.html nunca teve o erro — o Code gerou a key correta independentemente.
+- **Signup 500 (trigger sem SECURITY DEFINER):** O trigger `handle_new_user` falhava ao inserir em `profiles` porque o RLS bloqueava o INSERT feito pelo contexto de auth. Corrigido no PROMPT-18 adicionando `SECURITY DEFINER` e `SET search_path = public`. Policies de profiles: `users_own_profile` (ALL) + `allow_trigger_insert` (INSERT).
 
 ## Próximos passos
 
-1. **PROMPT-14 — Pipeline de satélite** — Renato cria conta no Copernicus, gera OAuth credentials, depois executa no Code. Edge Function `fetch-satellite-data` + pg_cron diário.
-2. **PROMPT-15 — Dados de satélite no painel** — Após pipeline funcionar, executar para mostrar NDVI nos cards, colorir mapa, gráficos temporais, tela de alertas.
+1. **PROMPT-17 — Teste completo de produção** — Lighthouse, Playwright, verificação de secrets, RPCs, Edge Function com resposta JSON completa.
+2. **PROMPT-15 — Dados de satélite no painel** — Mostrar NDVI nos cards, colorir mapa por saúde, gráficos temporais, tela de alertas.
 3. **Google Auth** — Login social no painel (OAuth Google via Supabase).
 4. **Notificações push** — Quando alerta é criado, enviar push notification via service worker.
 5. **Pausar clube-prime** — Acessar dashboard Supabase e pausar projeto antigo (manual).
