@@ -222,6 +222,12 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .inv-card-unit{font-size:.65rem;color:var(--muted);font-weight:400}
 .inv-low{color:var(--red)}
 
+/* Financial risk */
+.risk-value-tag{display:block;font-family:'Space Grotesk',sans-serif;font-size:.82rem;font-weight:700;color:var(--red);margin-top:6px;padding:5px 10px;background:rgba(196,90,74,.08);border:1px solid rgba(196,90,74,.15);border-radius:var(--radius-sm);line-height:1.3}
+.risk-value-tag .risk-label{font-size:.65rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:1px}
+.prop-card-risk{border-left:3px solid var(--red)}
+.alert-risk{font-family:'Space Grotesk',sans-serif;font-size:.85rem;font-weight:700;color:var(--red);margin-top:4px}
+
 /* Offline sync status */
 .sync-status{font-size:.58rem;font-weight:600;padding:1px 7px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;margin-left:4px}
 .sync-status.pending{background:rgba(168,158,144,.12);color:var(--muted)}
@@ -546,6 +552,18 @@ function getCropMeta(val){return CROP_TYPES.find(function(c){return c.value===va
 function getCropIcon(val){var m=getCropMeta(val);return m?m.icon:'🌱'}
 function getCropLabel(val){var m=getCropMeta(val);return m?m.label:'—'}
 
+function calcFinancialRisk(p){
+var hasNDVI=p.last_ndvi!=null;if(!hasNDVI||!p.area_ha)return 0;
+var cls=p.last_classification||'';
+if(cls!=='critical'&&cls!=='stressed')return 0;
+var riskPct=cls==='critical'?0.35:0.15;
+var areaRisco=p.area_ha*riskPct;
+var crop=getCropMeta(p.crop_type);
+if(!crop||!crop.sacaValor||crop.sacaValor<=0){
+if(crop&&crop.value==='pastagem')return Math.round(areaRisco*800);
+return Math.round(areaRisco*500)}
+return Math.round(areaRisco*crop.prodHa*crop.sacaValor)}
+
 function buildRiskCard(p){
 var hasNDVI=p.last_ndvi!=null;if(!hasNDVI||!p.area_ha)return'';
 var ndvi=p.last_ndvi;var cls=p.last_classification||'';
@@ -581,13 +599,19 @@ State.propriedades=owned.concat(managed);State.isManager=managed.length>0&&owned
 async function renderPropriedades(){var c=document.getElementById('propContent');c.innerHTML='<h2 class="page-title">Minhas Propriedades</h2><div style="text-align:center;padding:20px"><div class="spinner"></div></div>';
 var props=await carregarPropriedades();
 if(props.length===0){c.innerHTML='<h2 class="page-title">Minhas Propriedades</h2><div class="empty-state"><div class="empty-icon">🛰️</div><h3 class="empty-title">Nenhuma propriedade cadastrada</h3><p class="empty-desc">Cadastre sua primeira propriedade para começar o monitoramento por satélite.</p><button class="btn-primary" style="max-width:280px;margin:0 auto" onclick="navegarPara(\'cadastro\')">+ Cadastrar Propriedade</button></div>';return}
+props.forEach(function(p){p._risk=calcFinancialRisk(p)});
+props.sort(function(a,b){return b._risk-a._risk});
+var totalRisk=props.reduce(function(s,p){return s+p._risk},0);
 var html='<h2 class="page-title">Minhas Propriedades</h2>';
+if(totalRisk>0){html+='<div style="padding:12px 16px;background:rgba(196,90,74,.06);border:1px solid rgba(196,90,74,.15);border-radius:var(--radius-sm);margin-bottom:16px;text-align:center"><span style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Risco total estimado</span><div style="font-family:Space Grotesk,sans-serif;font-size:1.4rem;font-weight:700;color:var(--red);margin-top:2px">R$ '+formatarNumero(totalRisk)+'</div><span style="font-size:.68rem;color:var(--muted)">Ordenado por prejuízo decrescente</span></div>'}
 props.forEach(function(p){var pid=p.property_id||p.id;var areaStr=p.area_ha?formatarNumero(Math.round(p.area_ha))+' ha':'';var hasNDVI=p.last_ndvi!=null;var cls=p.last_classification||'';
 var ndviHTML='';if(hasNDVI){var delta='';if(p.prev_ndvi!=null){var d=p.last_ndvi-p.prev_ndvi;delta='<span class="ndvi-delta '+(d>=0?'up':'down')+'">'+(d>=0?'+':'')+d.toFixed(2)+'</span>'}ndviHTML='<div class="ndvi-row"><div class="ndvi-bar-v" style="background:'+getNDVIHex(cls)+'"></div><div class="ndvi-info"><span class="ndvi-value" style="color:'+getNDVIColor(cls)+'">'+p.last_ndvi.toFixed(2)+'</span> <span class="ndvi-class" style="color:'+getNDVIColor(cls)+'">'+getNDVILabel(cls)+'</span>'+delta+'<span class="ndvi-date">'+diasAtras(p.last_reading_date)+'</span></div></div>'}else{ndviHTML='<div class="ndvi-row"><div class="ndvi-bar-v" style="background:var(--muted)"></div><div class="ndvi-info"><span class="ndvi-value" style="color:var(--muted)">—</span> <span class="ndvi-class" style="color:var(--muted)">Aguardando satélite</span><span class="ndvi-date">Primeira leitura em até 5 dias</span></div></div>'}
 var alertBadge=p.pending_alerts>0?'<span class="prop-alerts">⚠️ '+p.pending_alerts+'</span>':'';var badge=hasNDVI?'<span class="prop-badge ok">🛰️ Monitorando</span>':'<span class="prop-badge pendente">⏳ Pendente</span>';
 if(p._managed)badge+=' <span class="prop-badge pendente" style="color:var(--gold);background:rgba(197,165,114,.1)">Gestor'+(p._role&&p._role!=='gestor'?' · '+p._role:'')+'</span>';
 var cropBadge=p.crop_type?'<span class="crop-badge"><span class="crop-badge-icon">'+getCropIcon(p.crop_type)+'</span>'+getCropLabel(p.crop_type)+'</span> ':'';
-html+='<div class="prop-card" onclick="State.selectedProperty=\''+pid+'\';navegarPara(\'detalhe\')"><div class="prop-header"><div class="prop-nome">'+p.nome+'</div><div class="prop-area">'+areaStr+'</div></div><div class="prop-meta">'+p.municipio+'/'+p.estado+(p.car_code?' · CAR: '+p.car_code.substring(0,15)+'...':'')+'</div>'+ndviHTML+cropBadge+badge+alertBadge+'</div>'});
+var riskTag=p._risk>0?'<div class="risk-value-tag"><span class="risk-label">Risco projetado</span>R$ '+formatarNumero(p._risk)+'</div>':'';
+var cardClass=p._risk>0?'prop-card prop-card-risk':'prop-card';
+html+='<div class="'+cardClass+'" onclick="State.selectedProperty=\''+pid+'\';navegarPara(\'detalhe\')"><div class="prop-header"><div class="prop-nome">'+p.nome+'</div><div class="prop-area">'+areaStr+'</div></div><div class="prop-meta">'+p.municipio+'/'+p.estado+(p.car_code?' · CAR: '+p.car_code.substring(0,15)+'...':'')+'</div>'+ndviHTML+riskTag+cropBadge+badge+alertBadge+'</div>'});
 html+='<button class="btn-primary" style="margin-top:16px" onclick="navegarPara(\'cadastro\')">+ Cadastrar Propriedade</button>';c.innerHTML=html}
 
 /* ========== DETALHE ========== */
@@ -718,7 +742,11 @@ fecharModalConvite();loadGestores(State.selectedProperty)}catch(e){toast('Erro: 
 async function removerGestor(id){try{var r=await sb.from('property_managers').delete().eq('id',id);if(r.error)throw r.error;toast('Gestor removido','ok');if(State.selectedProperty)loadGestores(State.selectedProperty)}catch(e){toast('Erro ao remover','erro')}}
 
 /* ========== ALERTAS ========== */
-async function renderAlertas(){var c=document.getElementById('alertasContent');c.innerHTML='<h2 class="page-title">Alertas</h2><div style="text-align:center;padding:20px"><div class="spinner"></div></div>';var props=State.propriedades.length?State.propriedades:await carregarPropriedades();var all=[];for(var i=0;i<props.length;i++){var pid=props[i].property_id||props[i].id;try{var r=await sb.rpc('get_property_alerts',{p_property_id:pid});if(!r.error&&r.data)r.data.forEach(function(a){a.fazenda=props[i].nome;all.push(a)})}catch(e){}}all.sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at)});var pending=all.filter(function(a){return!a.resolved});if(pending.length===0){c.innerHTML='<h2 class="page-title">Alertas</h2><div class="empty-state"><div class="empty-icon">✅</div><h3 class="empty-title">Nenhum alerta pendente</h3><p class="empty-desc">Todas as propriedades estão em dia.</p></div>';return}c.innerHTML='<h2 class="page-title">Alertas ('+pending.length+')</h2>'+pending.map(function(a){var ic=a.severity==='critical'?'critical':'warning';return'<div class="alert-item"><div class="alert-icon '+ic+'">'+(a.severity==='critical'?'🔴':'⚠️')+'</div><div class="alert-text"><div class="alert-msg"><strong>'+a.fazenda+'</strong> — '+a.message+'</div><div class="alert-meta">'+diasAtras(a.created_at)+'</div></div><button class="alert-resolve" onclick="resolverAlerta(\''+a.id+'\')">Resolver</button></div>'}).join('')}
+async function renderAlertas(){var c=document.getElementById('alertasContent');c.innerHTML='<h2 class="page-title">Alertas</h2><div style="text-align:center;padding:20px"><div class="spinner"></div></div>';var props=State.propriedades.length?State.propriedades:await carregarPropriedades();var all=[];for(var i=0;i<props.length;i++){var pid=props[i].property_id||props[i].id;var propRisk=calcFinancialRisk(props[i]);try{var r=await sb.rpc('get_property_alerts',{p_property_id:pid});if(!r.error&&r.data)r.data.forEach(function(a){a.fazenda=props[i].nome;a._risk=propRisk;all.push(a)})}catch(e){}}
+all.sort(function(a,b){return b._risk-a._risk||new Date(b.created_at)-new Date(a.created_at)});
+var pending=all.filter(function(a){return!a.resolved});if(pending.length===0){c.innerHTML='<h2 class="page-title">Alertas</h2><div class="empty-state"><div class="empty-icon">✅</div><h3 class="empty-title">Nenhum alerta pendente</h3><p class="empty-desc">Todas as propriedades estão em dia.</p></div>';return}
+var totalRisk=pending.reduce(function(s,a){return s+a._risk},0);
+c.innerHTML='<h2 class="page-title">Alertas ('+pending.length+')</h2>'+(totalRisk>0?'<div style="padding:10px 14px;background:rgba(196,90,74,.06);border:1px solid rgba(196,90,74,.15);border-radius:var(--radius-sm);margin-bottom:14px;text-align:center;font-size:.72rem;color:var(--muted)">Ordenado por <strong style="color:var(--red)">prejuízo decrescente</strong></div>':'')+pending.map(function(a){var ic=a.severity==='critical'?'critical':'warning';var riskLine=a._risk>0?'<div class="alert-risk">RISCO: - R$ '+formatarNumero(a._risk)+' projetados</div>':'';return'<div class="alert-item"><div class="alert-icon '+ic+'">'+(a.severity==='critical'?'🔴':'⚠️')+'</div><div class="alert-text"><div class="alert-msg"><strong>'+a.fazenda+'</strong> — '+a.message+'</div>'+riskLine+'<div class="alert-meta">'+diasAtras(a.created_at)+'</div></div><button class="alert-resolve" onclick="resolverAlerta(\''+a.id+'\')">Resolver</button></div>'}).join('')}
 
 /* ========== CADASTRO ========== */
 var ESTADOS=['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
