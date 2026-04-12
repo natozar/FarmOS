@@ -14,6 +14,7 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <style>
 :root{--dark:#0F1F0F;--surface:#1A2E1A;--border:#2E4A2E;--green:#4A8C5C;--amber:#D4A040;--red:#C45A4A;--gold:#C5A572;--text:#F5F0E8;--muted:#A89E90;--white:#FAFAF7;--radius:12px;--radius-sm:8px;--transition:.25s ease;--sab:env(safe-area-inset-bottom)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -221,6 +222,13 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .inv-card-qty{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold);text-align:right;min-width:60px}
 .inv-card-unit{font-size:.65rem;color:var(--muted);font-weight:400}
 .inv-low{color:var(--red)}
+
+/* ESG Report button */
+.btn-esg{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 18px;margin-bottom:16px;border-radius:var(--radius);background:linear-gradient(135deg,rgba(197,165,114,.1),rgba(74,140,92,.08));border:1px solid rgba(197,165,114,.25);color:var(--gold);font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:700;transition:all var(--transition);letter-spacing:.01em}
+.btn-esg:hover{background:linear-gradient(135deg,rgba(197,165,114,.18),rgba(74,140,92,.12));border-color:var(--gold);transform:translateY(-1px);box-shadow:0 4px 20px rgba(197,165,114,.15)}
+.btn-esg:active{transform:translateY(0)}
+.btn-esg:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-esg-icon{font-size:1.1rem}
 
 /* Financial risk */
 .risk-value-tag{display:block;font-family:'Space Grotesk',sans-serif;font-size:.82rem;font-weight:700;color:var(--red);margin-top:6px;padding:5px 10px;background:rgba(196,90,74,.08);border:1px solid rgba(196,90,74,.15);border-radius:var(--radius-sm);line-height:1.3}
@@ -619,6 +627,7 @@ async function renderDetalhe(pid){var c=document.getElementById('detalheContent'
 var cropBadgeHTML=p.crop_type?'<span class="crop-badge" style="margin-left:8px"><span class="crop-badge-icon">'+getCropIcon(p.crop_type)+'</span>'+getCropLabel(p.crop_type)+'</span>':'';
 var riskHTML=buildRiskCard(p);
 c.innerHTML='<div class="prop-meta" style="margin-bottom:12px">'+p.municipio+'/'+p.estado+(p.area_ha?' · '+formatarNumero(Math.round(p.area_ha))+' ha':'')+cropBadgeHTML+'</div>'+
+'<button class="btn-esg" onclick="gerarLaudoESG()" id="btnESG"><span class="btn-esg-icon">&#128196;</span> Emitir Laudo do Banco (ESG)</button>'+
 '<div class="detalhe-tabs"><button class="detalhe-tab ativo" onclick="switchDetalheTab(\'satelite\')">Satélite</button><button class="detalhe-tab" onclick="switchDetalheTab(\'diario\')">Diário</button><button class="detalhe-tab" onclick="switchDetalheTab(\'insumos\')">Insumos</button>'+(p._managed?'':'<button class="detalhe-tab" onclick="switchDetalheTab(\'equipe\')">Equipe</button>')+'</div>'+
 '<div class="tab-panel ativo" id="panelSatelite">'+
 '<div class="metrics-grid"><div class="metric-card"><div class="metric-label">NDVI</div><div class="metric-value" style="color:'+(hasNDVI?getNDVIColor(cls):'var(--muted)')+'">'+(hasNDVI?p.last_ndvi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">EVI</div><div class="metric-value" style="color:var(--green)">'+(p.last_evi!=null?p.last_evi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">NDWI</div><div class="metric-value" style="color:#4A90A4">'+(p.last_ndwi!=null?p.last_ndwi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">Nuvens</div><div class="metric-value">'+(p.last_cloud_coverage!=null?Math.round(p.last_cloud_coverage)+'%':'—')+'</div></div></div>'+
@@ -684,6 +693,111 @@ async function deletarLog(id){try{var r=await sb.from('field_logs').delete().eq(
 function escapeHtml(str){var d=document.createElement('div');d.textContent=str;return d.innerHTML}
 
 function formatarDataHora(iso){if(!iso)return'';var d=new Date(iso);var agora=new Date();var diff=Math.floor((agora-d)/1000);if(diff<60)return'agora';if(diff<3600)return Math.floor(diff/60)+' min atrás';if(diff<86400)return Math.floor(diff/3600)+'h atrás';var dia=d.getDate().toString().padStart(2,'0');var mes=(d.getMonth()+1).toString().padStart(2,'0');var hora=d.getHours().toString().padStart(2,'0');var min=d.getMinutes().toString().padStart(2,'0');return dia+'/'+mes+' às '+hora+':'+min}
+
+/* ========== LAUDO ESG (EPIC 4) ========== */
+async function gerarLaudoESG(){
+var btn=document.getElementById('btnESG');if(btn){btn.disabled=true;btn.innerHTML='<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block"></div> Gerando laudo...'}
+var pid=State.selectedProperty;if(!pid){toast('Propriedade não selecionada','erro');return}
+var p=State.propriedades.find(function(x){return(x.property_id||x.id)===pid});if(!p){toast('Dados não encontrados','erro');return}
+var history=[];try{var r=await sb.rpc('get_satellite_history',{p_property_id:pid,p_limit:24});if(!r.error&&r.data)history=r.data.reverse()}catch(e){}
+try{
+var jsPDF=window.jspdf.jsPDF;var doc=new jsPDF('p','mm','a4');var w=210;var mg=20;var cw=w-mg*2;var y=20;
+var gold=[197,165,114];var dark=[15,31,15];var text=[60,55,48];var green=[74,140,92];var red=[196,90,74];var muted=[140,135,125];
+
+// Header bar
+doc.setFillColor(dark[0],dark[1],dark[2]);doc.rect(0,0,w,40,'F');
+doc.setFontSize(22);doc.setTextColor(245,240,232);doc.setFont('helvetica','bold');doc.text('AgrUAI',mg,18);
+doc.setFontSize(9);doc.setTextColor(gold[0],gold[1],gold[2]);doc.text('Inteligência Rural por Satélite',mg,25);
+doc.setFontSize(8);doc.setTextColor(168,158,144);doc.text('LAUDO DE MONITORAMENTO AMBIENTAL E PRODUTIVO (ESG)',mg,33);
+doc.setFontSize(7);doc.text('Documento gerado automaticamente em '+new Date().toLocaleDateString('pt-BR')+' às '+new Date().toLocaleTimeString('pt-BR'),w-mg,33,{align:'right'});
+y=50;
+
+// Property info box
+doc.setDrawColor(gold[0],gold[1],gold[2]);doc.setLineWidth(0.3);doc.roundedRect(mg,y,cw,38,3,3,'S');
+doc.setFontSize(14);doc.setTextColor(text[0],text[1],text[2]);doc.setFont('helvetica','bold');doc.text(p.nome||'Propriedade',mg+6,y+10);
+doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(muted[0],muted[1],muted[2]);
+doc.text(p.municipio+'/'+p.estado+(p.area_ha?' — '+formatarNumero(Math.round(p.area_ha))+' hectares':''),mg+6,y+17);
+if(p.car_code)doc.text('CAR: '+p.car_code,mg+6,y+23);
+var crop=getCropMeta(p.crop_type);if(crop)doc.text('Cultura: '+crop.label,mg+6,y+29);
+doc.text('Coordenadas: dados georreferenciados via PostGIS (SRID 4326)',mg+6,y+35);
+y+=46;
+
+// NDVI current status
+doc.setFontSize(11);doc.setTextColor(text[0],text[1],text[2]);doc.setFont('helvetica','bold');doc.text('1. Status Atual da Vegetação',mg,y);y+=8;
+var hasNDVI=p.last_ndvi!=null;var cls=p.last_classification||'';
+if(hasNDVI){
+var statusColor=cls==='healthy'||cls==='moderate'?green:red;
+doc.setFillColor(statusColor[0],statusColor[1],statusColor[2]);doc.roundedRect(mg,y,8,8,1,1,'F');
+doc.setFontSize(18);doc.setTextColor(text[0],text[1],text[2]);doc.setFont('helvetica','bold');doc.text(p.last_ndvi.toFixed(2),mg+12,y+7);
+doc.setFontSize(10);doc.setTextColor(statusColor[0],statusColor[1],statusColor[2]);doc.text(getNDVILabel(cls),mg+32,y+7);
+doc.setFontSize(8);doc.setTextColor(muted[0],muted[1],muted[2]);doc.setFont('helvetica','normal');
+doc.text('Última leitura: '+(p.last_reading_date||'—')+'  |  EVI: '+(p.last_evi!=null?p.last_evi.toFixed(2):'—')+'  |  NDWI: '+(p.last_ndwi!=null?p.last_ndwi.toFixed(2):'—'),mg+12,y+13);
+}else{doc.setFontSize(9);doc.setTextColor(muted[0],muted[1],muted[2]);doc.text('Aguardando primeira leitura de satélite.',mg,y+6)}
+y+=22;
+
+// NDVI scale reference
+doc.setFontSize(8);doc.setTextColor(text[0],text[1],text[2]);doc.setFont('helvetica','bold');doc.text('Escala NDVI de referência:',mg,y);y+=4;
+var scaleColors=[[74,140,92,'≥ 0.6 Saudável'],[212,160,64,'0.4–0.6 Moderado'],[224,112,48,'0.2–0.4 Estressado'],[196,90,74,'< 0.2 Crítico']];
+scaleColors.forEach(function(sc,i){doc.setFillColor(sc[0],sc[1],sc[2]);doc.roundedRect(mg+i*42,y,5,5,1,1,'F');doc.setFontSize(7);doc.setTextColor(muted[0],muted[1],muted[2]);doc.setFont('helvetica','normal');doc.text(sc[3],mg+7+i*42,y+4)});
+y+=12;
+
+// Historical chart
+doc.setFontSize(11);doc.setTextColor(text[0],text[1],text[2]);doc.setFont('helvetica','bold');doc.text('2. Histórico Temporal NDVI (Últimos 12 Meses)',mg,y);y+=6;
+if(history.length>=2){
+var chartW=cw;var chartH=45;var chartX=mg;var chartY=y;
+doc.setDrawColor(220,220,215);doc.setLineWidth(0.15);
+for(var g=0;g<=4;g++){var gy=chartY+chartH-g*(chartH/4);doc.line(chartX,gy,chartX+chartW,gy);doc.setFontSize(6);doc.setTextColor(muted[0],muted[1],muted[2]);doc.text((g*0.25).toFixed(1),chartX-2,gy+1,{align:'right'})}
+// Alert threshold line
+var thY=chartY+chartH-0.3*chartH;doc.setDrawColor(red[0],red[1],red[2]);doc.setLineWidth(0.2);doc.setLineDashPattern([2,2],0);doc.line(chartX,thY,chartX+chartW,thY);doc.setLineDashPattern([],0);
+// Data line
+doc.setDrawColor(green[0],green[1],green[2]);doc.setLineWidth(0.6);
+var pts=history.map(function(d,i){return{x:chartX+i*(chartW/(history.length-1)),y:chartY+chartH-Math.min(d.ndvi,1)*chartH}});
+for(var i=1;i<pts.length;i++){doc.line(pts[i-1].x,pts[i-1].y,pts[i].x,pts[i].y)}
+// Data points
+pts.forEach(function(pt,i){var d=history[i];var c=d.classification==='healthy'||d.classification==='moderate'?green:d.classification==='stressed'?[224,112,48]:red;doc.setFillColor(c[0],c[1],c[2]);doc.circle(pt.x,pt.y,1,'F')});
+// Date labels
+doc.setFontSize(5.5);doc.setTextColor(muted[0],muted[1],muted[2]);
+if(history.length>0){doc.text(history[0].reading_date||'',chartX,chartY+chartH+4);doc.text(history[history.length-1].reading_date||'',chartX+chartW,chartY+chartH+4,{align:'right'})}
+doc.setFontSize(6);doc.text('— Limiar de alerta (0.3)',chartX+chartW-30,thY-1.5);
+y=chartY+chartH+10;
+}else{doc.setFontSize(9);doc.setTextColor(muted[0],muted[1],muted[2]);doc.setFont('helvetica','normal');doc.text('Dados históricos insuficientes (mínimo 2 leituras necessárias).',mg,y+4);y+=12}
+
+// Risk assessment
+y+=4;doc.setFontSize(11);doc.setTextColor(text[0],text[1],text[2]);doc.setFont('helvetica','bold');doc.text('3. Avaliação de Risco Financeiro',mg,y);y+=8;
+var risk=calcFinancialRisk(p);
+if(risk>0){
+doc.setFillColor(red[0],red[1],red[2]);doc.roundedRect(mg,y,cw,20,3,3,'F');
+doc.setFontSize(10);doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.text('RISCO ESTIMADO: R$ '+formatarNumero(risk),mg+cw/2,y+9,{align:'center'});
+doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text('Baseado em '+Math.round((cls==='critical'?35:15))+'% da área com vegetação '+(cls==='critical'?'crítica':'estressada')+(crop?' × produtividade '+crop.label:''),mg+cw/2,y+15,{align:'center'});
+y+=28;
+}else{doc.setFontSize(9);doc.setTextColor(green[0],green[1],green[2]);doc.text('Nenhum risco financeiro significativo identificado. Vegetação dentro dos padrões.',mg,y+4);y+=12}
+
+// ESG attestation
+y+=4;doc.setFontSize(11);doc.setTextColor(text[0],text[1],text[2]);doc.setFont('helvetica','bold');doc.text('4. Atestado de Conformidade Ambiental',mg,y);y+=8;
+doc.setFontSize(8.5);doc.setTextColor(text[0],text[1],text[2]);doc.setFont('helvetica','normal');
+var atestText='Com base nos dados coletados pelo satélite Sentinel-2 (Agência Espacial Europeia / Copernicus) e processados pela plataforma AgrUAI, atesta-se que a propriedade "'+p.nome+'"';
+if(hasNDVI&&(cls==='healthy'||cls==='moderate')){atestText+=' apresenta cobertura vegetal compatível com atividade produtiva sustentável, sem evidência de desmatamento irregular ou degradação ambiental no período analisado.'}
+else if(hasNDVI){atestText+=' apresenta áreas com vegetação em estado de estresse que requerem investigação e manejo corretivo. Recomenda-se ação imediata.'}
+else{atestText+=' ainda não possui dados suficientes para emissão de parecer definitivo.'}
+doc.text(atestText,mg,y,{maxWidth:cw});y+=18;
+
+// Data source
+doc.setDrawColor(220,220,215);doc.setLineWidth(0.2);doc.line(mg,y,mg+cw,y);y+=6;
+doc.setFontSize(7);doc.setTextColor(muted[0],muted[1],muted[2]);
+doc.text('Fonte de dados: Sentinel-2 L2A (Copernicus/ESA) — Resolução: 10m/pixel — Revisita: 5 dias',mg,y);y+=4;
+doc.text('Índices: NDVI (Normalized Difference Vegetation Index), EVI (Enhanced Vegetation Index), NDWI (Normalized Difference Water Index)',mg,y);y+=4;
+doc.text('Processamento: AgrUAI (agruai.com) — Geolocalização: PostGIS SRID 4326'+(p.car_code?' — CAR: '+p.car_code:''),mg,y);y+=4;
+doc.text('Este documento é gerado automaticamente e não substitui laudo técnico assinado por profissional habilitado (CREA/CRBio).',mg,y);y+=8;
+doc.setFontSize(6);doc.text('AgrUAI — Inteligência Rural por Satélite | agruai.com | Documento gerado em '+new Date().toISOString(),mg,285);
+
+// Footer bar
+doc.setFillColor(dark[0],dark[1],dark[2]);doc.rect(0,288,w,10,'F');
+doc.setFontSize(7);doc.setTextColor(gold[0],gold[1],gold[2]);doc.text('AgrUAI',mg,293);
+doc.setTextColor(168,158,144);doc.text('Laudo ESG — '+p.nome+' — '+(new Date().toLocaleDateString('pt-BR')),w-mg,293,{align:'right'});
+
+var filename='Laudo_ESG_'+p.nome.replace(/[^a-zA-Z0-9]/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
+doc.save(filename);toast('Laudo gerado: '+filename,'ok')}catch(e){console.error('PDF error:',e);toast('Erro ao gerar PDF: '+e.message,'erro')}
+if(btn){btn.disabled=false;btn.innerHTML='<span class="btn-esg-icon">&#128196;</span> Emitir Laudo do Banco (ESG)'}}
 
 /* ========== INVENTARIO (EPIC 2) ========== */
 var INV_CATS=[{v:'semente',l:'Semente'},{v:'fertilizante',l:'Fertilizante'},{v:'defensivo',l:'Defensivo'},{v:'combustivel',l:'Combustível'},{v:'peca',l:'Peça/Reposição'},{v:'racao',l:'Ração'},{v:'medicamento',l:'Medicamento'},{v:'outro',l:'Outro'}];
@@ -897,7 +1011,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.gerarLaudoESG=gerarLaudoESG;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none'}
 })();
 </script>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agruai-v4';
+const CACHE_NAME = 'agruai-v5';
 const STATIC_ASSETS = [
   './',
   './painel.html',
@@ -11,7 +11,8 @@ const STATIC_ASSETS = [
   'https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css',
   'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.js',
   'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.css',
-  'https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js'
+  'https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js'
 ];
 
 const FONT_CACHE = 'agruai-fonts-v1';
