@@ -83,7 +83,7 @@ RETURNS TABLE (
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM auth.users WHERE id = auth.uid()
-    AND email IN ('fazendeiro.teste@agruai.com','renato@agruai.com','admin@agruai.com')
+    AND email IN ('chatsagrado@gmail.com','fazendeiro.teste@agruai.com')
   ) THEN
     RAISE EXCEPTION 'Acesso negado';
   END IF;
