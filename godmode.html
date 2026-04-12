@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>AgrUAI — God Mode</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#08090a;--surface:#0e1012;--border:#1a1d22;--green:#4A8C5C;--red:#C45A4A;--gold:#C5A572;--text:#c8c8c8;--dim:#555;--mono:'SF Mono','Fira Code','Consolas',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--mono);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;min-height:100vh}
+::selection{background:rgba(197,165,114,.2)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#222;border-radius:3px}
+
+/* AUTH */
+.auth-gate{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:40px 32px;max-width:360px;width:100%;text-align:center}
+.auth-box h1{font-size:14px;color:var(--gold);margin-bottom:4px;letter-spacing:.1em;text-transform:uppercase}
+.auth-box .sub{font-size:11px;color:var(--dim);margin-bottom:24px}
+.auth-input{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;margin-bottom:8px}
+.auth-input:focus{outline:none;border-color:var(--gold)}
+.auth-btn{width:100%;padding:10px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:var(--mono);font-size:12px;border-radius:4px;cursor:pointer;margin-top:8px;transition:all .2s}
+.auth-btn:hover{background:rgba(197,165,114,.08)}
+.auth-err{font-size:11px;color:var(--red);margin-top:8px;min-height:16px}
+
+/* DASHBOARD */
+.dash{display:none;padding:16px 20px;max-width:1400px;margin:0 auto}
+.dash.ativo{display:block}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:20px}
+.top-bar h1{font-size:13px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase}
+.top-bar .user{font-size:11px;color:var(--dim)}
+.top-bar .logout{font-size:11px;color:var(--dim);cursor:pointer;border:1px solid var(--border);padding:4px 10px;border-radius:3px;background:none;font-family:var(--mono);transition:all .2s}
+.top-bar .logout:hover{border-color:var(--red);color:var(--red)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:16px 14px}
+.stat-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.stat-val{font-size:24px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.stat-val.gold{color:var(--gold)}
+.stat-val.red{color:var(--red)}
+.stat-val.green{color:var(--green)}
+
+/* TABLE */
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.tbl-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+.tbl-header h2{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.tbl-header .count{font-size:11px;color:var(--gold);font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:rgba(255,255,255,.02)}
+th{padding:10px 14px;text-align:left;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid rgba(26,29,34,.6);vertical-align:middle}
+tr:hover td{background:rgba(197,165,114,.02)}
+.t-nome{color:var(--text);font-weight:600}
+.t-prop{color:var(--gold)}
+.t-ha{font-variant-numeric:tabular-nums;color:var(--text);text-align:right}
+.t-ndvi{font-weight:700;font-variant-numeric:tabular-nums}
+.t-ndvi.healthy{color:var(--green)}
+.t-ndvi.moderate{color:#D4A040}
+.t-ndvi.stressed{color:#E07030}
+.t-ndvi.critical{color:var(--red)}
+.t-risk{font-weight:700;color:var(--red);font-variant-numeric:tabular-nums;text-align:right}
+.t-risk.safe{color:var(--dim);font-weight:400}
+.t-login{font-variant-numeric:tabular-nums}
+.t-login.stale{color:var(--red);font-weight:600}
+.t-login.recent{color:var(--green)}
+.risk-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.risk-dot.high{background:var(--red);box-shadow:0 0 8px rgba(196,90,74,.5);animation:pulse 2s infinite}
+.risk-dot.low{background:var(--dim)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.empty-row{text-align:center;padding:40px;color:var(--dim)}
+
+@media(max-width:768px){
+  .stats{grid-template-columns:1fr 1fr}
+  table{font-size:11px}
+  th,td{padding:8px 10px}
+  .dash{padding:12px}
+}
+@media(max-width:480px){
+  .stats{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div class="auth-gate" id="authGate">
+  <div class="auth-box">
+    <h1>God Mode</h1>
+    <div class="sub">AgrUAI Admin — Acesso restrito</div>
+    <input class="auth-input" type="email" id="gmEmail" placeholder="email">
+    <input class="auth-input" type="password" id="gmSenha" placeholder="senha">
+    <button class="auth-btn" id="gmBtn" onclick="gmLogin()">Acessar</button>
+    <div class="auth-err" id="gmErro"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash" id="dashboard">
+  <div class="top-bar">
+    <h1>&#9670; AgrUAI God Mode</h1>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="user" id="gmUser"></span>
+      <button class="logout" onclick="gmLogout()">sair</button>
+    </div>
+  </div>
+
+  <div class="stats" id="statsGrid">
+    <div class="stat"><div class="stat-label">Usuários</div><div class="stat-val" id="sUsers">-</div></div>
+    <div class="stat"><div class="stat-label">Propriedades</div><div class="stat-val gold" id="sProps">-</div></div>
+    <div class="stat"><div class="stat-label">Leads (LP)</div><div class="stat-val green" id="sLeads">-</div></div>
+    <div class="stat"><div class="stat-label">Risco Total (R$)</div><div class="stat-val red" id="sRisk">-</div></div>
+  </div>
+
+  <div class="tbl-wrap">
+    <div class="tbl-header">
+      <h2>Propriedades por Produtor</h2>
+      <span class="count" id="tblCount">carregando...</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Risco</th>
+            <th>Produtor</th>
+            <th>Propriedade</th>
+            <th>Local</th>
+            <th style="text-align:right">Hectares</th>
+            <th>Cultura</th>
+            <th>NDVI</th>
+            <th style="text-align:right">Risco (R$)</th>
+            <th>Último Login</th>
+          </tr>
+        </thead>
+        <tbody id="tblBody">
+          <tr><td colspan="9" class="empty-row">Carregando dados...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+var SUPA_URL='https://kyvbnntoxslrtrsiejzc.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5dmJubnRveHNscnRyc2llanpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjQ1NDcsImV4cCI6MjA5MTQ0MDU0N30.Dx-9SKxWfAoxXg3gzx3NpzJD1taZgkQCCjwDXlY9J6I';
+var sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+
+var ADMIN_EMAILS=['fazendeiro.teste@agruai.com','renato@agruai.com','admin@agruai.com'];
+
+function fmt(n){return n!=null?n.toLocaleString('pt-BR'):'—'}
+
+window.gmLogin=async function(){
+  var email=document.getElementById('gmEmail').value.trim();
+  var senha=document.getElementById('gmSenha').value;
+  var err=document.getElementById('gmErro');err.textContent='';
+  if(!ADMIN_EMAILS.includes(email)){err.textContent='Acesso negado.';return}
+  document.getElementById('gmBtn').disabled=true;
+  try{var r=await sb.auth.signInWithPassword({email:email,password:senha});if(r.error)throw r.error;initDash(r.data.user)}
+  catch(e){err.textContent=e.message==='Invalid login credentials'?'Credenciais inválidas.':e.message}
+  document.getElementById('gmBtn').disabled=false};
+
+window.gmLogout=async function(){await sb.auth.signOut();location.reload()};
+
+async function initDash(user){
+  document.getElementById('authGate').style.display='none';
+  document.getElementById('dashboard').classList.add('ativo');
+  document.getElementById('gmUser').textContent=user.email;
+  loadStats();loadTable()}
+
+async function loadStats(){
+  try{var r=await sb.rpc('admin_stats');if(r.error)throw r.error;var d=r.data[0]||{};
+  document.getElementById('sUsers').textContent=fmt(d.total_users);
+  document.getElementById('sProps').textContent=fmt(d.total_properties);
+  document.getElementById('sLeads').textContent=fmt(d.total_leads);
+  document.getElementById('sRisk').textContent='R$ '+fmt(d.total_risk)}
+  catch(e){console.error('Stats error:',e)}}
+
+async function loadTable(){
+  var tbody=document.getElementById('tblBody');
+  try{var r=await sb.rpc('admin_dashboard_data');if(r.error)throw r.error;var rows=r.data||[];
+  document.getElementById('tblCount').textContent=rows.length+' registros';
+  if(rows.length===0){tbody.innerHTML='<tr><td colspan="9" class="empty-row">Nenhuma propriedade cadastrada.</td></tr>';return}
+  tbody.innerHTML=rows.map(function(row){
+    var risk=row.financial_risk||0;
+    var riskDot=risk>=10000?'<span class="risk-dot high"></span>':'<span class="risk-dot low"></span>';
+    var ndviCls=row.last_classification||'';
+    var ndviVal=row.last_ndvi!=null?row.last_ndvi.toFixed(2):'—';
+    var riskStr=risk>0?'R$ '+fmt(risk):'—';
+    var riskCls=risk>=10000?'t-risk':'t-risk safe';
+    var daysAgo=row.last_sign_in?Math.floor((Date.now()-new Date(row.last_sign_in).getTime())/864e5):999;
+    var loginStr=row.last_sign_in?new Date(row.last_sign_in).toLocaleDateString('pt-BR'):'nunca';
+    var loginCls=daysAgo>7?'t-login stale':daysAgo<=2?'t-login recent':'t-login';
+    var loginWarn=daysAgo>7?' ('+daysAgo+'d)':'';
+    return'<tr>'+
+      '<td>'+riskDot+'</td>'+
+      '<td class="t-nome">'+esc(row.user_nome)+'</td>'+
+      '<td class="t-prop">'+esc(row.property_nome)+'</td>'+
+      '<td>'+(row.municipio||'')+'/'+row.estado+'</td>'+
+      '<td class="t-ha">'+(row.area_ha?fmt(Math.round(row.area_ha)):'—')+'</td>'+
+      '<td>'+(row.crop_type||'—')+'</td>'+
+      '<td class="t-ndvi '+ndviCls+'">'+ndviVal+'</td>'+
+      '<td class="'+riskCls+'">'+riskStr+'</td>'+
+      '<td class="'+loginCls+'">'+loginStr+loginWarn+'</td>'+
+      '</tr>'}).join('')}
+  catch(e){tbody.innerHTML='<tr><td colspan="9" class="empty-row" style="color:var(--red)">Erro: '+esc(e.message)+'. Execute SQL-GODMODE-admin-rpc.sql no Supabase.</td></tr>'}}
+
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+// Auto-login check
+(async function(){var r=await sb.auth.getSession();if(r.data.session){var u=r.data.session.user;if(ADMIN_EMAILS.includes(u.email)){initDash(u)}}})();
+})();
+</script>
+</body>
+</html>
