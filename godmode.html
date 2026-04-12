@@ -214,7 +214,6 @@ var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 var sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storageKey:'agruai-godmode-auth',persistSession:true}});
 
 var GOD_EMAIL='chatsagrado@gmail.com';
-var ADMIN_EMAILS=[GOD_EMAIL,'fazendeiro.teste@agruai.com'];
 
 function fmt(n){return n!=null?n.toLocaleString('pt-BR'):'—'}
 
@@ -270,9 +269,9 @@ async function loadTable(){
       '<td>'+riskDot+'</td>'+
       '<td class="t-nome">'+esc(row.user_nome)+'</td>'+
       '<td class="t-prop">'+esc(row.property_nome)+'</td>'+
-      '<td>'+(row.municipio||'')+'/'+row.estado+'</td>'+
+      '<td>'+esc(row.municipio||'')+'/'+esc(row.estado)+'</td>'+
       '<td class="t-ha">'+(row.area_ha?fmt(Math.round(row.area_ha)):'—')+'</td>'+
-      '<td>'+(row.crop_type||'—')+'</td>'+
+      '<td>'+esc(row.crop_type||'—')+'</td>'+
       '<td class="t-ndvi '+ndviCls+'">'+ndviVal+'</td>'+
       '<td class="'+riskCls+'">'+riskStr+'</td>'+
       '<td class="'+loginCls+'">'+loginStr+loginWarn+'</td>'+
@@ -315,7 +314,6 @@ function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent
 // Auto-login check
 (async function(){
   localStorage.removeItem('sb-kyvbnntoxslrtrsiejzc-auth-token');
-  if('caches' in window){var keys=await caches.keys();await Promise.all(keys.map(function(k){return caches.delete(k)}))}
   var r=await sb.auth.getSession();
   if(r.data.session){var u=r.data.session.user;if(u.email===GOD_EMAIL){initDash(u)}else{await sb.auth.signOut();window.location.href='index.html'}}
 })();
