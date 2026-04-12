@@ -72,8 +72,53 @@ tr:hover td{background:rgba(197,165,114,.02)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .empty-row{text-align:center;padding:40px;color:var(--dim)}
 
+/* VAGAS MVP */
+.vagas-bar{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.vagas-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.vagas-track{flex:1;min-width:120px;height:8px;background:var(--border);border-radius:4px;overflow:hidden;position:relative}
+.vagas-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.vagas-fill.safe{background:var(--green)}
+.vagas-fill.warn{background:var(--gold)}
+.vagas-fill.full{background:var(--red)}
+.vagas-count{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.vagas-count.safe{color:var(--green)}
+.vagas-count.warn{color:var(--gold)}
+.vagas-count.full{color:var(--red)}
+
+/* SECTIONS */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:16px}
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+.section-header h2{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.section-body{padding:0}
+
+/* RECENT USERS */
+.ru-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid rgba(26,29,34,.4);font-size:12px}
+.ru-row:last-child{border-bottom:none}
+.ru-row:hover{background:rgba(197,165,114,.02)}
+.ru-email{color:var(--gold);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ru-nome{color:var(--text);width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ru-date{color:var(--dim);font-size:11px;font-variant-numeric:tabular-nums;width:90px;text-align:right}
+.ru-props{font-size:11px;color:var(--dim);width:50px;text-align:center}
+
+/* ALERT FEED */
+.af-row{padding:10px 16px;border-bottom:1px solid rgba(26,29,34,.4);font-size:11px;line-height:1.5}
+.af-row:last-child{border-bottom:none}
+.af-row:hover{background:rgba(196,90,74,.02)}
+.af-type{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border-radius:3px;margin-right:6px}
+.af-type.new_property{background:rgba(74,140,92,.15);color:var(--green)}
+.af-type.new_user{background:rgba(74,144,164,.15);color:#6AB0C8}
+.af-type.kill_switch{background:rgba(196,90,74,.15);color:var(--red)}
+.af-msg{color:var(--text)}
+.af-time{color:var(--dim);font-size:10px;margin-top:2px}
+
+/* KILL SWITCH */
+.kill-btn{font-size:10px;font-family:var(--mono);padding:3px 8px;border:1px solid var(--border);border-radius:3px;color:var(--dim);background:none;cursor:pointer;transition:all .2s;white-space:nowrap}
+.kill-btn:hover{border-color:var(--red);color:var(--red);background:rgba(196,90,74,.06)}
+.kill-btn.killed{border-color:var(--red);color:var(--red);cursor:default;opacity:.5}
+
 @media(max-width:768px){
   .stats{grid-template-columns:1fr 1fr}
+  #securityGrid{grid-template-columns:1fr!important}
   table{font-size:11px}
   th,td{padding:8px 10px}
   .dash{padding:12px}
@@ -114,6 +159,25 @@ tr:hover td{background:rgba(197,165,114,.02)}
     <div class="stat"><div class="stat-label">Risco Total (R$)</div><div class="stat-val red" id="sRisk">-</div></div>
   </div>
 
+  <!-- VAGAS MVP -->
+  <div class="vagas-bar">
+    <div class="vagas-label">Vagas MVP</div>
+    <div class="vagas-track"><div class="vagas-fill safe" id="vagasFill" style="width:0%"></div></div>
+    <div class="vagas-count safe" id="vagasCount">- / 10</div>
+  </div>
+
+  <!-- GRID: Recent Users + Alert Feed side by side -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px" id="securityGrid">
+    <div class="section">
+      <div class="section-header"><h2>Entradas Recentes (7 dias)</h2></div>
+      <div class="section-body" id="recentUsers"><div class="empty-row" style="padding:20px">Carregando...</div></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><h2>Alertas do Sistema</h2></div>
+      <div class="section-body" id="alertFeed" style="max-height:260px;overflow-y:auto"><div class="empty-row" style="padding:20px">Carregando...</div></div>
+    </div>
+  </div>
+
   <div class="tbl-wrap">
     <div class="tbl-header">
       <h2>Propriedades por Produtor</h2>
@@ -132,6 +196,7 @@ tr:hover td{background:rgba(197,165,114,.02)}
             <th>NDVI</th>
             <th style="text-align:right">Risco (R$)</th>
             <th>Último Login</th>
+            <th>Ação</th>
           </tr>
         </thead>
         <tbody id="tblBody">
@@ -164,25 +229,28 @@ window.gmLogin=async function(){
 
 window.gmLogout=async function(){await sb.auth.signOut();location.reload()};
 
+var MVP_LIMIT=10;
+
 async function initDash(user){
   document.getElementById('authGate').style.display='none';
   document.getElementById('dashboard').classList.add('ativo');
   document.getElementById('gmUser').textContent=user.email;
-  loadStats();loadTable()}
+  loadStats();loadTable();loadRecentUsers();loadAlertFeed()}
 
 async function loadStats(){
   try{var r=await sb.rpc('admin_stats');if(r.error)throw r.error;var d=r.data[0]||{};
   document.getElementById('sUsers').textContent=fmt(d.total_users);
   document.getElementById('sProps').textContent=fmt(d.total_properties);
   document.getElementById('sLeads').textContent=fmt(d.total_leads);
-  document.getElementById('sRisk').textContent='R$ '+fmt(d.total_risk)}
+  document.getElementById('sRisk').textContent='R$ '+fmt(d.total_risk);
+  updateVagas(d.total_users||0)}
   catch(e){console.error('Stats error:',e)}}
 
 async function loadTable(){
   var tbody=document.getElementById('tblBody');
   try{var r=await sb.rpc('admin_dashboard_data');if(r.error)throw r.error;var rows=r.data||[];
   document.getElementById('tblCount').textContent=rows.length+' registros';
-  if(rows.length===0){tbody.innerHTML='<tr><td colspan="9" class="empty-row">Nenhuma propriedade cadastrada.</td></tr>';return}
+  if(rows.length===0){tbody.innerHTML='<tr><td colspan="10" class="empty-row">Nenhuma propriedade cadastrada.</td></tr>';return}
   tbody.innerHTML=rows.map(function(row){
     var risk=row.financial_risk||0;
     var riskDot=risk>=10000?'<span class="risk-dot high"></span>':'<span class="risk-dot low"></span>';
@@ -204,8 +272,39 @@ async function loadTable(){
       '<td class="t-ndvi '+ndviCls+'">'+ndviVal+'</td>'+
       '<td class="'+riskCls+'">'+riskStr+'</td>'+
       '<td class="'+loginCls+'">'+loginStr+loginWarn+'</td>'+
+      '<td><button class="kill-btn" onclick="killProp(\''+row.property_id+'\',this)">KILL</button></td>'+
       '</tr>'}).join('')}
-  catch(e){tbody.innerHTML='<tr><td colspan="9" class="empty-row" style="color:var(--red)">Erro: '+esc(e.message)+'. Execute SQL-GODMODE-admin-rpc.sql no Supabase.</td></tr>'}}
+  catch(e){tbody.innerHTML='<tr><td colspan="10" class="empty-row" style="color:var(--red)">Erro: '+esc(e.message)+'. Execute SQL-GODMODE-admin-rpc.sql e SQL-GODMODE-security.sql no Supabase.</td></tr>'}}
+
+function updateVagas(count){
+  var pct=Math.min(count/MVP_LIMIT*100,100);
+  var cls=count>=MVP_LIMIT?'full':count>=7?'warn':'safe';
+  document.getElementById('vagasFill').style.width=pct+'%';
+  document.getElementById('vagasFill').className='vagas-fill '+cls;
+  document.getElementById('vagasCount').className='vagas-count '+cls;
+  document.getElementById('vagasCount').textContent=count+' / '+MVP_LIMIT}
+
+async function loadRecentUsers(){
+  var el=document.getElementById('recentUsers');
+  try{var r=await sb.rpc('admin_recent_users');if(r.error)throw r.error;var users=r.data||[];
+  if(users.length===0){el.innerHTML='<div class="empty-row" style="padding:16px;font-size:11px">Nenhum cadastro nos últimos 7 dias.</div>';return}
+  el.innerHTML=users.map(function(u){var d=new Date(u.created_at);return'<div class="ru-row"><span class="ru-nome">'+esc(u.nome)+'</span><span class="ru-email">'+esc(u.email)+'</span><span class="ru-props">'+u.property_count+' faz.</span><span class="ru-date">'+d.toLocaleDateString('pt-BR')+'</span></div>'}).join('')}
+  catch(e){el.innerHTML='<div class="empty-row" style="padding:16px;font-size:11px;color:var(--red)">Execute SQL-GODMODE-security.sql</div>'}}
+
+async function loadAlertFeed(){
+  var el=document.getElementById('alertFeed');
+  try{var r=await sb.rpc('admin_alerts_feed',{p_limit:15});if(r.error)throw r.error;var alerts=r.data||[];
+  if(alerts.length===0){el.innerHTML='<div class="empty-row" style="padding:16px;font-size:11px">Nenhum alerta registrado.</div>';return}
+  el.innerHTML=alerts.map(function(a){var d=new Date(a.created_at);var diff=Math.floor((Date.now()-d.getTime())/60000);var ago=diff<60?diff+'min':diff<1440?Math.floor(diff/60)+'h':Math.floor(diff/1440)+'d';
+  return'<div class="af-row"><span class="af-type '+a.event_type+'">'+a.event_type.replace('_',' ')+'</span><span class="af-msg">'+esc(a.message)+'</span><div class="af-time">'+ago+' atrás</div></div>'}).join('')}
+  catch(e){el.innerHTML='<div class="empty-row" style="padding:16px;font-size:11px;color:var(--red)">Execute SQL-GODMODE-security.sql</div>'}}
+
+window.killProp=async function(pid,btn){
+  if(!confirm('KILL SWITCH: Desativar esta propriedade? O usuário perderá acesso imediatamente.'))return;
+  btn.disabled=true;btn.textContent='...';
+  try{var r=await sb.rpc('admin_kill_property',{p_property_id:pid});if(r.error)throw r.error;
+  btn.textContent='KILLED';btn.className='kill-btn killed';loadStats();loadAlertFeed()}
+  catch(e){btn.textContent='ERRO';setTimeout(function(){btn.textContent='KILL';btn.disabled=false},2000)}};
 
 function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
 
