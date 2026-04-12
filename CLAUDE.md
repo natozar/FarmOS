@@ -28,8 +28,8 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 - `properties` — propriedades rurais com geometria PostGIS (MultiPolygon), CAR code, centroide, área, crop_type (ADR-004)
 - `satellite_readings` — leituras de satélite (NDVI, EVI, NDWI) por propriedade
 - `alerts` — alertas automáticos baseados em leituras
-- `field_logs` — diário de campo (ADR-002): registros textuais por propriedade com author_id e photo_url
-- `property_managers` — relação proprietário→gestor (ADR-003): manager_email, manager_user_id (preenchido no primeiro login), role (gestor/agronomo/tecnico)
+- `field_logs` — diário de campo (ADR-002): registros textuais por propriedade com author_id, photo_url, sector (ADR-005)
+- `property_managers` — relação proprietário→profissional (ADR-003/005): manager_email, manager_user_id, role, sector (agronomia/zootecnia/veterinaria/mecanica/operacional/financeiro)
 
 ### Colunas adicionadas (PROMPT-16)
 

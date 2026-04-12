@@ -188,7 +188,15 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .timeline-icon.log{background:rgba(197,165,114,.12);color:var(--gold)}
 .timeline-icon.alert-sat{background:rgba(196,90,74,.12);color:var(--red)}
 .timeline-body{flex:1;min-width:0}
-.timeline-author{font-size:.72rem;font-weight:600;color:var(--gold);margin-bottom:2px}
+.timeline-author{font-size:.72rem;font-weight:600;color:var(--gold);margin-bottom:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sector-badge{font-size:.58rem;font-weight:700;padding:1px 7px;border-radius:8px;text-transform:uppercase;letter-spacing:.04em;line-height:1.6}
+.sector-badge.s-agronomia{background:rgba(74,140,92,.15);color:#6AB87A}
+.sector-badge.s-zootecnia{background:rgba(46,107,62,.18);color:#4A8C5C}
+.sector-badge.s-veterinaria{background:rgba(160,80,160,.12);color:#C080C0}
+.sector-badge.s-mecanica{background:rgba(74,144,164,.15);color:#6AB0C8}
+.sector-badge.s-operacional{background:rgba(197,165,114,.12);color:var(--gold)}
+.sector-badge.s-financeiro{background:rgba(168,158,144,.12);color:var(--muted)}
+.sector-badge.s-satelite{background:rgba(196,90,74,.12);color:var(--red)}
 .timeline-text{font-size:.85rem;color:var(--text);line-height:1.5;word-break:break-word}
 .timeline-time{font-size:.68rem;color:var(--muted);margin-top:4px}
 .timeline-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:.85rem}
@@ -557,6 +565,7 @@ riskHTML+
 '<div class="ndvi-chart"><div class="ndvi-chart-title">Evolução NDVI</div><div id="chartSvg" style="text-align:center;padding:20px;color:var(--muted);font-size:.8rem">Carregando...</div></div>'+
 '<h3 style="font-size:1rem;margin:20px 0 12px">Alertas</h3><div id="detalheAlertas" style="color:var(--muted);font-size:.85rem">Carregando...</div></div>'+
 '<div class="tab-panel" id="panelDiario">'+
+'<div style="margin-bottom:10px"><select class="form-input" id="diarioSector" style="font-size:.8rem;padding:10px 14px">'+sectorOptions('operacional')+'</select></div>'+
 '<div class="diario-input-wrap"><textarea class="diario-input" id="diarioInput" placeholder="O que aconteceu hoje na fazenda?" rows="1" maxlength="1000"></textarea><button class="diario-send" id="btnDiarioSend" onclick="enviarLog()" title="Enviar">&#10148;</button></div>'+
 '<div id="timelineContainer"><div style="text-align:center;padding:20px"><div class="spinner"></div></div></div></div>'+
 (p._managed?'':'<div class="tab-panel" id="panelEquipe"><div class="gestores-title"><span>Gestores e Equipe</span><button class="btn-convidar" onclick="abrirModalConvite()">+ Convidar</button></div><div id="gestoresLista" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>');
@@ -577,14 +586,15 @@ async function loadTimeline(pid){var el=document.getElementById('timelineContain
 try{var r=await sb.rpc('get_property_timeline',{p_property_id:pid,p_limit:30});
 if(r.error){el.innerHTML=renderFieldLogsOnly(pid);return}
 var items=r.data||[];if(items.length===0){el.innerHTML='<div class="timeline-empty">Nenhum registro ainda.<br>Use o campo acima para registrar o que aconteceu na fazenda.</div>';return}
-el.innerHTML=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var icon=isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
-return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div><div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('')}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
+el.innerHTML=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var icon=isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
+return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div><div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('')}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
 
 function renderFieldLogsOnly(pid){return'<div class="timeline-empty">Timeline indisponível. Execute o SQL de field_logs no Supabase.</div>'}
 
 async function enviarLog(){var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content)return;if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
 var btn=document.getElementById('btnDiarioSend');btn.disabled=true;
-try{var r=await sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,content:content});if(r.error)throw r.error;input.value='';toast('Registro salvo','ok');loadTimeline(State.selectedProperty)}catch(e){toast('Erro: '+e.message,'erro')}btn.disabled=false}
+var sectorSel=document.getElementById('diarioSector');var sector=sectorSel?sectorSel.value:'operacional';
+try{var r=await sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,content:content,sector:sector});if(r.error)throw r.error;input.value='';toast('Registro salvo','ok');loadTimeline(State.selectedProperty)}catch(e){toast('Erro: '+e.message,'erro')}btn.disabled=false}
 
 async function deletarLog(id){try{var r=await sb.from('field_logs').delete().eq('id',id).eq('author_id',State.user.id);if(r.error)throw r.error;toast('Registro excluído','ok');if(State.selectedProperty)loadTimeline(State.selectedProperty)}catch(e){toast('Erro ao excluir','erro')}}
 
@@ -597,19 +607,20 @@ async function loadGestores(pid){var el=document.getElementById('gestoresLista')
 try{var r=await sb.rpc('get_property_managers',{p_property_id:pid});if(r.error){el.innerHTML='<span style="font-size:.8rem;color:var(--muted)">Execute o SQL de property_managers no Supabase.</span>';return}
 var mgrs=r.data||[];if(mgrs.length===0){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:.85rem">Nenhum gestor convidado.<br>Clique em "+ Convidar" para adicionar sua equipe.</div>';return}
 el.innerHTML=mgrs.map(function(m){var initials=m.manager_email.substring(0,2).toUpperCase();var status=m.accepted_at?'<span class="gestor-status aceito">Ativo</span>':'<span class="gestor-status pendente">Pendente</span>';
-return'<div class="gestor-item"><div class="gestor-avatar">'+initials+'</div><div class="gestor-info"><div class="gestor-email">'+escapeHtml(m.manager_email)+'</div><div class="gestor-role">'+m.role+'</div></div>'+status+'<button class="gestor-remove" onclick="removerGestor(\''+m.id+'\')">remover</button></div>'}).join('')}catch(e){el.innerHTML='Indisponível.'}}
+return'<div class="gestor-item"><div class="gestor-avatar">'+initials+'</div><div class="gestor-info"><div class="gestor-email">'+escapeHtml(m.manager_email)+'</div>'+sectorBadgeHtml(m.sector||m.role)+'</div>'+status+'<button class="gestor-remove" onclick="removerGestor(\''+m.id+'\')">remover</button></div>'}).join('')}catch(e){el.innerHTML='Indisponível.'}}
 
 function abrirModalConvite(){var overlay=document.createElement('div');overlay.className='modal-overlay';overlay.id='modalConvite';
-overlay.innerHTML='<div class="modal-box"><h3 class="modal-title">Convidar Gestor</h3><p style="font-size:.8rem;color:var(--muted);margin-bottom:16px;line-height:1.5">O gestor receberá acesso apenas a esta propriedade. Ele poderá entrar pelo link mágico sem criar senha.</p><div class="form-group"><label class="form-label">Email do gestor</label><input class="form-input" type="email" id="conviteEmail" placeholder="gestor@email.com"></div><div class="form-group"><label class="form-label">Função</label><select class="form-input" id="conviteRole"><option value="gestor">Gestor de Campo</option><option value="agronomo">Agrônomo</option><option value="tecnico">Técnico</option></select></div><div class="btn-row"><button class="btn-secondary" onclick="fecharModalConvite()">Cancelar</button><button class="btn-primary" onclick="salvarConvite()">Convidar</button></div></div>';
+overlay.innerHTML='<div class="modal-box"><h3 class="modal-title">Convidar Profissional</h3><p style="font-size:.8rem;color:var(--muted);margin-bottom:16px;line-height:1.5">O profissional receberá acesso apenas a esta propriedade. Ele poderá entrar pelo link mágico sem criar senha.</p><div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="conviteEmail" placeholder="profissional@email.com"></div><div class="form-group"><label class="form-label">Área de atuação</label><select class="form-input" id="conviteSector"><option value="">Selecione o setor</option>'+sectorOptions()+'</select></div><div class="btn-row"><button class="btn-secondary" onclick="fecharModalConvite()">Cancelar</button><button class="btn-primary" onclick="salvarConvite()">Convidar</button></div></div>';
 overlay.addEventListener('click',function(e){if(e.target===overlay)fecharModalConvite()});
 document.body.appendChild(overlay)}
 
 function fecharModalConvite(){var m=document.getElementById('modalConvite');if(m)m.remove()}
 
-async function salvarConvite(){var email=document.getElementById('conviteEmail').value.trim().toLowerCase();var role=document.getElementById('conviteRole').value;
+async function salvarConvite(){var email=document.getElementById('conviteEmail').value.trim().toLowerCase();var sector=document.getElementById('conviteSector').value;
 if(!email){toast('Informe o email','erro');return}
+if(!sector){toast('Selecione a área de atuação','erro');return}
 if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
-try{var r=await sb.from('property_managers').insert({property_id:State.selectedProperty,manager_email:email,role:role});if(r.error){if(r.error.message.includes('duplicate')||r.error.code==='23505'){toast('Este gestor já foi convidado','info')}else{throw r.error}}else{toast('Gestor convidado!','ok')}
+try{var r=await sb.from('property_managers').insert({property_id:State.selectedProperty,manager_email:email,role:sector,sector:sector});if(r.error){if(r.error.message.includes('duplicate')||r.error.code==='23505'){toast('Este profissional já foi convidado','info')}else{throw r.error}}else{toast('Profissional convidado!','ok')}
 fecharModalConvite();loadGestores(State.selectedProperty)}catch(e){toast('Erro: '+e.message,'erro')}}
 
 async function removerGestor(id){try{var r=await sb.from('property_managers').delete().eq('id',id);if(r.error)throw r.error;toast('Gestor removido','ok');if(State.selectedProperty)loadGestores(State.selectedProperty)}catch(e){toast('Erro ao remover','erro')}}
@@ -626,6 +637,17 @@ var CROP_TYPES=[
 {value:'fruticultura',label:'Fruticultura',icon:'🍊',sacaLabel:'ton/ha',sacaValor:2800,prodHa:25},
 {value:'floresta',label:'Floresta / Silvicultura',icon:'🌲',sacaLabel:'m³/ha',sacaValor:120,prodHa:40}
 ];
+var SECTORS=[
+{value:'agronomia',label:'Agronomia / Fitotecnia',css:'s-agronomia'},
+{value:'zootecnia',label:'Zootecnia / Pecuária',css:'s-zootecnia'},
+{value:'veterinaria',label:'Veterinária',css:'s-veterinaria'},
+{value:'mecanica',label:'Mecânica / Frota',css:'s-mecanica'},
+{value:'operacional',label:'Operacional',css:'s-operacional'},
+{value:'financeiro',label:'Admin / Financeiro',css:'s-financeiro'}
+];
+function getSectorMeta(v){return SECTORS.find(function(s){return s.value===v})||{value:v||'operacional',label:v||'Operacional',css:'s-operacional'}}
+function sectorBadgeHtml(v){var s=getSectorMeta(v);return'<span class="sector-badge '+s.css+'">'+s.label+'</span>'}
+function sectorOptions(selected){return SECTORS.map(function(s){return'<option value="'+s.value+'"'+(selected===s.value?' selected':'')+'>'+s.label+'</option>'}).join('')}
 
 function renderCadastro(){var c=document.getElementById('cadContent');
 if(State.cadStep===1){c.innerHTML='<div class="cadastro-header"><button class="btn-back" onclick="navegarPara(\'propriedades\')">←</button><h2 style="font-size:1.15rem">Cadastrar Propriedade</h2></div><div class="step-indicator">Passo <span>1</span> de 3 — Identificação</div>'+
