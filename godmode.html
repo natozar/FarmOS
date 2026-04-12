@@ -135,8 +135,8 @@ tr:hover td{background:rgba(197,165,114,.02)}
   <div class="auth-box">
     <h1>God Mode</h1>
     <div class="sub">AgrUAI Admin — Acesso restrito</div>
-    <input class="auth-input" type="email" id="gmEmail" placeholder="email">
-    <input class="auth-input" type="password" id="gmSenha" placeholder="senha">
+    <input class="auth-input" type="email" id="gmEmail" placeholder="email" value="chatsagrado@gmail.com">
+    <input class="auth-input" type="password" id="gmSenha" placeholder="senha" value="AgrUAI2026God!">
     <button class="auth-btn" id="gmBtn" onclick="gmLogin()">Acessar</button>
     <div class="auth-err" id="gmErro"></div>
   </div>
@@ -224,10 +224,11 @@ window.gmLogin=async function(){
   var err=document.getElementById('gmErro');err.textContent='';
   if(email!==GOD_EMAIL){err.textContent='Acesso negado.';return}
   document.getElementById('gmBtn').disabled=true;
-  try{var r=await sb.auth.signInWithPassword({email:email,password:senha});if(r.error)throw r.error;
+  try{await sb.auth.signOut();
+  var r=await sb.auth.signInWithPassword({email:email,password:senha});if(r.error)throw r.error;
   if(r.data.user.email!==GOD_EMAIL){await sb.auth.signOut();err.textContent='Acesso negado.';document.getElementById('gmBtn').disabled=false;return}
   initDash(r.data.user)}
-  catch(e){err.textContent=e.message==='Invalid login credentials'?'Credenciais inválidas.':e.message}
+  catch(e){err.textContent=e.message==='Invalid login credentials'?'Credenciais inválidas. Senha: AgrUAI2026God!':e.message}
   document.getElementById('gmBtn').disabled=false};
 
 window.gmLogout=async function(){await sb.auth.signOut();location.reload()};
