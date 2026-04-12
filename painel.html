@@ -252,6 +252,16 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 /* Voice badge in timeline */
 .voice-badge{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;font-weight:600;padding:2px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(197,165,114,.12),rgba(74,140,92,.08));border:1px solid rgba(197,165,114,.2);color:var(--gold);margin-left:4px}
 
+/* AI Suggestions */
+.ai-suggest{margin-top:8px;padding:10px 12px;background:rgba(15,31,15,.6);border:1px solid rgba(197,165,114,.15);border-radius:var(--radius-sm);position:relative;overflow:hidden}
+.ai-suggest::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.3),rgba(74,140,92,.2),transparent)}
+.ai-suggest-title{font-size:.65rem;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:4px}
+.ai-suggest-actions{display:flex;flex-wrap:wrap;gap:6px}
+.ai-action{font-size:.72rem;font-weight:500;padding:6px 12px;border-radius:20px;border:1px solid rgba(197,165,114,.2);color:var(--text);background:rgba(197,165,114,.04);cursor:pointer;transition:all .2s;white-space:nowrap}
+.ai-action:hover{background:rgba(197,165,114,.12);border-color:var(--gold);color:var(--gold);box-shadow:0 0 12px rgba(197,165,114,.08)}
+.ai-action:active{transform:scale(.96)}
+.ai-action.done{background:rgba(74,140,92,.1);border-color:var(--green);color:var(--green);pointer-events:none}
+
 /* Offline sync status */
 .sync-status{font-size:.58rem;font-weight:600;padding:1px 7px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;margin-left:4px}
 .sync-status.pending{background:rgba(168,158,144,.12);color:var(--muted)}
@@ -759,7 +769,8 @@ try{var r=await sb.rpc('get_property_timeline',{p_property_id:pid,p_limit:30});
 if(r.error){el.innerHTML=renderFieldLogsOnly(pid);return}
 var items=r.data||[];if(items.length===0){el.innerHTML='<div class="timeline-empty">Nenhum registro ainda.<br>Use o campo acima para registrar o que aconteceu na fazenda.</div>';return}
 var remoteHtml=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var isVoice=isLog&&item.content&&item.content.indexOf('🎙️')===0;var icon=isVoice?'&#127908;':isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var voiceBadge=isVoice?'<span class="voice-badge">&#127908; Ditado por voz</span>':'';var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
-return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+voiceBadge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div><div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
+var aiHtml=isLog&&!item.content.match(/^\[IA\]/)?renderAISuggestions(item.id,item.content):'';
+return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+voiceBadge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div>'+aiHtml+'<div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
 var pendingLogs=await getAllPendingLogs();var pendingHtml=pendingLogs.filter(function(l){return l.property_id===pid}).map(function(l){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];return'<div class="timeline-item pending" data-local-id="'+l.localId+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(l.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(l.content)+'</div><div class="timeline-time">'+formatarDataHora(l.created_at)+'</div></div></div>'}).join('');
 el.innerHTML=pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
 
@@ -898,6 +909,46 @@ doc.setTextColor(168,158,144);doc.text('Laudo ESG — '+p.nome+' — '+(new Date
 var filename='Laudo_ESG_'+p.nome.replace(/[^a-zA-Z0-9]/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
 doc.save(filename);toast('Laudo gerado: '+filename,'ok')}catch(e){console.error('PDF error:',e);toast('Erro ao gerar PDF: '+e.message,'erro')}
 if(btn){btn.disabled=false;btn.innerHTML='<span class="btn-esg-icon">&#128196;</span> Emitir Laudo do Banco (ESG)'}}
+
+/* ========== PSEUDO-IA PRESCRITIVA (EPIC 6) ========== */
+var AI_RULES=[
+{keys:['bomba','motor','trator','diesel','peça','quebrou','quebrado','colheitadeira','pneu','óleo','filtro','manutenção'],
+ actions:['Enviar Ordem p/ Oficina','Atualizar Estoque Rápido','Risco Aceitável (Arquivar)']},
+{keys:['boi','gado','vaca','mancando','bicheira','doente','bezerro','novilha','aborto','carrapato','verme','mosca'],
+ actions:['Puxar pro Curral Hospital','Acionar Veterinário','Descarte Imediato']},
+{keys:['cerca','porteira','arame','vizinho','fuga','fugiu','escapou','invadiu','divisor'],
+ actions:['Ordem de Manutenção de Cerca','Contar Gado do Lote','Arquivar Ocorrência']},
+{keys:['praga','lagarta','percevejo','ferrugem','fungo','erva','daninha','buva','capim','invasora'],
+ actions:['Aplicar Defensivo Urgente','Solicitar Laudo Agrônomo','Monitorar Próx. 48h']},
+{keys:['seca','sem água','irrigação','pivô','bomba d\'água','chuva','estiagem','represa'],
+ actions:['Acionar Equipe Irrigação','Remanejar Rebanho','Solicitar Caminhão-Pipa']},
+{keys:['fogo','incêndio','queimada','fumaça'],
+ actions:['Acionar Brigada Imediato','Ligar Bombeiros','Isolar Área']}
+];
+var AI_FALLBACK=['Investigar Amanhã','Solicitar Foto','Cientificou'];
+
+function detectAISuggestions(text){
+if(!text)return null;
+var lower=text.toLowerCase();
+for(var i=0;i<AI_RULES.length;i++){
+var rule=AI_RULES[i];
+for(var j=0;j<rule.keys.length;j++){
+if(lower.indexOf(rule.keys[j])>=0)return rule.actions}}
+return AI_FALLBACK}
+
+function renderAISuggestions(logId,text){
+var actions=detectAISuggestions(text);if(!actions)return'';
+return'<div class="ai-suggest"><div class="ai-suggest-title">&#10024; Resoluções da IA AgrUAI</div><div class="ai-suggest-actions">'+
+actions.map(function(a,i){return'<button class="ai-action" onclick="executeAIAction(this,\''+escapeHtml(a)+'\',\''+logId+'\')">'+(i+1)+'. '+escapeHtml(a)+'</button>'}).join('')+'</div></div>'}
+
+function executeAIAction(btn,action,logId){
+btn.classList.add('done');btn.textContent='✓ '+action;
+var siblings=btn.parentElement.querySelectorAll('.ai-action');siblings.forEach(function(s){if(s!==btn){s.style.opacity='.3';s.style.pointerEvents='none'}});
+toast('Ação registrada: '+action,'ok');
+if(logId&&logId!=='undefined'){
+try{sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,
+content:'[IA] Ação executada: '+action+' (ref: log '+logId.substring(0,8)+')',
+sector:'operacional'}).then(function(){if(State.selectedProperty)loadTimeline(State.selectedProperty)})}catch(e){}}}
 
 /* ========== INVENTARIO (EPIC 2) ========== */
 var INV_CATS=[{v:'semente',l:'Semente'},{v:'fertilizante',l:'Fertilizante'},{v:'defensivo',l:'Defensivo'},{v:'combustivel',l:'Combustível'},{v:'peca',l:'Peça/Reposição'},{v:'racao',l:'Ração'},{v:'medicamento',l:'Medicamento'},{v:'outro',l:'Outro'}];
@@ -1183,7 +1234,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
 var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();
