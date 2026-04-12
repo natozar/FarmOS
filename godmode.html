@@ -135,8 +135,8 @@ tr:hover td{background:rgba(197,165,114,.02)}
   <div class="auth-box">
     <h1>God Mode</h1>
     <div class="sub">AgrUAI Admin — Acesso restrito</div>
-    <input class="auth-input" type="email" id="gmEmail" placeholder="email" value="chatsagrado@gmail.com">
-    <input class="auth-input" type="password" id="gmSenha" placeholder="senha" value="AgrUAI2026God!">
+    <input class="auth-input" type="email" id="gmEmail" placeholder="email">
+    <input class="auth-input" type="password" id="gmSenha" placeholder="senha">
     <button class="auth-btn" id="gmBtn" onclick="gmLogin()">Acessar</button>
     <div class="auth-err" id="gmErro"></div>
   </div>
@@ -211,7 +211,7 @@ tr:hover td{background:rgba(197,165,114,.02)}
 (function(){
 var SUPA_URL='https://kyvbnntoxslrtrsiejzc.supabase.co';
 var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5dmJubnRveHNscnRyc2llanpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjQ1NDcsImV4cCI6MjA5MTQ0MDU0N30.Dx-9SKxWfAoxXg3gzx3NpzJD1taZgkQCCjwDXlY9J6I';
-var sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+var sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storageKey:'agruai-godmode-auth',persistSession:true}});
 
 var GOD_EMAIL='chatsagrado@gmail.com';
 var ADMIN_EMAILS=[GOD_EMAIL,'fazendeiro.teste@agruai.com'];
@@ -228,7 +228,7 @@ window.gmLogin=async function(){
   var r=await sb.auth.signInWithPassword({email:email,password:senha});if(r.error)throw r.error;
   if(r.data.user.email!==GOD_EMAIL){await sb.auth.signOut();err.textContent='Acesso negado.';document.getElementById('gmBtn').disabled=false;return}
   initDash(r.data.user)}
-  catch(e){err.textContent=e.message==='Invalid login credentials'?'Credenciais inválidas. Senha: AgrUAI2026God!':e.message}
+  catch(e){err.textContent=e.message==='Invalid login credentials'?'Credenciais inválidas.':e.message}
   document.getElementById('gmBtn').disabled=false};
 
 window.gmLogout=async function(){await sb.auth.signOut();location.reload()};
