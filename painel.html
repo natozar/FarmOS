@@ -197,6 +197,31 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .sector-badge.s-operacional{background:rgba(197,165,114,.12);color:var(--gold)}
 .sector-badge.s-financeiro{background:rgba(168,158,144,.12);color:var(--muted)}
 .sector-badge.s-satelite{background:rgba(196,90,74,.12);color:var(--red)}
+/* Inventory */
+.inv-toggle{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border);color:var(--muted);font-size:1rem;transition:all var(--transition);flex-shrink:0}
+.inv-toggle:hover,.inv-toggle.ativo{border-color:var(--gold);color:var(--gold);background:rgba(197,165,114,.06)}
+.inv-picker{display:none;margin-bottom:12px;background:rgba(15,31,15,.5);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px}
+.inv-picker.visivel{display:block;animation:fadeIn .2s ease}
+.inv-picker-title{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;font-weight:500}
+.inv-list{max-height:140px;overflow-y:auto;margin-bottom:8px}
+.inv-option{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s;font-size:.82rem}
+.inv-option:hover{background:rgba(197,165,114,.06)}
+.inv-option.selected{background:rgba(74,140,92,.1);border:1px solid rgba(74,140,92,.2)}
+.inv-option-nome{flex:1;color:var(--text)}
+.inv-option-stock{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.inv-qty-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.inv-qty-input{width:80px;padding:8px 10px;background:rgba(15,31,15,.6);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.88rem;text-align:center}
+.inv-qty-label{font-size:.78rem;color:var(--muted)}
+.inv-usage-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:8px;font-size:.65rem;font-weight:600;background:rgba(74,144,164,.1);color:#6AB0C8;margin-top:4px}
+/* Inventory tab */
+.inv-card{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(15,31,15,.4);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px}
+.inv-card-info{flex:1;min-width:0}
+.inv-card-nome{font-size:.85rem;color:var(--text);font-weight:500}
+.inv-card-meta{font-size:.72rem;color:var(--muted)}
+.inv-card-qty{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold);text-align:right;min-width:60px}
+.inv-card-unit{font-size:.65rem;color:var(--muted);font-weight:400}
+.inv-low{color:var(--red)}
+
 /* Offline sync status */
 .sync-status{font-size:.58rem;font-weight:600;padding:1px 7px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;margin-left:4px}
 .sync-status.pending{background:rgba(168,158,144,.12);color:var(--muted)}
@@ -570,7 +595,7 @@ async function renderDetalhe(pid){var c=document.getElementById('detalheContent'
 var cropBadgeHTML=p.crop_type?'<span class="crop-badge" style="margin-left:8px"><span class="crop-badge-icon">'+getCropIcon(p.crop_type)+'</span>'+getCropLabel(p.crop_type)+'</span>':'';
 var riskHTML=buildRiskCard(p);
 c.innerHTML='<div class="prop-meta" style="margin-bottom:12px">'+p.municipio+'/'+p.estado+(p.area_ha?' · '+formatarNumero(Math.round(p.area_ha))+' ha':'')+cropBadgeHTML+'</div>'+
-'<div class="detalhe-tabs"><button class="detalhe-tab ativo" onclick="switchDetalheTab(\'satelite\')">Satélite</button><button class="detalhe-tab" onclick="switchDetalheTab(\'diario\')">Diário</button>'+(p._managed?'':'<button class="detalhe-tab" onclick="switchDetalheTab(\'equipe\')">Equipe</button>')+'</div>'+
+'<div class="detalhe-tabs"><button class="detalhe-tab ativo" onclick="switchDetalheTab(\'satelite\')">Satélite</button><button class="detalhe-tab" onclick="switchDetalheTab(\'diario\')">Diário</button><button class="detalhe-tab" onclick="switchDetalheTab(\'insumos\')">Insumos</button>'+(p._managed?'':'<button class="detalhe-tab" onclick="switchDetalheTab(\'equipe\')">Equipe</button>')+'</div>'+
 '<div class="tab-panel ativo" id="panelSatelite">'+
 '<div class="metrics-grid"><div class="metric-card"><div class="metric-label">NDVI</div><div class="metric-value" style="color:'+(hasNDVI?getNDVIColor(cls):'var(--muted)')+'">'+(hasNDVI?p.last_ndvi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">EVI</div><div class="metric-value" style="color:var(--green)">'+(p.last_evi!=null?p.last_evi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">NDWI</div><div class="metric-value" style="color:#4A90A4">'+(p.last_ndwi!=null?p.last_ndwi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">Nuvens</div><div class="metric-value">'+(p.last_cloud_coverage!=null?Math.round(p.last_cloud_coverage)+'%':'—')+'</div></div></div>'+
 riskHTML+
@@ -578,12 +603,14 @@ riskHTML+
 '<h3 style="font-size:1rem;margin:20px 0 12px">Alertas</h3><div id="detalheAlertas" style="color:var(--muted);font-size:.85rem">Carregando...</div></div>'+
 '<div class="tab-panel" id="panelDiario">'+
 '<div style="margin-bottom:10px"><select class="form-input" id="diarioSector" style="font-size:.8rem;padding:10px 14px">'+sectorOptions('operacional')+'</select></div>'+
-'<div class="diario-input-wrap"><textarea class="diario-input" id="diarioInput" placeholder="O que aconteceu hoje na fazenda?" rows="1" maxlength="1000"></textarea><button class="diario-send" id="btnDiarioSend" onclick="enviarLog()" title="Enviar">&#10148;</button></div>'+
+'<div class="diario-input-wrap"><textarea class="diario-input" id="diarioInput" placeholder="O que aconteceu hoje na fazenda?" rows="1" maxlength="1000"></textarea><button class="inv-toggle" id="btnInvToggle" onclick="toggleInvPicker()" title="Vincular insumo">&#128230;</button><button class="diario-send" id="btnDiarioSend" onclick="enviarLog()" title="Enviar">&#10148;</button></div>'+
+'<div class="inv-picker" id="invPicker"><div class="inv-picker-title">Vincular insumo utilizado</div><div class="inv-list" id="invPickerList"><span style="color:var(--muted);font-size:.8rem">Carregando...</span></div><div class="inv-qty-row" id="invQtyRow" style="display:none"><label class="inv-qty-label">Quantidade usada:</label><input class="inv-qty-input" type="number" id="invQtyInput" min="0.1" step="0.1" placeholder="0"><span class="inv-qty-label" id="invQtyUnit">un</span><button class="btn-secondary" style="padding:8px 12px;font-size:.75rem" onclick="clearInvSelection()">Limpar</button></div></div>'+
 '<div id="timelineContainer"><div style="text-align:center;padding:20px"><div class="spinner"></div></div></div></div>'+
+'<div class="tab-panel" id="panelInsumos"><div class="gestores-title"><span>Estoque / Galpão</span><button class="btn-convidar" onclick="abrirModalInsumo()">+ Cadastrar Insumo</button></div><div id="insumosList" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>'+
 (p._managed?'':'<div class="tab-panel" id="panelEquipe"><div class="gestores-title"><span>Gestores e Equipe</span><button class="btn-convidar" onclick="abrirModalConvite()">+ Convidar</button></div><div id="gestoresLista" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>');
-loadHistory(pid);loadAlerts(pid);loadTimeline(pid);if(!p._managed)loadGestores(pid)}
+loadHistory(pid);loadAlerts(pid);loadTimeline(pid);loadInvPickerData(pid);if(!p._managed)loadGestores(pid)}
 
-function switchDetalheTab(tab){var tabs=['satelite','diario','equipe'];document.querySelectorAll('.detalhe-tab').forEach(function(t,i){t.classList.toggle('ativo',tabs[i]===tab)});document.getElementById('panelSatelite').classList.toggle('ativo',tab==='satelite');document.getElementById('panelDiario').classList.toggle('ativo',tab==='diario');var pe=document.getElementById('panelEquipe');if(pe)pe.classList.toggle('ativo',tab==='equipe')}
+function switchDetalheTab(tab){var tabs=['satelite','diario','insumos','equipe'];document.querySelectorAll('.detalhe-tab').forEach(function(t,i){t.classList.toggle('ativo',tabs[i]===tab)});document.getElementById('panelSatelite').classList.toggle('ativo',tab==='satelite');document.getElementById('panelDiario').classList.toggle('ativo',tab==='diario');var pi=document.getElementById('panelInsumos');if(pi)pi.classList.toggle('ativo',tab==='insumos');var pe=document.getElementById('panelEquipe');if(pe)pe.classList.toggle('ativo',tab==='equipe');if(tab==='insumos')loadInsumos(State.selectedProperty)}
 
 async function loadHistory(pid){try{var r=await sb.rpc('get_satellite_history',{p_property_id:pid,p_limit:20});if(r.error)throw r.error;var data=r.data||[];if(data.length<2){document.getElementById('chartSvg').innerHTML='Aguardando leituras suficientes.';return}data.reverse();renderNDVIChart(data)}catch(e){document.getElementById('chartSvg').innerHTML='Gráfico indisponível.'}}
 
@@ -599,7 +626,7 @@ try{var r=await sb.rpc('get_property_timeline',{p_property_id:pid,p_limit:30});
 if(r.error){el.innerHTML=renderFieldLogsOnly(pid);return}
 var items=r.data||[];if(items.length===0){el.innerHTML='<div class="timeline-empty">Nenhum registro ainda.<br>Use o campo acima para registrar o que aconteceu na fazenda.</div>';return}
 var remoteHtml=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var icon=isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
-return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div><div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
+return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div><div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('')+'';
 var pendingLogs=await getAllPendingLogs();var pendingHtml=pendingLogs.filter(function(l){return l.property_id===pid}).map(function(l){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];return'<div class="timeline-item pending" data-local-id="'+l.localId+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(l.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(l.content)+'</div><div class="timeline-time">'+formatarDataHora(l.created_at)+'</div></div></div>'}).join('');
 el.innerHTML=pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
 
@@ -608,14 +635,19 @@ function renderFieldLogsOnly(pid){return'<div class="timeline-empty">Timeline in
 async function enviarLog(){var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content)return;if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
 var btn=document.getElementById('btnDiarioSend');btn.disabled=true;
 var sectorSel=document.getElementById('diarioSector');var sector=sectorSel?sectorSel.value:'operacional';
+var invItem=State.selectedInvItem;var invQty=invItem?parseFloat(document.getElementById('invQtyInput').value)||0:0;
+if(invItem&&invQty<=0){toast('Informe a quantidade usada do insumo','erro');btn.disabled=false;return}
 var logData={property_id:State.selectedProperty,author_id:State.user.id,content:content,sector:sector};
+if(invItem){logData.inventory_item_id=invItem.id;logData.inventory_qty_used=invQty;logData.content=content+' ['+invItem.nome+': '+invQty+' '+invItem.unidade+']'}
 if(navigator.onLine){
-try{var r=await sb.from('field_logs').insert(logData);if(r.error)throw r.error;input.value='';toast('Registro salvo','ok');loadTimeline(State.selectedProperty)}catch(e){
-logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();
-await addPendingLog(logData);input.value='';toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
+try{var r=await sb.from('field_logs').insert(logData);if(r.error)throw r.error;
+if(invItem&&invQty>0){await sb.rpc('use_inventory_item',{p_item_id:invItem.id,p_qty:invQty});loadInvPickerData(State.selectedProperty)}
+input.value='';clearInvSelection();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty)}catch(e){
+logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;
+await addPendingLog(logData);input.value='';clearInvSelection();toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
 }else{
-logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();
-await addPendingLog(logData);input.value='';toast('Salvo offline — será enviado quando conectar','info');renderPendingInTimeline(logData)}
+logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;
+await addPendingLog(logData);input.value='';clearInvSelection();toast('Salvo offline — será enviado quando conectar','info');renderPendingInTimeline(logData)}
 btn.disabled=false}
 
 function renderPendingInTimeline(log){var el=document.getElementById('timelineContainer');if(!el)return;
@@ -628,6 +660,39 @@ async function deletarLog(id){try{var r=await sb.from('field_logs').delete().eq(
 function escapeHtml(str){var d=document.createElement('div');d.textContent=str;return d.innerHTML}
 
 function formatarDataHora(iso){if(!iso)return'';var d=new Date(iso);var agora=new Date();var diff=Math.floor((agora-d)/1000);if(diff<60)return'agora';if(diff<3600)return Math.floor(diff/60)+' min atrás';if(diff<86400)return Math.floor(diff/3600)+'h atrás';var dia=d.getDate().toString().padStart(2,'0');var mes=(d.getMonth()+1).toString().padStart(2,'0');var hora=d.getHours().toString().padStart(2,'0');var min=d.getMinutes().toString().padStart(2,'0');return dia+'/'+mes+' às '+hora+':'+min}
+
+/* ========== INVENTARIO (EPIC 2) ========== */
+var INV_CATS=[{v:'semente',l:'Semente'},{v:'fertilizante',l:'Fertilizante'},{v:'defensivo',l:'Defensivo'},{v:'combustivel',l:'Combustível'},{v:'peca',l:'Peça/Reposição'},{v:'racao',l:'Ração'},{v:'medicamento',l:'Medicamento'},{v:'outro',l:'Outro'}];
+State.invItems=[];State.selectedInvItem=null;
+
+async function loadInsumos(pid){var el=document.getElementById('insumosList');if(!el)return;
+try{var r=await sb.from('inventory_items').select('*').eq('property_id',pid).order('nome');if(r.error)throw r.error;
+var items=r.data||[];State.invItems=items;
+if(items.length===0){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:.85rem">Nenhum insumo cadastrado.<br>Clique em "+ Cadastrar Insumo" para adicionar.</div>';return}
+el.innerHTML=items.map(function(it){var low=it.quantidade<=0?'inv-low':'';return'<div class="inv-card"><div class="inv-card-info"><div class="inv-card-nome">'+escapeHtml(it.nome)+'</div><div class="inv-card-meta">'+(it.categoria||'—')+(it.custo_unitario?' · R$ '+formatarNumero(it.custo_unitario)+'/'+it.unidade:'')+'</div></div><div class="inv-card-qty '+low+'">'+formatarNumero(it.quantidade)+'<div class="inv-card-unit">'+it.unidade+'</div></div></div>'}).join('')}catch(e){el.innerHTML='<span style="font-size:.8rem;color:var(--muted)">Execute o SQL de inventory_items no Supabase.</span>'}}
+
+async function loadInvPickerData(pid){try{var r=await sb.from('inventory_items').select('id,nome,quantidade,unidade').eq('property_id',pid).order('nome');if(!r.error)State.invItems=r.data||[]}catch(e){}}
+
+function toggleInvPicker(){var p=document.getElementById('invPicker');var btn=document.getElementById('btnInvToggle');if(!p)return;var show=!p.classList.contains('visivel');p.classList.toggle('visivel',show);btn.classList.toggle('ativo',show);if(show)renderInvPickerList()}
+
+function renderInvPickerList(){var el=document.getElementById('invPickerList');if(!el)return;
+if(State.invItems.length===0){el.innerHTML='<span style="font-size:.8rem;color:var(--muted)">Nenhum insumo. Cadastre na aba Insumos.</span>';return}
+el.innerHTML=State.invItems.map(function(it){var sel=State.selectedInvItem&&State.selectedInvItem.id===it.id?' selected':'';return'<div class="inv-option'+sel+'" onclick="selectInvItem(\''+it.id+'\')"><span class="inv-option-nome">'+escapeHtml(it.nome)+'</span><span class="inv-option-stock">'+formatarNumero(it.quantidade)+' '+it.unidade+'</span></div>'}).join('')}
+
+function selectInvItem(id){var it=State.invItems.find(function(x){return x.id===id});State.selectedInvItem=it||null;
+document.getElementById('invQtyRow').style.display=it?'flex':'none';if(it)document.getElementById('invQtyUnit').textContent=it.unidade;document.getElementById('invQtyInput').value='';renderInvPickerList()}
+
+function clearInvSelection(){State.selectedInvItem=null;document.getElementById('invQtyRow').style.display='none';document.getElementById('invQtyInput').value='';renderInvPickerList()}
+
+function abrirModalInsumo(){var overlay=document.createElement('div');overlay.className='modal-overlay';overlay.id='modalInsumo';
+overlay.innerHTML='<div class="modal-box"><h3 class="modal-title">Cadastrar Insumo</h3><div class="form-group"><label class="form-label">Nome do insumo</label><input class="form-input" id="invNome" placeholder="Ex: Semente de Soja NK 7059"></div><div class="form-group"><label class="form-label">Categoria</label><select class="form-input" id="invCat"><option value="">Selecione</option>'+INV_CATS.map(function(c){return'<option value="'+c.v+'">'+c.l+'</option>'}).join('')+'</select></div><div style="display:flex;gap:10px"><div class="form-group" style="flex:1"><label class="form-label">Quantidade</label><input class="form-input" id="invQtd" type="number" min="0" step="0.1" placeholder="0"></div><div class="form-group" style="flex:1"><label class="form-label">Unidade</label><select class="form-input" id="invUn"><option value="un">Unidade</option><option value="kg">Kg</option><option value="L">Litros</option><option value="sc">Sacas</option><option value="ton">Toneladas</option><option value="m³">m³</option></select></div></div><div class="form-group"><label class="form-label">Custo unitário (R$, opcional)</label><input class="form-input" id="invCusto" type="number" min="0" step="0.01" placeholder="0.00"></div><div class="btn-row"><button class="btn-secondary" onclick="fecharModalInsumo()">Cancelar</button><button class="btn-primary" onclick="salvarInsumo()">Salvar</button></div></div>';
+overlay.addEventListener('click',function(e){if(e.target===overlay)fecharModalInsumo()});document.body.appendChild(overlay)}
+
+function fecharModalInsumo(){var m=document.getElementById('modalInsumo');if(m)m.remove()}
+
+async function salvarInsumo(){var nome=document.getElementById('invNome').value.trim();var cat=document.getElementById('invCat').value;var qtd=parseFloat(document.getElementById('invQtd').value)||0;var un=document.getElementById('invUn').value;var custo=parseFloat(document.getElementById('invCusto').value)||null;
+if(!nome){toast('Informe o nome do insumo','erro');return}
+try{var r=await sb.from('inventory_items').insert({property_id:State.selectedProperty,nome:nome,categoria:cat||null,quantidade:qtd,unidade:un,custo_unitario:custo});if(r.error)throw r.error;toast('Insumo cadastrado!','ok');fecharModalInsumo();loadInsumos(State.selectedProperty);loadInvPickerData(State.selectedProperty)}catch(e){toast('Erro: '+e.message,'erro')}}
 
 /* ========== GESTORES (ADR-003) ========== */
 async function loadGestores(pid){var el=document.getElementById('gestoresLista');if(!el)return;
@@ -774,8 +839,11 @@ window.addEventListener('offline',function(){updateOfflineBar()});
 
 async function syncPendingLogs(){try{var logs=await getAllPendingLogs();if(logs.length===0)return;
 for(var i=0;i<logs.length;i++){var l=logs[i];
-try{var r=await sb.from('field_logs').insert({property_id:l.property_id,author_id:l.author_id,content:l.content,sector:l.sector});
+var insertData={property_id:l.property_id,author_id:l.author_id,content:l.content,sector:l.sector};
+if(l.inventory_item_id){insertData.inventory_item_id=l.inventory_item_id;insertData.inventory_qty_used=l.inventory_qty_used}
+try{var r=await sb.from('field_logs').insert(insertData);
 if(r.error)throw r.error;
+if(l._invDeduct&&l._invDeduct.id){await sb.rpc('use_inventory_item',{p_item_id:l._invDeduct.id,p_qty:l._invDeduct.qty})}
 await removePendingLog(l.localId);
 var el=document.querySelector('[data-local-id="'+l.localId+'"]');if(el){el.classList.remove('pending');var badge=el.querySelector('.sync-status');if(badge){badge.className='sync-status synced';badge.textContent='Sincronizado'}}}catch(e){console.error('Sync failed for log',l.localId,e);break}}
 if(State.selectedProperty)loadTimeline(State.selectedProperty)}catch(e){console.error('syncPendingLogs error',e)}}
@@ -801,7 +869,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none'}
 })();
 </script>
