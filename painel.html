@@ -315,6 +315,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         <button class="header-user" id="btnUser" onclick="toggleUserMenu()"><span id="userName">Usuário</span> ▾</button>
         <div class="user-menu" id="userMenu">
           <button class="user-menu-item" onclick="navegarPara('perfil')">👤 Meu perfil</button>
+          <button class="user-menu-item" onclick="forcarAtualizacao()">🔄 Atualizar app</button>
           <button class="user-menu-item danger" onclick="fazerLogout()">Sair</button>
         </div>
       </div>
@@ -428,6 +429,8 @@ document.querySelector('.magic-link-section').style.display='none';document.getE
 document.getElementById('btnMagic').disabled=false}
 
 async function loginGoogle(){try{var r=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});if(r.error)throw r.error}catch(err){toast('Google login não configurado. Use email/senha.','erro')}}
+
+async function forcarAtualizacao(){toast('Atualizando...','info');try{if('serviceWorker' in navigator){var reg=await navigator.serviceWorker.getRegistration();if(reg){await reg.unregister()}}var keys=await caches.keys();await Promise.all(keys.map(function(k){return caches.delete(k)}));window.location.reload(true)}catch(e){window.location.reload(true)}}
 
 async function fazerLogout(){await sb.auth.signOut();State.user=null;navegarPara('login');toast('Desconectado','info')}
 
@@ -641,7 +644,7 @@ var r=await sb.auth.getSession();if(r.data.session){State.user=r.data.session.us
 sb.auth.onAuthStateChange(function(event,session){if(event==='SIGNED_IN'&&session){State.user=session.user;iniciarApp()}});
 checkSession();
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none'}
 })();
 </script>
