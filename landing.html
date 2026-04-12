@@ -80,8 +80,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .oque{padding:100px 0;background:#1A2E1A;position:relative;overflow:hidden}
 .oque::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.12),transparent)}
 .oque h2{text-align:center;font-size:clamp(1.15rem,2.8vw,1.7rem);color:#F5F0E8;margin-bottom:56px;line-height:1.35}
-.blocos{display:grid;grid-template-columns:1fr;gap:20px;max-width:960px;margin:0 auto}
-@media(min-width:640px){.blocos{grid-template-columns:1fr 1fr 1fr;gap:24px}}
+.blocos{display:flex;flex-wrap:wrap;gap:20px;max-width:960px;margin:0 auto;justify-content:center}
+.bloco{flex:1 1 100%;min-width:0}
+@media(min-width:640px){.blocos{gap:24px}.bloco{flex:1 1 calc(33.333% - 16px);max-width:calc(33.333% - 16px)}}
 .bloco{background:rgba(15,31,15,.6);border:1px solid rgba(197,165,114,.08);border-radius:16px;padding:36px 28px;position:relative;transition:all .3s ease;overflow:hidden}
 .bloco::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--bloco-cor,#C5A572),transparent);opacity:0;transition:opacity .3s}
 .bloco:hover{border-color:rgba(197,165,114,.2);transform:translateY(-4px);box-shadow:0 12px 40px rgba(15,31,15,.5)}
@@ -484,6 +485,33 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
         </div>
         <h3>I.A. que fala a língua do campo</h3>
         <p>Alertas automáticos, análises preditivas e relatórios que traduzem dados de satélite em ação: 'mover gado', 'irrigar lote 3', 'investigar área norte'.</p>
+      </div>
+
+      <div class="bloco reveal reveal-d4">
+        <div class="bloco-icon" style="--bloco-cor:#C45A4A">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 8h20v16H6z" stroke="#C45A4A" stroke-width="1.5" rx="2"/>
+            <path d="M6 8l10 9 10-9" stroke="#C45A4A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="6" y1="24" x2="13" y2="17" stroke="#C45A4A" stroke-width="1" opacity=".4"/>
+            <line x1="26" y1="24" x2="19" y2="17" stroke="#C45A4A" stroke-width="1" opacity=".4"/>
+            <line x1="14" y1="14" x2="18" y2="14" stroke="#C45A4A" stroke-width="2.5" stroke-linecap="round" opacity=".6"/>
+          </svg>
+        </div>
+        <h3>O fim do WhatsApp na operação</h3>
+        <p>Abandone a confusão dos grupos de WhatsApp. Centralize as ocorrências da sua equipe na área exata do mapa — mesmo que o peão não tenha sinal de internet no pasto. Quando ele voltar pra sede, tudo sincroniza sozinho.</p>
+      </div>
+
+      <div class="bloco reveal reveal-d4">
+        <div class="bloco-icon" style="--bloco-cor:#C45A4A">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 26 L10 14 L16 18 L22 8 L28 12" stroke="#C45A4A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="22" cy="8" r="2.5" fill="none" stroke="#C45A4A" stroke-width="1.2"/>
+            <text x="21" y="10" font-size="5" fill="#C45A4A" font-weight="bold" font-family="sans-serif">$</text>
+            <line x1="4" y1="28" x2="28" y2="28" stroke="#C45A4A" stroke-width="1" opacity=".3"/>
+          </svg>
+        </div>
+        <h3>Prejuízo traduzido em Reais</h3>
+        <p>Chega de gráficos que você não entende. A nossa I.A. traduz a mancha do satélite instantaneamente em uma projeção de Perigo Financeiro — em R$ — direto no seu caixa. Você sabe exatamente quanto está perdendo e onde agir primeiro.</p>
       </div>
 
     </div>
