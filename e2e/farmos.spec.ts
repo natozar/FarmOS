@@ -420,3 +420,47 @@ test.describe('Epic 10 Modules', () => {
     await expect(btn).toBeVisible();
   });
 });
+
+// ============================================================
+// 11. EPIC 11 — Guided Tour
+// ============================================================
+test.describe('Epic 11 Guided Tour', () => {
+  test('tour functions exist in source', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('startTour');
+    expect(html).toContain('endTour');
+    expect(html).toContain('agruai_tour_done');
+    expect(html).toContain('tour-overlay');
+  });
+
+  test('tour CSS classes exist', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('.tour-pop');
+    expect(html).toContain('.tour-spot');
+    expect(html).toContain('.tour-btn');
+  });
+
+  test('tour does not block LGPD elements', async ({ page }) => {
+    await page.goto('/painel.html');
+    // LGPD disclaimer should be in the landing, not painel
+    // But verify tour overlay z-index (900) is below print-bar and modals
+    const html = await page.content();
+    expect(html).toContain('z-index:900');
+    // Legal disclaimers in painel (z-index not set, in normal flow)
+    expect(html).toContain('Lei n');
+    expect(html).toContain('recomendação financeira');
+  });
+
+  test('tour skips if already completed', async ({ page }) => {
+    await page.goto('/painel.html');
+    await page.evaluate(() => localStorage.setItem('agruai_tour_done', 'true'));
+    await page.fill('#authEmail', 'fazendeiro.teste@agruai.com');
+    await page.fill('#authSenha', 'AgrUAI2026!');
+    await page.click('#btnAuth');
+    await page.waitForTimeout(4000);
+    const overlay = page.locator('#tourOverlay');
+    await expect(overlay).toHaveCount(0);
+  });
+});

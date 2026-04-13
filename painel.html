@@ -261,6 +261,19 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .rec-status.visivel{display:block;animation:fadeIn .2s ease}
 .rec-timer{font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif}
 
+/* Guided Tour */
+.tour-overlay{position:fixed;top:0;right:0;bottom:0;left:0;z-index:900;background:rgba(2,3,4,.82);transition:opacity .3s ease}
+.tour-spot{position:relative;z-index:910;box-shadow:0 0 0 4px var(--gold),0 0 0 9999px rgba(2,3,4,.82);border-radius:var(--radius);transition:box-shadow .4s ease}
+.tour-pop{position:fixed;z-index:920;background:var(--surface);border:1px solid rgba(197,165,114,.3);border-radius:16px;padding:28px 24px;max-width:340px;width:calc(100vw - 40px);box-shadow:0 16px 48px rgba(0,0,0,.5);animation:fadeIn .3s ease}
+.tour-pop::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--green),var(--gold));border-radius:16px 16px 0 0}
+.tour-pop h3{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:700;color:var(--gold);margin-bottom:8px}
+.tour-pop p{font-size:.85rem;color:var(--text);line-height:1.6;margin-bottom:18px}
+.tour-step{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.tour-btn{padding:11px 20px;border-radius:var(--radius-sm);background:var(--gold);color:var(--dark);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.85rem;border:none;cursor:pointer;transition:all .2s;width:100%}
+.tour-btn:hover{background:#B8945A;transform:translateY(-1px)}
+.tour-skip{display:block;text-align:center;margin-top:10px;font-size:.72rem;color:var(--muted);cursor:pointer;border:none;background:none;font-family:inherit}
+.tour-skip:hover{color:var(--text)}
+
 /* Voice badge in timeline */
 .voice-badge{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;font-weight:600;padding:2px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(197,165,114,.12),rgba(74,140,92,.08));border:1px solid rgba(197,165,114,.2);color:var(--gold);margin-left:4px}
 
@@ -1262,7 +1275,7 @@ if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14});renderHeatmap
 /* ========== INIT ========== */
 async function iniciarApp(){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];document.getElementById('userName').textContent=nome;
 var ls=document.getElementById('langSelect');if(ls)ls.value=currentLang;
-navegarPara('propriedades');updateOfflineBar();loadTicker();startBackgroundTracking();requestNotifPermission();setTimeout(verificarInstall,3000);setTimeout(syncPendingLogs,1500)}
+navegarPara('propriedades');updateOfflineBar();loadTicker();startBackgroundTracking();requestNotifPermission();setTimeout(syncPendingLogs,1500);setTimeout(function(){if(!localStorage.getItem('agruai_tour_done')){startTour()}else{setTimeout(verificarInstall,1000)}},2500)}
 
 async function checkSession(){showLoading('Verificando sessão...');
 try{
@@ -1470,6 +1483,56 @@ map.addLayer({id:'track-heatmap',type:'heatmap',source:'track-heat',paint:{
 'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.2,'rgba(74,140,92,0.3)',0.4,'rgba(197,165,114,0.5)',0.6,'rgba(224,112,48,0.7)',0.8,'rgba(196,90,74,0.85)',1,'rgba(196,50,50,1)'],
 'heatmap-radius':['interpolate',['linear'],['zoom'],0,8,9,30],'heatmap-opacity':0.7}})}
 
+/* ========== GUIDED TOUR (EPIC 11) ========== */
+var tourSteps=[
+{target:null,title:'Sua fazenda no Século 22',text:'Nós automatizamos as planilhas e blindamos seu caixa. Siga este voo rápido de 30 segundos.',step:'Bem-vindo'},
+{target:'.diario-input-wrap',title:'O Diário Offline',text:'Esqueça áudios perdidos no Zap. Pressione o microfone no mato, relate a ocorrência e nossa I.A. fará o resto — de graça. Funciona sem internet.',step:'Passo 1 de 3',nav:'diario'},
+{target:'#timelapseBar',title:'Máquina do Tempo NDVI',text:'Arraste a linha para reviver o histórico biológico e hídrico do seu pasto ao longo dos meses. Veja a seca se aproximando antes que ela chegue.',step:'Passo 2 de 3',nav:'mapa'},
+{target:'#tickerBar',title:'Painel de Elite',text:'O lucro é o alvo. A cotação viva do dólar cruza o seu risco estrutural enquanto calculamos os ativos de carbono que o senhor nem sabia que tinha.',step:'Passo 3 de 3',nav:'propriedades'}
+];
+var tourIdx=0;var tourOverlay=null;var tourPopover=null;
+
+function startTour(){
+if(localStorage.getItem('agruai_tour_done'))return;
+tourIdx=0;showTourStep()}
+
+function showTourStep(){
+if(tourIdx>=tourSteps.length){endTour();return}
+var step=tourSteps[tourIdx];
+clearTourUI();
+if(step.nav){
+if(step.nav==='diario'){
+var card=document.querySelector('.prop-card');if(card)card.click();
+setTimeout(function(){var tab=document.querySelector('.detalhe-tab:nth-child(2)');if(tab)tab.click();setTimeout(function(){renderTourPopover(step)},400)},600);return}
+if(step.nav==='mapa'){navegarPara('mapa');setTimeout(function(){renderTourPopover(step)},800);return}
+if(step.nav==='propriedades'){navegarPara('propriedades');setTimeout(function(){renderTourPopover(step)},400);return}}
+renderTourPopover(step)}
+
+function renderTourPopover(step){
+clearTourUI();
+var target=step.target?document.querySelector(step.target):null;
+if(target){target.classList.add('tour-spot');target.scrollIntoView({behavior:'smooth',block:'center'})}
+tourOverlay=document.createElement('div');tourOverlay.className='tour-overlay';tourOverlay.id='tourOverlay';
+if(target)tourOverlay.style.pointerEvents='none';
+document.body.appendChild(tourOverlay);
+tourPopover=document.createElement('div');tourPopover.className='tour-pop';tourPopover.id='tourPop';
+tourPopover.innerHTML='<div class="tour-step">'+step.step+'</div><h3>'+step.title+'</h3><p>'+step.text+'</p><button class="tour-btn" onclick="nextTourStep()">'+(tourIdx<tourSteps.length-1?'Próximo':'Começar')+'</button><button class="tour-skip" onclick="endTour()">Pular tour</button>';
+document.body.appendChild(tourPopover);
+if(target){var rect=target.getBoundingClientRect();var popH=tourPopover.offsetHeight;
+var top=rect.bottom+12;if(top+popH>window.innerHeight)top=rect.top-popH-12;
+if(top<10)top=window.innerHeight/2-popH/2;
+tourPopover.style.top=Math.max(10,top)+'px';tourPopover.style.left=Math.max(20,(window.innerWidth-340)/2)+'px'}
+else{tourPopover.style.top='50%';tourPopover.style.left='50%';tourPopover.style.transform='translate(-50%,-50%)'}}
+
+function nextTourStep(){tourIdx++;showTourStep()}
+
+function endTour(){clearTourUI();localStorage.setItem('agruai_tour_done','true');navegarPara('propriedades')}
+
+function clearTourUI(){
+var old=document.querySelector('.tour-spot');if(old)old.classList.remove('tour-spot');
+var ov=document.getElementById('tourOverlay');if(ov)ov.remove();
+var pop=document.getElementById('tourPop');if(pop)pop.remove()}
+
 /* ========== PWA INSTALL ========== */
 var deferredPrompt=null;
 var isIos=/iPad|iPhone|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&'ontouchend' in document);
@@ -1491,7 +1554,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.nextTourStep=nextTourStep;window.endTour=endTour;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
 var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();
