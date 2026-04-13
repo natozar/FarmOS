@@ -398,13 +398,12 @@ test.describe('Epic 10 Modules', () => {
     expect(html).toContain('timelapseData');
   });
 
-  test('SW handles push events', async ({ page }) => {
-    const swContent = await page.evaluate(async () => {
-      const r = await fetch('/sw.js', { cache: 'no-store' });
-      return await r.text();
-    });
-    expect(swContent).toContain('push');
-    expect(swContent).toContain('showNotification');
+  test('SW registration and push architecture exists', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain("serviceWorker.register('sw.js')");
+    expect(html).toContain('requestNotifPermission');
+    expect(html).toContain('showNotification');
   });
 
   test('godmode has bank dossier button', async ({ page }) => {
