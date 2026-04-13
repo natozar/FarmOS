@@ -306,12 +306,62 @@ test.describe('Epic 7 Modules', () => {
 
   test('ticker works offline with cached data', async ({ page }) => {
     await page.goto('/painel.html');
-    // Set cached forex in localStorage
     await page.evaluate(() => {
       localStorage.setItem('agruai_forex', JSON.stringify({ usd: 5.25, pct: 0.15, time: '14:30' }));
     });
-    // Simulate offline by checking the function handles it
     const hasTickerFn = await page.evaluate(() => typeof document.getElementById('tickerBar') !== 'undefined');
     expect(hasTickerFn).toBe(true);
+  });
+});
+
+// ============================================================
+// 9. EPIC 8 — War Room, Scanner, Heatmap
+// ============================================================
+test.describe('Epic 8 Modules', () => {
+  test('war room toggle function exists', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('toggleWarRoom');
+    expect(html).toContain('war-room-mode');
+  });
+
+  test('war room menu button exists', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('Sala de Guerra');
+  });
+
+  test('scanner function exists in JS', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('iniciarScanner');
+    expect(html).toContain('Html5Qrcode');
+  });
+
+  test('background tracking function exists', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('startBackgroundTracking');
+    expect(html).toContain('agruai_track_points');
+  });
+
+  test('heatmap layer function exists', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('renderHeatmapLayer');
+    expect(html).toContain('track-heatmap');
+  });
+
+  test('war exit button exists in DOM', async ({ page }) => {
+    await page.goto('/painel.html');
+    const exit = page.locator('#warExit');
+    await expect(exit).toHaveCount(1);
+  });
+
+  test('scanner button renders in supply tab source', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('Escanear Defensivo');
+    expect(html).toContain('scannerContainer');
   });
 });

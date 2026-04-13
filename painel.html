@@ -19,6 +19,7 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root{--dark:#0F1F0F;--surface:#1A2E1A;--border:#2E4A2E;--green:#4A8C5C;--amber:#D4A040;--red:#C45A4A;--gold:#C5A572;--text:#F5F0E8;--muted:#A89E90;--white:#FAFAF7;--radius:12px;--radius-sm:8px;--transition:.25s ease;--sab:env(safe-area-inset-bottom)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -252,6 +253,28 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 /* Voice badge in timeline */
 .voice-badge{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;font-weight:600;padding:2px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(197,165,114,.12),rgba(74,140,92,.08));border:1px solid rgba(197,165,114,.2);color:var(--gold);margin-left:4px}
 
+/* War Room Mode */
+.war-room-mode .app-header,.war-room-mode .bottom-nav,.war-room-mode .ticker+div,.war-room-mode .content{display:none!important}
+.war-room-mode .ticker{font-size:1.1rem;padding:12px 24px;gap:20px;position:fixed;top:0;left:0;right:0;z-index:600;background:rgba(14,16,18,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.war-room-mode .mapa-full{position:fixed!important;top:0;left:0;right:0;bottom:0;z-index:500}
+.war-room-mode #tela-mapa{display:flex!important;flex-direction:column}
+.war-room-mode #tela-mapa .app-header{display:none!important}
+.war-exit{position:fixed;top:12px;right:16px;z-index:700;padding:8px 16px;border-radius:var(--radius-sm);background:rgba(196,90,74,.85);color:#fff;font-size:.75rem;font-weight:700;font-family:var(--mono,'Space Grotesk',sans-serif);display:none;cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.war-room-mode .war-exit{display:block}
+.war-float{position:fixed;bottom:20px;left:20px;right:20px;z-index:650;display:none;gap:16px}
+.war-room-mode .war-float{display:flex}
+.war-alert{flex:1;background:rgba(196,90,74,.85);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-radius:var(--radius);padding:16px 20px;color:#fff;font-family:'Space Grotesk',sans-serif}
+.war-alert-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;opacity:.7;margin-bottom:4px}
+.war-alert-val{font-size:1.8rem;font-weight:700}
+
+/* QR Scanner */
+.scanner-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
+.scanner-box video{width:100%;border-radius:var(--radius)}
+.scan-result{padding:10px 14px;font-size:.82rem;color:var(--gold);background:rgba(197,165,114,.06);border:1px solid rgba(197,165,114,.15);border-radius:var(--radius-sm);margin-bottom:8px;display:none}
+.scan-result.visivel{display:block}
+.btn-scan{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:500;transition:all var(--transition);cursor:pointer;margin-bottom:12px}
+.btn-scan:hover{border-color:var(--gold);color:var(--gold)}
+
 /* Bloomberg Ticker */
 .ticker{display:flex;align-items:center;gap:12px;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;font-size:.72rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ticker-item{display:flex;align-items:center;gap:5px;color:var(--muted)}
@@ -457,6 +480,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         <div class="user-menu" id="userMenu">
           <button class="user-menu-item" onclick="navegarPara('perfil')">👤 Meu perfil</button>
           <div class="user-menu-item" style="display:flex;align-items:center;gap:6px;cursor:default">🌐 <select id="langSelect" style="background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:.78rem;padding:3px 6px;font-family:inherit;cursor:pointer" onchange="setLang(this.value)"><option value="pt-BR">Português</option><option value="en-US">English</option><option value="es-MX">Español</option></select></div>
+          <button class="user-menu-item" onclick="toggleWarRoom()">📺 Sala de Guerra</button>
           <button class="user-menu-item" onclick="forcarAtualizacao()">🔄 Atualizar app</button>
           <button class="user-menu-item danger" onclick="fazerLogout()">Sair</button>
         </div>
@@ -500,6 +524,13 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
   <a class="bnav ativo" href="#propriedades" onclick="event.preventDefault();navegarPara('propriedades')"><span class="bnav-icon">🏠</span>Propriedades</a>
   <a class="bnav" href="#" onclick="event.preventDefault();navegarPara('cadastro')"><span class="bnav-icon">➕</span>Cadastrar</a>
 </nav>
+
+<!-- WAR ROOM -->
+<button class="war-exit" id="warExit" onclick="toggleWarRoom()">ESC Sair da Sala de Guerra</button>
+<div class="war-float" id="warFloat">
+  <div class="war-alert"><div class="war-alert-title">Risco Total Ativo</div><div class="war-alert-val" id="warRisk">R$ --</div></div>
+  <div class="war-alert" style="background:rgba(74,140,92,.85)"><div class="war-alert-title">Propriedades Monitoradas</div><div class="war-alert-val" id="warProps">--</div></div>
+</div>
 
 <!-- OFFLINE BAR -->
 <div class="offline-bar" id="offlineBar">Sem conexão — registros serão enviados quando a internet voltar</div>
@@ -784,7 +815,7 @@ riskHTML+buildCarbonCard(p)+
 '<div class="rec-status" id="recStatus"><span>&#127908; Ouvindo... fale agora</span></div>'+
 '<div class="inv-picker" id="invPicker"><div class="inv-picker-title">Vincular insumo utilizado</div><div class="inv-list" id="invPickerList"><span style="color:var(--muted);font-size:.8rem">Carregando...</span></div><div class="inv-qty-row" id="invQtyRow" style="display:none"><label class="inv-qty-label">Quantidade usada:</label><input class="inv-qty-input" type="number" id="invQtyInput" min="0.1" step="0.1" placeholder="0"><span class="inv-qty-label" id="invQtyUnit">un</span><button class="btn-secondary" style="padding:8px 12px;font-size:.75rem" onclick="clearInvSelection()">Limpar</button></div></div>'+
 '<div id="timelineContainer"><div style="text-align:center;padding:20px"><div class="spinner"></div></div></div></div>'+
-'<div class="tab-panel" id="panelInsumos"><div class="gestores-title"><span>Estoque / Galpão</span><button class="btn-convidar" onclick="abrirModalInsumo()">+ Cadastrar Insumo</button></div><div id="insumosList" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>'+
+'<div class="tab-panel" id="panelInsumos"><div class="gestores-title"><span>Estoque / Galpão</span><button class="btn-convidar" onclick="abrirModalInsumo()">+ Cadastrar Insumo</button></div><button class="btn-scan" onclick="iniciarScanner()">&#128248; Escanear Defensivo / Vacina</button><div id="scannerContainer"></div><div class="scan-result" id="scanResult"></div><div id="insumosList" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>'+
 (p._managed?'':'<div class="tab-panel" id="panelEquipe"><div class="gestores-title"><span>Gestores e Equipe</span><button class="btn-convidar" onclick="abrirModalConvite()">+ Convidar</button></div><div id="gestoresLista" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>');
 loadHistory(pid);loadAlerts(pid);loadTimeline(pid);loadInvPickerData(pid);if(!p._managed)loadGestores(pid)}
 
@@ -1208,12 +1239,12 @@ map.addLayer({id:'prop-line',type:'line',source:'propriedades',paint:{'line-colo
 map.on('click','prop-fill',function(e){var p=e.features[0].properties;var ndviTxt=p.ndvi?'<br><span style="color:'+getNDVIHex(p.classification||'moderate')+'">NDVI '+Number(p.ndvi).toFixed(2)+' · '+getNDVILabel(p.classification)+'</span>':'';new mapboxgl.Popup().setLngLat(e.lngLat).setHTML('<strong style="font-family:Space Grotesk">'+p.nome+'</strong><br><span style="color:#A89E90">'+p.municipio+'/'+p.estado+'</span>'+(p.area_ha?'<br><span style="color:#C5A572">'+Math.round(p.area_ha)+' ha</span>':'')+ndviTxt).addTo(map)});
 map.on('mouseenter','prop-fill',function(){map.getCanvas().style.cursor='pointer'});
 map.on('mouseleave','prop-fill',function(){map.getCanvas().style.cursor=''})}
-if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14})})}
+if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14});renderHeatmapLayer(map)})}
 
 /* ========== INIT ========== */
 async function iniciarApp(){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];document.getElementById('userName').textContent=nome;
 var ls=document.getElementById('langSelect');if(ls)ls.value=currentLang;
-navegarPara('propriedades');updateOfflineBar();loadTicker();setTimeout(verificarInstall,3000);setTimeout(syncPendingLogs,1500)}
+navegarPara('propriedades');updateOfflineBar();loadTicker();startBackgroundTracking();setTimeout(verificarInstall,3000);setTimeout(syncPendingLogs,1500)}
 
 async function checkSession(){showLoading('Verificando sessão...');
 try{
@@ -1327,6 +1358,64 @@ var status=document.getElementById('recStatus');if(status)status.classList.remov
 var input=document.getElementById('diarioInput');
 if(input&&input.value.trim()){toast('Texto capturado — revise e clique Enviar','ok')}}
 
+/* ========== WAR ROOM (EPIC 8) ========== */
+function toggleWarRoom(){
+var body=document.body;var active=body.classList.toggle('war-room-mode');
+if(active){navegarPara('mapa');
+var totalRisk=State.propriedades.reduce(function(s,p){return s+(p._risk||0)},0);
+document.getElementById('warRisk').textContent='R$ '+formatarNumero(totalRisk);
+document.getElementById('warProps').textContent=State.propriedades.length;
+document.addEventListener('keydown',warRoomEscHandler)}
+else{document.removeEventListener('keydown',warRoomEscHandler)}}
+function warRoomEscHandler(e){if(e.key==='Escape')toggleWarRoom()}
+
+/* ========== QR SCANNER (EPIC 8) ========== */
+var html5QrScanner=null;
+function iniciarScanner(){
+var container=document.getElementById('scannerContainer');if(!container)return;
+if(html5QrScanner){html5QrScanner.stop().then(function(){html5QrScanner=null;container.innerHTML=''}).catch(function(){});return}
+try{
+html5QrScanner=new Html5Qrcode('scannerContainer');
+html5QrScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:250,height:250}},
+function(decoded){
+var result=document.getElementById('scanResult');result.textContent='Código lido: '+decoded;result.classList.add('visivel');
+html5QrScanner.stop().then(function(){html5QrScanner=null;container.innerHTML=''}).catch(function(){});
+var matched=State.invItems.find(function(it){return it.nome.toLowerCase().indexOf(decoded.toLowerCase())>=0||decoded.indexOf(it.id)>=0});
+if(matched){toast('Item encontrado: '+matched.nome+' — '+formatarNumero(matched.quantidade)+' '+matched.unidade,'ok');
+try{if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(pos){
+var logContent='[Scanner] Baixa automática: '+matched.nome+' | EAN: '+decoded+' [📍 '+pos.coords.latitude.toFixed(5)+', '+pos.coords.longitude.toFixed(5)+']';
+sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,content:logContent,sector:'operacional'});
+sb.rpc('use_inventory_item',{p_item_id:matched.id,p_qty:1}).then(function(){loadInsumos(State.selectedProperty);loadInvPickerData(State.selectedProperty)});
+toast('Estoque atualizado + GPS registrado','ok')},function(){
+sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,content:'[Scanner] Baixa: '+matched.nome+' | EAN: '+decoded,sector:'operacional'});
+sb.rpc('use_inventory_item',{p_item_id:matched.id,p_qty:1}).then(function(){loadInsumos(State.selectedProperty)})},{enableHighAccuracy:true,timeout:8000})}}catch(e){}}
+else{toast('Código '+decoded+' não encontrado no estoque','info')}},
+function(){}).catch(function(e){toast('Câmera não disponível: '+(e.message||e),'erro')})}catch(e){toast('Scanner não suportado neste navegador','erro')}}
+
+/* ========== BACKGROUND TRACKING (EPIC 8) ========== */
+var trackingInterval=null;
+function startBackgroundTracking(){
+if(trackingInterval)return;
+trackingInterval=setInterval(function(){
+try{if(!navigator.geolocation||!State.user)return;
+navigator.geolocation.getCurrentPosition(function(pos){
+var point={lat:pos.coords.latitude,lng:pos.coords.longitude,ts:Date.now(),user:State.user.id};
+var stored=JSON.parse(localStorage.getItem('agruai_track_points')||'[]');
+stored.push(point);if(stored.length>500)stored=stored.slice(-500);
+localStorage.setItem('agruai_track_points',JSON.stringify(stored))},function(){},{enableHighAccuracy:false,timeout:5000})}catch(e){}},600000)}
+
+function getTrackPoints(){try{return JSON.parse(localStorage.getItem('agruai_track_points')||'[]')}catch(e){return[]}}
+
+function renderHeatmapLayer(map){
+var points=getTrackPoints();if(points.length<2)return;
+var features=points.map(function(p){return{type:'Feature',geometry:{type:'Point',coordinates:[p.lng,p.lat]},properties:{intensity:1}}});
+if(map.getSource('track-heat')){map.getSource('track-heat').setData({type:'FeatureCollection',features:features});return}
+map.addSource('track-heat',{type:'geojson',data:{type:'FeatureCollection',features:features}});
+map.addLayer({id:'track-heatmap',type:'heatmap',source:'track-heat',paint:{
+'heatmap-weight':1,'heatmap-intensity':['interpolate',['linear'],['zoom'],0,1,9,3],
+'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.2,'rgba(74,140,92,0.3)',0.4,'rgba(197,165,114,0.5)',0.6,'rgba(224,112,48,0.7)',0.8,'rgba(196,90,74,0.85)',1,'rgba(196,50,50,1)'],
+'heatmap-radius':['interpolate',['linear'],['zoom'],0,8,9,30],'heatmap-opacity':0.7}})}
+
 /* ========== PWA INSTALL ========== */
 var deferredPrompt=null;
 var isIos=/iPad|iPhone|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&'ontouchend' in document);
@@ -1348,7 +1437,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.onPhotoSelected=onPhotoSelected;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
 var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();
