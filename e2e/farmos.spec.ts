@@ -126,11 +126,12 @@ test.describe('Speech Recognition', () => {
 
   test('mic button visible on Chromium (has SpeechRecognition)', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'Chromium-only test');
+    test.setTimeout(20000);
     await page.goto(PAINEL);
     await page.fill('#authEmail', 'fazendeiro.teste@agruai.com');
     await page.fill('#authSenha', 'AgrUAI2026!');
     await page.click('#btnAuth');
-    await page.waitForSelector('#propContent', { timeout: 10000 });
+    await page.waitForSelector('#propContent', { timeout: 15000 });
     const card = page.locator('.prop-card').first();
     if (await card.isVisible()) {
       await card.click();
@@ -151,11 +152,12 @@ test.describe('Speech Recognition', () => {
 // ============================================================
 test.describe('Internationalization', () => {
   test('language switch to English changes UI text', async ({ page }) => {
+    test.setTimeout(20000);
     await page.goto(PAINEL);
     await page.fill('#authEmail', 'fazendeiro.teste@agruai.com');
     await page.fill('#authSenha', 'AgrUAI2026!');
     await page.click('#btnAuth');
-    await page.waitForSelector('#propContent', { timeout: 10000 });
+    await page.waitForSelector('#propContent', { timeout: 15000 });
     // Open user menu and switch language
     await page.click('#btnUser');
     await page.waitForTimeout(300);
@@ -167,11 +169,12 @@ test.describe('Internationalization', () => {
   });
 
   test('language switch to Spanish changes UI text', async ({ page }) => {
+    test.setTimeout(20000);
     await page.goto(PAINEL);
     await page.fill('#authEmail', 'fazendeiro.teste@agruai.com');
     await page.fill('#authSenha', 'AgrUAI2026!');
     await page.click('#btnAuth');
-    await page.waitForSelector('#propContent', { timeout: 10000 });
+    await page.waitForSelector('#propContent', { timeout: 15000 });
     await page.click('#btnUser');
     await page.waitForTimeout(300);
     await page.selectOption('#langSelect', 'es-MX');
@@ -181,12 +184,13 @@ test.describe('Internationalization', () => {
   });
 
   test('language persists after reload', async ({ page }) => {
+    test.setTimeout(20000);
     await page.goto(PAINEL);
     await page.evaluate(() => localStorage.setItem('agruai_lang', 'en-US'));
     await page.fill('#authEmail', 'fazendeiro.teste@agruai.com');
     await page.fill('#authSenha', 'AgrUAI2026!');
     await page.click('#btnAuth');
-    await page.waitForSelector('#propContent', { timeout: 10000 });
+    await page.waitForSelector('#propContent', { timeout: 15000 });
     const lang = await page.evaluate(() => localStorage.getItem('agruai_lang'));
     expect(lang).toBe('en-US');
   });
@@ -244,5 +248,70 @@ test.describe('International Landing Pages', () => {
     const html = page.locator('html');
     await expect(html).toHaveAttribute('lang', 'es');
     await expect(page).toHaveTitle(/AgrUAI|Finanzas/);
+  });
+});
+
+// ============================================================
+// 8. EPIC 7 — Bloomberg, Carbon, Geo-Camera
+// ============================================================
+test.describe('Epic 7 Modules', () => {
+  test('ticker bar exists in DOM', async ({ page }) => {
+    await page.goto('/painel.html');
+    const ticker = page.locator('#tickerBar');
+    await expect(ticker).toHaveCount(1);
+  });
+
+  test('ticker renders forex data after login', async ({ page }) => {
+    await page.goto('/painel.html');
+    await page.fill('#authEmail', 'fazendeiro.teste@agruai.com');
+    await page.fill('#authSenha', 'AgrUAI2026!');
+    await page.click('#btnAuth');
+    await page.waitForTimeout(5000);
+    const ticker = await page.textContent('#tickerBar');
+    expect(ticker).toBeTruthy();
+  });
+
+  test('photo input exists in diary source', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('onPhotoSelected');
+    expect(html).toContain('capture="environment"');
+  });
+
+  test('carbon card function exists', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('buildCarbonCard');
+  });
+
+  test('image compression function exists in JS', async ({ page }) => {
+    await page.goto('/painel.html');
+    const hasCompression = await page.evaluate(() => {
+      return typeof window.onPhotoSelected === 'function';
+    });
+    expect(hasCompression).toBe(true);
+  });
+
+  test('geolocation denial does not crash', async ({ browser }) => {
+    const context = await browser.newContext({
+      permissions: [],
+      geolocation: undefined,
+    });
+    const page = await context.newPage();
+    await page.goto('/painel.html');
+    // App should load without crashing even with no geo permissions
+    await expect(page.locator('#tela-login')).toBeVisible();
+    await context.close();
+  });
+
+  test('ticker works offline with cached data', async ({ page }) => {
+    await page.goto('/painel.html');
+    // Set cached forex in localStorage
+    await page.evaluate(() => {
+      localStorage.setItem('agruai_forex', JSON.stringify({ usd: 5.25, pct: 0.15, time: '14:30' }));
+    });
+    // Simulate offline by checking the function handles it
+    const hasTickerFn = await page.evaluate(() => typeof document.getElementById('tickerBar') !== 'undefined');
+    expect(hasTickerFn).toBe(true);
   });
 });

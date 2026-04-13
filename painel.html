@@ -948,19 +948,26 @@ if(btn){btn.disabled=false;btn.innerHTML='<span class="btn-esg-icon">&#128196;</
 /* ========== BLOOMBERG TICKER (EPIC 7) ========== */
 State.forex={usd:5.20,soja_sc:135,arroba:310,updated:null};
 
+function renderTickerBar(usd,pctChg,timeStr){
+var dir=(pctChg>=0)?'up':'down';var bar=document.getElementById('tickerBar');if(!bar)return;
+bar.innerHTML='<span class="ticker-item"><span class="ticker-label">USD/BRL</span><span class="ticker-val '+dir+'">R$ '+usd.toFixed(2)+'</span><span class="ticker-chg '+dir+'">'+(pctChg>=0?'+':'')+pctChg.toFixed(2)+'%</span></span>'+
+'<span class="ticker-sep">|</span><span class="ticker-item"><span class="ticker-label">Soja 60kg</span><span class="ticker-val">R$ '+State.forex.soja_sc.toFixed(0)+'</span></span>'+
+'<span class="ticker-sep">|</span><span class="ticker-item"><span class="ticker-label">Boi @</span><span class="ticker-val">R$ '+State.forex.arroba.toFixed(0)+'</span></span>'+
+'<span class="ticker-sep">|</span><span class="ticker-item" style="font-size:.6rem;color:var(--border)">'+(timeStr||'--:--')+'</span>'}
+
 async function loadTicker(){
-try{var r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL');var d=await r.json();
-if(d&&d.USDBRL){var q=d.USDBRL;State.forex.usd=parseFloat(q.bid);State.forex.updated=q.create_date;
-var pctChg=parseFloat(q.pctChange);var dir=pctChg>=0?'up':'down';
-var bar=document.getElementById('tickerBar');if(bar){bar.innerHTML=
-'<span class="ticker-item"><span class="ticker-label">USD/BRL</span><span class="ticker-val '+dir+'">R$ '+parseFloat(q.bid).toFixed(2)+'</span><span class="ticker-chg '+dir+'">'+(pctChg>=0?'+':'')+pctChg.toFixed(2)+'%</span></span>'+
-'<span class="ticker-sep">|</span>'+
-'<span class="ticker-item"><span class="ticker-label">Soja 60kg</span><span class="ticker-val">R$ '+State.forex.soja_sc.toFixed(0)+'</span></span>'+
-'<span class="ticker-sep">|</span>'+
-'<span class="ticker-item"><span class="ticker-label">Boi @</span><span class="ticker-val">R$ '+State.forex.arroba.toFixed(0)+'</span></span>'+
-'<span class="ticker-sep">|</span>'+
-'<span class="ticker-item" style="font-size:.6rem;color:var(--border)">'+q.create_date.split(' ')[1]+'</span>'}}}
-catch(e){}}
+try{
+var cached=localStorage.getItem('agruai_forex');
+if(cached){try{var c=JSON.parse(cached);State.forex.usd=c.usd;State.forex._pct=c.pct;State.forex._time=c.time}catch(x){}}
+if(!navigator.onLine){renderTickerBar(State.forex.usd,State.forex._pct||0,State.forex._time||'offline');return}
+var ctrl=new AbortController();var timer=setTimeout(function(){ctrl.abort()},8000);
+var r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL',{signal:ctrl.signal});clearTimeout(timer);
+var d=await r.json();
+if(d&&d.USDBRL){var q=d.USDBRL;var usd=parseFloat(q.bid);var pct=parseFloat(q.pctChange);var timeStr=q.create_date.split(' ')[1];
+State.forex.usd=usd;State.forex._pct=pct;State.forex._time=timeStr;
+localStorage.setItem('agruai_forex',JSON.stringify({usd:usd,pct:pct,time:timeStr}));
+renderTickerBar(usd,pct,timeStr)}}
+catch(e){renderTickerBar(State.forex.usd,State.forex._pct||0,State.forex._time||'offline')}}
 setInterval(loadTicker,300000);
 
 /* ========== CARBON CARD (EPIC 7) ========== */
@@ -983,18 +990,29 @@ return'<div class="carbon-card"><div class="carbon-title">&#127793; Capital ESG 
 State.pendingPhoto=null;
 
 function onPhotoSelected(input){
+try{
 if(!input.files||!input.files[0])return;
-var file=input.files[0];var reader=new FileReader();
-reader.onload=function(){
-State.pendingPhoto={base64:reader.result,timestamp:new Date().toISOString(),lat:null,lng:null};
-document.getElementById('photoPreview').src=reader.result;
+var file=input.files[0];
+var img=new Image();var url=URL.createObjectURL(file);
+img.onload=function(){
+var MAX=800;var w=img.width;var h=img.height;
+if(w>MAX||h>MAX){if(w>h){h=Math.round(h*(MAX/w));w=MAX}else{w=Math.round(w*(MAX/h));h=MAX}}
+var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+var ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);
+var compressed=canvas.toDataURL('image/jpeg',0.7);URL.revokeObjectURL(url);
+State.pendingPhoto={base64:compressed,timestamp:new Date().toISOString(),lat:null,lng:null};
+document.getElementById('photoPreview').src=compressed;
 document.getElementById('photoPreviewWrap').style.display='block';
-if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(pos){
+try{if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(pos){
 State.pendingPhoto.lat=pos.coords.latitude.toFixed(5);State.pendingPhoto.lng=pos.coords.longitude.toFixed(5);
 var stamp=document.getElementById('photoGeoStamp');stamp.textContent='📍 Coordenada: '+State.pendingPhoto.lat+', '+State.pendingPhoto.lng;stamp.style.display='inline-flex'},
-function(){var stamp=document.getElementById('photoGeoStamp');stamp.textContent='📍 GPS indisponível';stamp.style.display='inline-flex'},
-{enableHighAccuracy:true,timeout:10000})}};
-reader.readAsDataURL(file)}
+function(err){var stamp=document.getElementById('photoGeoStamp');
+stamp.textContent=err.code===1?'📍 GPS não autorizado — foto enviada sem carimbo':'📍 GPS indisponível';stamp.style.display='inline-flex'},
+{enableHighAccuracy:true,timeout:10000})}else{
+var stamp=document.getElementById('photoGeoStamp');stamp.textContent='📍 GPS não suportado';stamp.style.display='inline-flex'}}catch(ge){
+var stamp=document.getElementById('photoGeoStamp');stamp.textContent='📍 GPS desativado';stamp.style.display='inline-flex'}};
+img.onerror=function(){URL.revokeObjectURL(url);toast('Erro ao processar foto','erro')};
+img.src=url}catch(e){toast('Erro ao capturar foto: '+e.message,'erro')}}
 
 function getPhotoAppend(){
 if(!State.pendingPhoto)return{text:'',html:''};
