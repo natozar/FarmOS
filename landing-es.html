@@ -898,7 +898,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
           <textarea id="desafio" name="desafio" rows="3" placeholder="Ex: Não consigo acompanhar todas as fazendas à distância..."></textarea>
         </div>
 
-        <button type="submit" class="btn-submit" id="btnSubmit">Asegurar mi cupo</button>
+        <label style="display:flex;align-items:flex-start;gap:8px;margin:16px 0 12px;cursor:pointer;font-size:.68rem;color:#A89E90;line-height:1.5;text-align:left"><input type="checkbox" id="eulaCheck" onchange="document.getElementById('btnSubmit').disabled=!this.checked" style="margin-top:3px;min-width:16px;accent-color:#C5A572"><span>Declaro bajo las penas de la ley que el rastreo por Geolocalización (GPS) de los dispositivos de mis colaboradores cuenta con consentimiento laboral explícito y que estoy eximiendo a los socios de AgrUAI (FarmOS) de cualquier demanda de pasivo laboral por la operación.</span></label>
+        <button type="submit" class="btn-submit" id="btnSubmit" disabled style="opacity:.5">Asegurar mi cupo</button>
         <div class="legal-disclaimer" style="font-size:.68rem;color:#706858;margin-top:12px;line-height:1.5;text-align:center;max-width:400px;margin-left:auto;margin-right:auto">🔒 Protección Oculta. Sus coordenadas y métricas están encriptadas bajo confidencialidad y nunca se comparten.</div>
         <p class="form-micro">Seus dados são confidenciais. Entraremos em contato apenas para o programa.</p>
       </form>

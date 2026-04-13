@@ -898,7 +898,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
           <textarea id="desafio" name="desafio" rows="3" placeholder="Ex: Não consigo acompanhar todas as fazendas à distância..."></textarea>
         </div>
 
-        <button type="submit" class="btn-submit" id="btnSubmit">Secure my spot</button>
+        <label style="display:flex;align-items:flex-start;gap:8px;margin:16px 0 12px;cursor:pointer;font-size:.68rem;color:#A89E90;line-height:1.5;text-align:left"><input type="checkbox" id="eulaCheck" onchange="document.getElementById('btnSubmit').disabled=!this.checked" style="margin-top:3px;min-width:16px;accent-color:#C5A572"><span>I declare under penalty of law that Geolocation (GPS) tracking of my employees' devices has explicit labor consent and that I am exempting AgrUAI (FarmOS) partners from any labor liability arising from this operation.</span></label>
+        <button type="submit" class="btn-submit" id="btnSubmit" disabled style="opacity:.5">Secure my spot</button>
         <div class="legal-disclaimer" style="font-size:.68rem;color:#706858;margin-top:12px;line-height:1.5;text-align:center;max-width:400px;margin-left:auto;margin-right:auto">🔒 Enterprise-grade Data Protection. Your field coordinates are encrypted and fully compliant with GDPR/LGPD.</div>
         <p class="form-micro">Seus dados são confidenciais. Entraremos em contato apenas para o programa.</p>
       </form>

@@ -898,7 +898,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
           <textarea id="desafio" name="desafio" rows="3" placeholder="Ex: Não consigo acompanhar todas as fazendas à distância..."></textarea>
         </div>
 
-        <button type="submit" class="btn-submit" id="btnSubmit">Garantir minha vaga</button>
+        <label style="display:flex;align-items:flex-start;gap:8px;margin:16px 0 12px;cursor:pointer;font-size:.68rem;color:#A89E90;line-height:1.5;text-align:left"><input type="checkbox" id="eulaCheck" onchange="document.getElementById('btnSubmit').disabled=!this.checked" style="margin-top:3px;min-width:16px;accent-color:#C5A572"><span>Declaro sob as penas da lei que o rastreio via Geolocalização (GPS) dos dispositivos dos meus colaboradores possui concordância trabalhista explícita e que estou isentando os sócios do AgrUAI (FarmOS) de qualquer demanda de passivo trabalhista pela operação.</span></label>
+        <button type="submit" class="btn-submit" id="btnSubmit" disabled style="opacity:.5">Garantir minha vaga</button>
         <div class="legal-disclaimer" style="font-size:.68rem;color:#706858;margin-top:12px;line-height:1.5;text-align:center;max-width:400px;margin-left:auto;margin-right:auto">🔒 Protocolo de Dados Protegido. Suas coordenadas e métricas financeiras são criptografadas sob sigilo LGPD e jamais compartilhadas.</div>
         <p class="form-micro">Seus dados são confidenciais. Entraremos em contato apenas para o programa.</p>
       </form>

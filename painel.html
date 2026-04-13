@@ -448,6 +448,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 <!-- PROPRIEDADES -->
 <div class="screen" id="tela-propriedades">
   <div class="ticker" id="tickerBar"><span style="color:var(--muted)">Carregando cotações...</span></div>
+  <div style="font-size:.5rem;color:rgba(168,158,144,.35);text-align:center;padding:2px 16px;background:var(--surface);border-bottom:1px solid var(--border)">Projeção matemática referencial. Nenhuma métrica aqui constitui recomendação financeira ou oferta de ativos.</div>
   <div class="app-header">
     <div class="header-logo"><span class="l1">Agr</span><span class="l2">UAI</span></div>
     <div class="header-right">
@@ -984,7 +985,7 @@ return'<div class="carbon-card"><div class="carbon-title">&#127793; Capital ESG 
 '<div class="carbon-metric"><div class="carbon-metric-label">CO₂ sequestrado/ano</div><div class="carbon-metric-val">'+formatarNumero(co2Tons)+' t</div></div>'+
 '<div class="carbon-metric"><div class="carbon-metric-label">Valor carbono (USD)</div><div class="carbon-metric-val gold">$ '+formatarNumero(usdVal)+'</div></div>'+
 '<div class="carbon-metric"><div class="carbon-metric-label">Valor carbono (BRL)</div><div class="carbon-metric-val gold">R$ '+formatarNumero(brlVal)+'</div></div></div>'+
-'<button class="carbon-cta" onclick="toast(\'Disponível na versão Premium — entre em contato\',\'info\')">Desbloquear Venda de Créditos na versão Premium</button></div>'}
+'<button class="carbon-cta" onclick="toast(\'Disponível na versão Premium — entre em contato\',\'info\')">Desbloquear Venda de Créditos na versão Premium</button><div style="font-size:.5rem;color:rgba(168,158,144,.4);margin-top:8px;line-height:1.4;text-align:center">Projeção matemática referencial. Nenhuma métrica aqui constitui recomendação financeira ou oferta de ativos.</div></div>'}
 
 /* ========== GEO-CAPTURE CAMERA (EPIC 7) ========== */
 State.pendingPhoto=null;
@@ -1052,7 +1053,7 @@ return AI_FALLBACK}
 function renderAISuggestions(logId,text){
 var actions=detectAISuggestions(text);if(!actions)return'';
 return'<div class="ai-suggest"><div class="ai-suggest-title">&#10024; Resoluções da IA AgrUAI</div><div class="ai-suggest-actions">'+
-actions.map(function(a,i){return'<button class="ai-action" onclick="executeAIAction(this,\''+escapeHtml(a)+'\',\''+logId+'\')">'+(i+1)+'. '+escapeHtml(a)+'</button>'}).join('')+'</div></div>'}
+actions.map(function(a,i){return'<button class="ai-action" onclick="executeAIAction(this,\''+escapeHtml(a)+'\',\''+logId+'\')">'+(i+1)+'. '+escapeHtml(a)+'</button>'}).join('')+'</div><div style="font-size:.55rem;color:rgba(168,158,144,.5);margin-top:8px;line-height:1.4">Aviso: Sugestões logísticas baseadas em processamento algorítmico interno. Não substitui e não atua como laudo técnico oficial Zootécnico, Agronômico ou Veterinário (Lei n° 5.194/66).</div></div>'}
 
 function executeAIAction(btn,action,logId){
 btn.classList.add('done');btn.textContent='✓ '+action;
