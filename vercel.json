@@ -6,6 +6,12 @@
   ],
   "headers": [
     {
+      "source": "/report.html",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
       "source": "/painel.html",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" }

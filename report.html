@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>AgrUAI — Relatório Semanal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#1a1a1a;--muted:#666;--border:#ddd;--green:#2E7D32;--red:#C62828;--gold:#8D6E37;--bg:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Georgia','Times New Roman',serif;background:var(--bg);color:var(--ink);font-size:11pt;line-height:1.6}
+
+/* PRINT BUTTON (hidden on print) */
+.print-bar{position:fixed;top:0;left:0;right:0;z-index:100;padding:12px 20px;background:#C62828;display:flex;align-items:center;justify-content:space-between}
+.print-btn{padding:10px 24px;background:#fff;color:#C62828;font-family:'Georgia',serif;font-size:11pt;font-weight:700;border:none;border-radius:6px;cursor:pointer}
+.print-btn:hover{background:#f5f5f5}
+.print-title{color:#fff;font-size:10pt;font-weight:400}
+
+/* REPORT LAYOUT */
+.report{max-width:210mm;margin:60px auto 40px;padding:20mm;background:#fff}
+.header{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:3px solid var(--ink);padding-bottom:12px;margin-bottom:24px}
+.header-brand{font-size:22pt;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.header-brand span{color:var(--gold)}
+.header-meta{text-align:right;font-size:8pt;color:var(--muted);line-height:1.5}
+.header-meta strong{color:var(--ink);font-size:9pt}
+
+.section{margin-bottom:24px}
+.section-title{font-size:13pt;font-weight:700;color:var(--ink);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:14px;letter-spacing:-.01em}
+.section-subtitle{font-size:9pt;color:var(--muted);font-style:italic;margin-bottom:10px}
+
+/* PROPERTY INFO */
+.prop-box{display:flex;gap:20px;margin-bottom:20px}
+.prop-main{flex:2}
+.prop-name{font-size:16pt;font-weight:700;margin-bottom:4px}
+.prop-detail{font-size:9pt;color:var(--muted);line-height:1.7}
+.prop-stats{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.prop-stat{text-align:center;padding:10px;border:1px solid var(--border);border-radius:4px}
+.prop-stat-val{font-size:16pt;font-weight:700}
+.prop-stat-val.green{color:var(--green)}
+.prop-stat-val.red{color:var(--red)}
+.prop-stat-val.gold{color:var(--gold)}
+.prop-stat-label{font-size:7pt;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+
+/* NDVI CHART */
+.chart-container{border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:16px}
+.chart-container canvas{width:100%;height:120px}
+
+/* RISK */
+.risk-banner{padding:14px 18px;border-radius:4px;margin-bottom:16px}
+.risk-banner.high{background:#FFEBEE;border:1px solid #FFCDD2;color:var(--red)}
+.risk-banner.low{background:#E8F5E9;border:1px solid #C8E6C9;color:var(--green)}
+.risk-val{font-size:18pt;font-weight:700}
+.risk-desc{font-size:8pt;margin-top:2px}
+
+/* LOGS TABLE */
+.log-table{width:100%;border-collapse:collapse;font-size:9pt}
+.log-table th{text-align:left;padding:8px 10px;background:#f5f5f5;border-bottom:2px solid var(--border);font-size:7pt;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.log-table td{padding:8px 10px;border-bottom:1px solid #eee;vertical-align:top}
+.log-table tr:nth-child(even) td{background:#fafafa}
+.sector-tag{display:inline-block;font-size:7pt;font-weight:700;padding:1px 6px;border-radius:3px;text-transform:uppercase}
+.sector-tag.agronomia{background:#E8F5E9;color:#2E7D32}
+.sector-tag.zootecnia{background:#E0F2F1;color:#00695C}
+.sector-tag.mecanica{background:#E3F2FD;color:#1565C0}
+.sector-tag.operacional{background:#FFF8E1;color:#8D6E37}
+.sector-tag.financeiro{background:#F5F5F5;color:#666}
+.sector-tag.veterinaria{background:#F3E5F5;color:#7B1FA2}
+
+/* AI ACTIONS */
+.ai-tag{font-size:7pt;color:var(--gold);font-weight:700;font-style:italic}
+
+/* FOOTER */
+.footer{margin-top:32px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:7pt;color:var(--muted)}
+
+/* LOADING */
+.loading{text-align:center;padding:60px;color:var(--muted);font-size:12pt}
+
+/* PRINT STYLES */
+@media print{
+  .print-bar{display:none!important}
+  .report{margin:0;padding:15mm;max-width:none}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .risk-banner,.sector-tag,.prop-stat{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .chart-container canvas{height:100px}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+
+<div class="print-bar">
+  <span class="print-title">Relatório Semanal — AgrUAI</span>
+  <button class="print-btn" onclick="window.print()">Exportar para WhatsApp (PDF)</button>
+</div>
+
+<div class="report" id="reportContent">
+  <div class="loading" id="reportLoading">Carregando relatório...</div>
+</div>
+
+<script>
+(async function(){
+var SUPA_URL='https://kyvbnntoxslrtrsiejzc.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5dmJubnRveHNscnRyc2llanpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjQ1NDcsImV4cCI6MjA5MTQ0MDU0N30.Dx-9SKxWfAoxXg3gzx3NpzJD1taZgkQCCjwDXlY9J6I';
+var sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+
+var params=new URLSearchParams(window.location.search);
+var propId=params.get('id');
+if(!propId){document.getElementById('reportLoading').textContent='Erro: ID da propriedade não informado na URL.';return}
+
+var session=await sb.auth.getSession();
+if(!session.data.session){document.getElementById('reportLoading').textContent='Faça login no painel primeiro para acessar o relatório.';return}
+
+try{
+// Fetch property
+var pr=await sb.from('properties').select('*').eq('id',propId).single();
+if(pr.error)throw pr.error;var prop=pr.data;
+
+// Fetch last 7 days of satellite readings
+var weekAgo=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
+var sr=await sb.rpc('get_satellite_history',{p_property_id:propId,p_limit:10});
+var readings=(sr.data||[]).reverse();
+
+// Fetch last 7 days of field logs
+var fl=await sb.rpc('get_property_timeline',{p_property_id:propId,p_limit:30});
+var logs=(fl.data||[]).filter(function(l){return new Date(l.created_at)>=new Date(Date.now()-7*864e5)});
+
+// Fetch alerts
+var al=await sb.rpc('get_property_alerts',{p_property_id:propId});
+var alerts=(al.data||[]).filter(function(a){return!a.resolved});
+
+// Crop info
+var CROPS={'pastagem':{l:'Pecuária',v:0},'soja_milho':{l:'Soja/Milho',v:135,p:55},'cafe':{l:'Café',v:1400,p:30},'fruticultura':{l:'Fruticultura',v:2800,p:25},'floresta':{l:'Floresta',v:120,p:40}};
+var crop=CROPS[prop.crop_type]||{l:'—',v:0};
+
+// Calc risk
+var lastReading=readings.length?readings[readings.length-1]:null;
+var ndvi=lastReading?lastReading.ndvi:null;
+var cls=lastReading?lastReading.classification:'';
+var riskPct=cls==='critical'?0.35:cls==='stressed'?0.15:0;
+var riskHa=prop.area_ha?Math.round(prop.area_ha*riskPct):0;
+var riskBrl=crop.v&&crop.p?Math.round(riskHa*crop.p*crop.v):0;
+
+var today=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+var weekStart=new Date(Date.now()-7*864e5).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+var weekEnd=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+
+var fmt=function(n){return n!=null?n.toLocaleString('pt-BR'):'—'};
+var sectorCls=function(s){return s||'operacional'};
+
+// BUILD HTML
+var html='<div class="header"><div><div class="header-brand">Agr<span>UAI</span></div><div style="font-size:8pt;color:#666;margin-top:2px">Inteligência Rural por Satélite</div></div><div class="header-meta"><strong>Relatório Semanal</strong><br>'+today+'<br>Período: '+weekStart+' a '+weekEnd+'</div></div>';
+
+// Property info
+html+='<div class="section"><div class="prop-box"><div class="prop-main"><div class="prop-name">'+prop.nome+'</div><div class="prop-detail">'+prop.municipio+'/'+prop.estado+'<br>'+(prop.car_code?'CAR: '+prop.car_code+'<br>':'')+'Cultura: '+crop.l+'<br>Área: '+fmt(Math.round(prop.area_ha))+' hectares</div></div><div class="prop-stats">';
+html+='<div class="prop-stat"><div class="prop-stat-val '+(ndvi&&ndvi>=0.4?'green':'red')+'">'+(ndvi?ndvi.toFixed(2):'—')+'</div><div class="prop-stat-label">NDVI atual</div></div>';
+html+='<div class="prop-stat"><div class="prop-stat-val gold">'+alerts.length+'</div><div class="prop-stat-label">Alertas</div></div>';
+html+='<div class="prop-stat"><div class="prop-stat-val">'+logs.filter(function(l){return l.entry_type==='log'}).length+'</div><div class="prop-stat-label">Logs 7d</div></div>';
+html+='<div class="prop-stat"><div class="prop-stat-val '+(riskBrl>0?'red':'green')+'">'+fmt(riskBrl)+'</div><div class="prop-stat-label">Risco R$</div></div>';
+html+='</div></div></div>';
+
+// Risk banner
+if(riskBrl>0){html+='<div class="risk-banner high"><div class="risk-val">R$ '+fmt(riskBrl)+' em risco</div><div class="risk-desc">'+riskHa+' ha com vegetação '+(cls==='critical'?'crítica':'estressada')+' × '+crop.p+' '+crop.l+'/ha × R$ '+fmt(crop.v)+'/unid</div></div>'}
+else{html+='<div class="risk-banner low"><div class="risk-val">Sem risco significativo</div><div class="risk-desc">Vegetação dentro dos padrões esperados para o período.</div></div>'}
+
+// NDVI Chart
+html+='<div class="section"><div class="section-title">Evolução NDVI</div><div class="section-subtitle">Índice de vegetação dos últimos '+readings.length+' períodos</div><div class="chart-container"><canvas id="ndviChart" height="120"></canvas></div></div>';
+
+// Logs table
+html+='<div class="section"><div class="section-title">Ocorrências da Semana</div>';
+if(logs.length===0){html+='<p style="color:#666;font-size:9pt;font-style:italic">Nenhuma ocorrência registrada nesta semana.</p>'}
+else{html+='<table class="log-table"><thead><tr><th>Data</th><th>Setor</th><th>Autor</th><th>Ocorrência</th></tr></thead><tbody>';
+logs.forEach(function(l){var d=new Date(l.created_at);var isAI=l.content&&l.content.indexOf('[IA]')===0;
+html+='<tr><td>'+d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</td><td><span class="sector-tag '+sectorCls(l.sector)+'">'+(l.sector||l.entry_type)+'</span></td><td>'+(l.author_name||'—')+'</td><td>'+l.content+(isAI?' <span class="ai-tag">Ação IA</span>':'')+'</td></tr>'});
+html+='</tbody></table>'}
+html+='</div>';
+
+// Footer
+html+='<div class="footer"><span>AgrUAI — agruai.com — Dados: Sentinel-2/Copernicus (ESA)</span><span>Gerado automaticamente em '+new Date().toISOString()+'</span></div>';
+
+document.getElementById('reportContent').innerHTML=html;
+
+// Draw chart
+if(readings.length>=2){
+var canvas=document.getElementById('ndviChart');var ctx=canvas.getContext('2d');
+canvas.width=canvas.offsetWidth*2;canvas.height=240;ctx.scale(2,2);
+var w=canvas.offsetWidth;var h=120;var mg=30;var cw=w-mg*2;var ch=h-20;
+// Grid
+ctx.strokeStyle='#eee';ctx.lineWidth=0.5;
+for(var g=0;g<=4;g++){var gy=10+ch-g*(ch/4);ctx.beginPath();ctx.moveTo(mg,gy);ctx.lineTo(mg+cw,gy);ctx.stroke();
+ctx.fillStyle='#999';ctx.font='7px Georgia';ctx.textAlign='right';ctx.fillText((g*0.25).toFixed(1),mg-4,gy+3)}
+// Threshold
+ctx.strokeStyle='#FFCDD2';ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(mg,10+ch-0.3*ch);ctx.lineTo(mg+cw,10+ch-0.3*ch);ctx.stroke();ctx.setLineDash([]);
+// Line
+ctx.strokeStyle='#2E7D32';ctx.lineWidth=2;ctx.beginPath();
+readings.forEach(function(r,i){var x=mg+i*(cw/(readings.length-1));var y=10+ch-Math.min(r.ndvi,1)*ch;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke();
+// Points
+readings.forEach(function(r,i){var x=mg+i*(cw/(readings.length-1));var y=10+ch-Math.min(r.ndvi,1)*ch;
+ctx.fillStyle=r.classification==='healthy'?'#2E7D32':r.classification==='moderate'?'#F9A825':r.classification==='stressed'?'#E65100':'#C62828';
+ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill()});
+// Date labels
+ctx.fillStyle='#999';ctx.font='7px Georgia';ctx.textAlign='start';ctx.fillText(readings[0].reading_date||'',mg,h-2);
+ctx.textAlign='end';ctx.fillText(readings[readings.length-1].reading_date||'',mg+cw,h-2)}
+
+}catch(e){document.getElementById('reportContent').innerHTML='<div class="loading" style="color:#C62828">Erro ao carregar: '+e.message+'</div>'}
+})();
+</script>
+</body>
+</html>
