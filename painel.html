@@ -261,6 +261,22 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .rec-status.visivel{display:block;animation:fadeIn .2s ease}
 .rec-timer{font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif}
 
+/* Weather Window */
+.weather-card{border-radius:var(--radius);padding:16px;margin-bottom:16px}
+.weather-card.open{background:rgba(74,140,92,.06);border:1px solid rgba(74,140,92,.2)}
+.weather-card.closed{background:rgba(196,90,74,.06);border:1px solid rgba(196,90,74,.2)}
+.weather-title{font-family:'Space Grotesk',sans-serif;font-size:.85rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.weather-title.open{color:var(--green)}
+.weather-title.closed{color:var(--red)}
+.weather-status{font-size:.78rem;font-weight:600;margin-bottom:10px}
+.weather-days{display:flex;gap:4px;margin-bottom:8px}
+.weather-day{flex:1;text-align:center;padding:6px 2px;background:rgba(15,31,15,.3);border-radius:var(--radius-sm);font-size:.62rem}
+.weather-day-label{color:var(--muted);margin-bottom:2px}
+.weather-day-rain{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.78rem}
+.weather-day-rain.wet{color:#4A90A4}
+.weather-day-rain.dry{color:var(--muted)}
+.weather-detail{font-size:.68rem;color:var(--muted);text-align:center}
+
 /* Livestock Satellite */
 .livestock-card{background:linear-gradient(135deg,rgba(139,105,60,.06),rgba(74,140,92,.04));border:1px solid rgba(139,105,60,.2);border-radius:var(--radius);padding:18px;margin-bottom:16px}
 .livestock-title{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:700;color:#B8945A;margin-bottom:12px;display:flex;align-items:center;gap:6px}
@@ -887,7 +903,7 @@ c.innerHTML='<div class="prop-meta" style="margin-bottom:12px">'+escapeHtml(p.mu
 '<div class="detalhe-tabs"><button class="detalhe-tab ativo" onclick="switchDetalheTab(\'satelite\')">Satélite</button><button class="detalhe-tab" onclick="switchDetalheTab(\'diario\')">Diário</button><button class="detalhe-tab" onclick="switchDetalheTab(\'insumos\')">Insumos</button>'+(p._managed?'':'<button class="detalhe-tab" onclick="switchDetalheTab(\'equipe\')">Equipe</button>')+'</div>'+
 '<div class="tab-panel ativo" id="panelSatelite">'+
 '<div class="metrics-grid"><div class="metric-card"><div class="metric-label">NDVI</div><div class="metric-value" style="color:'+(hasNDVI?getNDVIColor(cls):'var(--muted)')+'">'+(hasNDVI?p.last_ndvi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">EVI</div><div class="metric-value" style="color:var(--green)">'+(p.last_evi!=null?p.last_evi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">NDWI</div><div class="metric-value" style="color:#4A90A4">'+(p.last_ndwi!=null?p.last_ndwi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">Nuvens</div><div class="metric-value">'+(p.last_cloud_coverage!=null?Math.round(p.last_cloud_coverage)+'%':'—')+'</div></div></div>'+
-riskHTML+buildLivestockCard(p)+buildCarbonCard(p)+buildCFOCard(p)+
+riskHTML+buildWeatherCard()+buildLivestockCard(p)+buildCarbonCard(p)+buildCFOCard(p)+
 '<div class="ndvi-chart"><div class="ndvi-chart-title">Evolução NDVI</div><div id="chartSvg" style="text-align:center;padding:20px;color:var(--muted);font-size:.8rem">Carregando...</div></div>'+
 '<h3 style="font-size:1rem;margin:20px 0 12px">Alertas</h3><div id="detalheAlertas" style="color:var(--muted);font-size:.85rem">Carregando...</div></div>'+
 '<div class="tab-panel" id="panelDiario">'+
@@ -899,7 +915,8 @@ riskHTML+buildLivestockCard(p)+buildCarbonCard(p)+buildCFOCard(p)+
 '<div id="timelineContainer"><div style="text-align:center;padding:20px"><div class="spinner"></div></div></div></div>'+
 '<div class="tab-panel" id="panelInsumos"><div class="gestores-title"><span>Estoque / Galpão</span><button class="btn-convidar" onclick="abrirModalInsumo()">+ Cadastrar Insumo</button></div><button class="btn-scan" onclick="iniciarScanner()">&#128248; Escanear Defensivo / Vacina</button><div id="scannerContainer"></div><div class="scan-result" id="scanResult"></div><div id="insumosList" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>'+
 (p._managed?'':'<div class="tab-panel" id="panelEquipe"><div class="gestores-title"><span>Gestores e Equipe</span><button class="btn-convidar" onclick="abrirModalConvite()">+ Convidar</button></div><div id="gestoresLista" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>');
-loadHistory(pid);loadAlerts(pid);loadTimeline(pid);loadInvPickerData(pid);if(!p._managed)loadGestores(pid)}
+loadHistory(pid);loadAlerts(pid);loadTimeline(pid);loadInvPickerData(pid);if(!p._managed)loadGestores(pid);
+loadWeather(p).then(function(){var wc=document.querySelector('.weather-card');if(!wc){var panel=document.getElementById('panelSatelite');if(panel){var riskEl=panel.querySelector('.risk-card');if(riskEl)riskEl.insertAdjacentHTML('afterend',buildWeatherCard())}}})
 
 function switchDetalheTab(tab){var tabs=['satelite','diario','insumos','equipe'];document.querySelectorAll('.detalhe-tab').forEach(function(t,i){t.classList.toggle('ativo',tabs[i]===tab)});document.getElementById('panelSatelite').classList.toggle('ativo',tab==='satelite');document.getElementById('panelDiario').classList.toggle('ativo',tab==='diario');var pi=document.getElementById('panelInsumos');if(pi)pi.classList.toggle('ativo',tab==='insumos');var pe=document.getElementById('panelEquipe');if(pe)pe.classList.toggle('ativo',tab==='equipe');if(tab==='insumos')loadInsumos(State.selectedProperty)}
 
@@ -936,7 +953,7 @@ if(invItem){logData.inventory_item_id=invItem.id;logData.inventory_qty_used=invQ
 if(navigator.onLine){
 try{var r=await sb.from('field_logs').insert(logData);if(r.error)throw r.error;
 if(invItem&&invQty>0){await sb.rpc('use_inventory_item',{p_item_id:invItem.id,p_qty:invQty});loadInvPickerData(State.selectedProperty)}
-checkEmergencyNotification(content);input.value='';clearInvSelection();clearPhoto();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty)}catch(e){
+checkEmergencyNotification(content);checkDieselAnomaly(content);input.value='';clearInvSelection();clearPhoto();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty)}catch(e){
 logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;
 await addPendingLog(logData);input.value='';clearInvSelection();toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
 }else{
@@ -1059,6 +1076,46 @@ doc.setTextColor(168,158,144);doc.text('Laudo ESG — '+p.nome+' — '+(new Date
 var filename='Laudo_ESG_'+p.nome.replace(/[^a-zA-Z0-9]/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
 doc.save(filename);toast('Laudo gerado: '+filename,'ok')}catch(e){console.error('PDF error:',e);toast('Erro ao gerar PDF: '+e.message,'erro')}
 if(btn){btn.disabled=false;btn.innerHTML='<span class="btn-esg-icon">&#128196;</span> Emitir Laudo do Banco (ESG)'}}
+
+/* ========== WEATHER ORACLE (EPIC 15) ========== */
+State.weather=null;State.weatherWindow='unknown';
+
+async function loadWeather(p){
+if(!p||!p.geojson)return;
+try{var geo=typeof p.geojson==='string'?JSON.parse(p.geojson):p.geojson;
+var coords=geo.type==='MultiPolygon'?geo.coordinates[0][0][0]:geo.coordinates[0][0];
+var lat=coords[1].toFixed(4);var lng=coords[0].toFixed(4);
+var ctrl=new AbortController();setTimeout(function(){ctrl.abort()},8000);
+var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lng+'&daily=precipitation_sum,soil_moisture_0_to_7cm_mean&timezone=America/Sao_Paulo&forecast_days=7';
+var r=await fetch(url,{signal:ctrl.signal});var d=await r.json();
+if(d&&d.daily){State.weather=d.daily;
+var rain48h=(d.daily.precipitation_sum[0]||0)+(d.daily.precipitation_sum[1]||0);
+State.weatherWindow=rain48h>10?'closed':'open'}}catch(e){State.weather=null;State.weatherWindow='unknown'}}
+
+function buildWeatherCard(){
+if(!State.weather)return'';
+var w=State.weather;var cls=State.weatherWindow;
+var days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+var daysHtml='';for(var i=0;i<Math.min(7,w.precipitation_sum.length);i++){
+var d=new Date(w.time[i]);var rain=w.precipitation_sum[i]||0;
+daysHtml+='<div class="weather-day"><div class="weather-day-label">'+days[d.getDay()]+'</div><div class="weather-day-rain '+(rain>2?'wet':'dry')+'">'+rain.toFixed(0)+'mm</div></div>'}
+var statusText=cls==='closed'?'JANELA FECHADA: Risco de lavagem de insumos. Evite pulverização.':'JANELA ABERTA: Condições favoráveis para manejo e aplicação.';
+var titleCls=cls==='closed'?'closed':'open';
+return'<div class="weather-card '+titleCls+'"><div class="weather-title '+titleCls+'">'+(cls==='closed'?'&#9940;':'&#9989;')+' Janela de Manejo (7 dias)</div><div class="weather-status" style="color:'+(cls==='closed'?'var(--red)':'var(--green)')+'">'+statusText+'</div><div class="weather-days">'+daysHtml+'</div><div class="weather-detail">Fonte: Open-Meteo.com (grátis, sem chave API)</div></div>'}
+
+/* ========== DIESEL AUDITOR (EPIC 15) ========== */
+function checkDieselAnomaly(content){
+if(!content)return;
+var lower=content.toLowerCase();
+var match=lower.match(/(\d+)\s*(?:litros|l)\b/);if(!match)return;
+var liters=parseInt(match[1]);
+var avgConsumption=parseFloat(localStorage.getItem('agruai_avg_diesel')||'0');
+if(avgConsumption===0){localStorage.setItem('agruai_avg_diesel',liters.toString());return}
+var newAvg=(avgConsumption*0.8+liters*0.2);
+localStorage.setItem('agruai_avg_diesel',newAvg.toFixed(0));
+if(liters>avgConsumption*1.2&&avgConsumption>50){
+fireEmergencyNotification('ALERTA: Pico de Diesel','Consumo de '+liters+'L detectado — '+Math.round((liters/avgConsumption-1)*100)+'% acima da média ('+Math.round(avgConsumption)+'L). Verificar bico injetor ou desvio.');
+toast('Alerta de diesel: consumo '+Math.round((liters/avgConsumption-1)*100)+'% acima da média','erro')}}
 
 /* ========== BLOOMBERG TICKER (EPIC 7) ========== */
 State.forex={usd:5.20,soja_sc:135,arroba:310,updated:null};
@@ -1390,8 +1447,8 @@ if(r2.error)throw r2.error;State.cadStep=3;renderCadastro();toast('Propriedade c
 /* ========== MAPA GERAL ========== */
 async function renderMapaGeral(){if(State.mapaGeral){State.mapaGeral.remove();State.mapaGeral=null}
 var container=document.getElementById('mapaFullContainer');container.innerHTML='';
-var map=new mapboxgl.Map({container:container,style:'mapbox://styles/mapbox/satellite-streets-v12',center:[-47.9,-15.7],zoom:4,attributionControl:false});
-map.addControl(new mapboxgl.NavigationControl(),'top-right');State.mapaGeral=map;
+var map=new mapboxgl.Map({container:container,style:'mapbox://styles/mapbox/satellite-streets-v12',center:[-47.9,-15.7],zoom:4,attributionControl:false,pitch:0,bearing:0});
+map.addControl(new mapboxgl.NavigationControl({visualizePitch:true}),'top-right');State.mapaGeral=map;
 map.on('load',async function(){var props=await carregarPropriedades();if(props.length===0)return;
 var features=[];var bounds=new mapboxgl.LngLatBounds();
 props.forEach(function(p){if(p.geojson){var geo=typeof p.geojson==='string'?JSON.parse(p.geojson):p.geojson;features.push({type:'Feature',properties:{nome:p.nome,area_ha:p.area_ha,municipio:p.municipio,estado:p.estado,ndvi:p.last_ndvi||null,classification:p.last_classification||null},geometry:geo});
@@ -1402,7 +1459,10 @@ map.addLayer({id:'prop-line',type:'line',source:'propriedades',paint:{'line-colo
 map.on('click','prop-fill',function(e){var p=e.features[0].properties;var ndviTxt=p.ndvi?'<br><span style="color:'+getNDVIHex(p.classification||'moderate')+'">NDVI '+Number(p.ndvi).toFixed(2)+' · '+getNDVILabel(p.classification)+'</span>':'';new mapboxgl.Popup().setLngLat(e.lngLat).setHTML('<strong style="font-family:Space Grotesk">'+p.nome+'</strong><br><span style="color:#A89E90">'+p.municipio+'/'+p.estado+'</span>'+(p.area_ha?'<br><span style="color:#C5A572">'+Math.round(p.area_ha)+' ha</span>':'')+ndviTxt).addTo(map)});
 map.on('mouseenter','prop-fill',function(){map.getCanvas().style.cursor='pointer'});
 map.on('mouseleave','prop-fill',function(){map.getCanvas().style.cursor=''})}
-if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14});renderHeatmapLayer(map);initTimelapse(map,props)})}
+if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14});renderHeatmapLayer(map);initTimelapse(map,props);
+try{map.addSource('mapbox-dem',{type:'raster-dem',url:'mapbox://mapbox.mapbox-terrain-dem-v1',tileSize:512,maxzoom:14});
+map.setTerrain({source:'mapbox-dem',exaggeration:1.6});
+map.addLayer({id:'sky',type:'sky',paint:{'sky-type':'atmosphere','sky-atmosphere-sun':[0,0],'sky-atmosphere-sun-intensity':15}})}catch(e){}})}
 
 /* ========== TELEMETRY (EPIC 12) ========== */
 var _sid=localStorage.getItem('agruai_sid');if(!_sid){_sid='s_'+Date.now()+'_'+Math.random().toString(36).substr(2,8);localStorage.setItem('agruai_sid',_sid)}
