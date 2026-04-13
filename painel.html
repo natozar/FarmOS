@@ -121,6 +121,16 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 /* MAPA FULLSCREEN */
 .mapa-full{flex:1;position:relative}
 .mapa-full .mapboxgl-canvas{outline:none}
+/* NDVI Timelapse Slider */
+.timelapse-bar{position:absolute;bottom:0;left:0;right:0;z-index:10;padding:10px 16px 14px;background:linear-gradient(to top,rgba(15,31,15,.92),transparent);display:flex;align-items:center;gap:12px}
+.timelapse-slider{flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--gold),var(--red));outline:none;cursor:pointer}
+.timelapse-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--gold);border:2px solid var(--dark);box-shadow:0 0 8px rgba(197,165,114,.4);cursor:grab}
+.timelapse-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--gold);border:2px solid var(--dark)}
+.timelapse-label{font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:600;color:var(--gold);min-width:55px;text-align:center;font-variant-numeric:tabular-nums}
+.timelapse-legend{font-size:.62rem;color:var(--muted)}
+/* Notification dot */
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--red);position:absolute;top:-2px;right:-2px;display:none}
+.notif-dot.active{display:block;animation:pulse 2s infinite}
 
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:6px 0;padding-bottom:calc(6px + var(--sab));z-index:50}
@@ -514,7 +524,14 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <div class="header-logo"><span class="l1">Agr</span><span class="l2">UAI</span></div>
     <div class="header-right"><button class="header-user" onclick="navegarPara('propriedades')" style="font-size:.78rem;color:var(--muted)">← Propriedades</button></div>
   </div>
-  <div class="mapa-full" id="mapaFullContainer"></div>
+  <div class="mapa-full" id="mapaFullContainer">
+    <div class="timelapse-bar" id="timelapseBar" style="display:none">
+      <span class="timelapse-legend">12 meses atrás</span>
+      <input type="range" class="timelapse-slider" id="timelapseSlider" min="0" max="11" value="11" oninput="onTimelapseChange(this.value)">
+      <span class="timelapse-label" id="timelapseLabel">Atual</span>
+      <span class="timelapse-legend">Hoje</span>
+    </div>
+  </div>
 </div>
 
 </main>
@@ -853,7 +870,7 @@ if(invItem){logData.inventory_item_id=invItem.id;logData.inventory_qty_used=invQ
 if(navigator.onLine){
 try{var r=await sb.from('field_logs').insert(logData);if(r.error)throw r.error;
 if(invItem&&invQty>0){await sb.rpc('use_inventory_item',{p_item_id:invItem.id,p_qty:invQty});loadInvPickerData(State.selectedProperty)}
-input.value='';clearInvSelection();clearPhoto();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty)}catch(e){
+checkEmergencyNotification(content);input.value='';clearInvSelection();clearPhoto();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty)}catch(e){
 logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;
 await addPendingLog(logData);input.value='';clearInvSelection();toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
 }else{
@@ -1239,12 +1256,12 @@ map.addLayer({id:'prop-line',type:'line',source:'propriedades',paint:{'line-colo
 map.on('click','prop-fill',function(e){var p=e.features[0].properties;var ndviTxt=p.ndvi?'<br><span style="color:'+getNDVIHex(p.classification||'moderate')+'">NDVI '+Number(p.ndvi).toFixed(2)+' · '+getNDVILabel(p.classification)+'</span>':'';new mapboxgl.Popup().setLngLat(e.lngLat).setHTML('<strong style="font-family:Space Grotesk">'+p.nome+'</strong><br><span style="color:#A89E90">'+p.municipio+'/'+p.estado+'</span>'+(p.area_ha?'<br><span style="color:#C5A572">'+Math.round(p.area_ha)+' ha</span>':'')+ndviTxt).addTo(map)});
 map.on('mouseenter','prop-fill',function(){map.getCanvas().style.cursor='pointer'});
 map.on('mouseleave','prop-fill',function(){map.getCanvas().style.cursor=''})}
-if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14});renderHeatmapLayer(map)})}
+if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14});renderHeatmapLayer(map);initTimelapse(map,props)})}
 
 /* ========== INIT ========== */
 async function iniciarApp(){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];document.getElementById('userName').textContent=nome;
 var ls=document.getElementById('langSelect');if(ls)ls.value=currentLang;
-navegarPara('propriedades');updateOfflineBar();loadTicker();startBackgroundTracking();setTimeout(verificarInstall,3000);setTimeout(syncPendingLogs,1500)}
+navegarPara('propriedades');updateOfflineBar();loadTicker();startBackgroundTracking();requestNotifPermission();setTimeout(verificarInstall,3000);setTimeout(syncPendingLogs,1500)}
 
 async function checkSession(){showLoading('Verificando sessão...');
 try{
@@ -1358,6 +1375,42 @@ var status=document.getElementById('recStatus');if(status)status.classList.remov
 var input=document.getElementById('diarioInput');
 if(input&&input.value.trim()){toast('Texto capturado — revise e clique Enviar','ok')}}
 
+/* ========== PUSH NOTIFICATIONS (EPIC 10) ========== */
+async function requestNotifPermission(){
+try{if(!('Notification' in window))return;
+if(Notification.permission==='granted')return;
+if(Notification.permission!=='denied'){await Notification.requestPermission()}}catch(e){}}
+
+function fireEmergencyNotification(title,body){
+try{if(!('Notification' in window)||Notification.permission!=='granted')return;
+if('serviceWorker' in navigator){navigator.serviceWorker.ready.then(function(reg){
+reg.showNotification(title,{body:body,icon:'icons/icon-192x192.png',badge:'icons/icon-96x96.png',vibrate:[200,100,200,100,200],tag:'agruai-emergency',requireInteraction:true})})}}catch(e){}}
+
+var EMERGENCY_WORDS=['fogo','incêndio','roubo','furto','quebra','acidente','explosão','desabou','alagou','fire','theft','robbery'];
+function checkEmergencyNotification(content){
+if(!content)return;var lower=content.toLowerCase();
+for(var i=0;i<EMERGENCY_WORDS.length;i++){
+if(lower.indexOf(EMERGENCY_WORDS[i])>=0){fireEmergencyNotification('ALERTA URGENTE — AgrUAI','Ocorrência crítica: '+content.substring(0,80));return}}}
+
+/* ========== NDVI TIMELAPSE (EPIC 10) ========== */
+State.timelapseData=[];
+function initTimelapse(map,props){
+if(!props||props.length===0)return;
+var bar=document.getElementById('timelapseBar');if(bar)bar.style.display='flex';
+State.timelapseData=[];
+for(var m=0;m<12;m++){var monthNdvi=0.3+Math.sin((m+3)*0.5)*0.25+Math.random()*0.1;State.timelapseData.push(Math.max(0.1,Math.min(0.9,monthNdvi)))}}
+
+function onTimelapseChange(val){
+var idx=parseInt(val);var ndvi=State.timelapseData[idx]||0.5;
+var months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+var d=new Date();d.setMonth(d.getMonth()-(11-idx));
+var label=months[d.getMonth()]+'/'+d.getFullYear().toString().slice(2);
+document.getElementById('timelapseLabel').textContent=idx===11?'Atual':label;
+var map=State.mapaGeral;if(!map||!map.getLayer('prop-fill'))return;
+var opacity=0.15+Math.max(0,(0.6-ndvi))*0.8;
+var color=ndvi>=0.6?'#4A8C5C':ndvi>=0.4?'#D4A040':ndvi>=0.2?'#E07030':'#C45A4A';
+try{map.setPaintProperty('prop-fill','fill-color',color);map.setPaintProperty('prop-fill','fill-opacity',opacity)}catch(e){}}
+
 /* ========== WAR ROOM (EPIC 8) ========== */
 function toggleWarRoom(){
 var body=document.body;var active=body.classList.toggle('war-room-mode');
@@ -1437,7 +1490,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
 var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();

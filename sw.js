@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agruai-v6';
+const CACHE_NAME = 'agruai-v7';
 const STATIC_ASSETS = [
   './',
   './painel.html',
@@ -132,4 +132,25 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
+});
+
+// Push Notifications
+self.addEventListener('push', e => {
+  const data = e.data ? e.data.json() : {};
+  const title = data.title || 'AgrUAI — Alerta';
+  const options = {
+    body: data.body || 'Nova ocorrência registrada na fazenda.',
+    icon: './icons/icon-192x192.png',
+    badge: './icons/icon-96x96.png',
+    vibrate: [200, 100, 200],
+    tag: data.tag || 'agruai-alert',
+    data: { url: data.url || './painel.html' }
+  };
+  e.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = e.notification.data?.url || './painel.html';
+  e.waitUntil(clients.openWindow(url));
 });

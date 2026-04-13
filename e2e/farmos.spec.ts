@@ -365,3 +365,60 @@ test.describe('Epic 8 Modules', () => {
     expect(html).toContain('scannerContainer');
   });
 });
+
+// ============================================================
+// 10. EPIC 10 — Push, Timelapse, Dossier
+// ============================================================
+test.describe('Epic 10 Modules', () => {
+  test('notification permission function exists', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('requestNotifPermission');
+    expect(html).toContain('fireEmergencyNotification');
+  });
+
+  test('emergency words detection exists', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('EMERGENCY_WORDS');
+    expect(html).toContain('checkEmergencyNotification');
+  });
+
+  test('timelapse slider exists in map page', async ({ page }) => {
+    await page.goto('/painel.html');
+    const slider = page.locator('#timelapseSlider');
+    await expect(slider).toHaveCount(1);
+  });
+
+  test('timelapse function exists', async ({ page }) => {
+    await page.goto('/painel.html');
+    const html = await page.content();
+    expect(html).toContain('onTimelapseChange');
+    expect(html).toContain('initTimelapse');
+    expect(html).toContain('timelapseData');
+  });
+
+  test('SW handles push events', async ({ page }) => {
+    const swContent = await page.evaluate(async () => {
+      const r = await fetch('/sw.js');
+      return await r.text();
+    });
+    expect(swContent).toContain("addEventListener('push'");
+    expect(swContent).toContain('showNotification');
+    expect(swContent).toContain('notificationclick');
+  });
+
+  test('godmode has bank dossier button', async ({ page }) => {
+    await page.goto('/godmode.html');
+    const html = await page.content();
+    expect(html).toContain('Auditação');
+    expect(html).toContain('report.html');
+  });
+
+  test('report page loads without crash', async ({ page }) => {
+    await page.goto('/report.html');
+    await expect(page).toHaveTitle(/AgrUAI.*Relatório/);
+    const btn = page.locator('.print-btn');
+    await expect(btn).toBeVisible();
+  });
+});
