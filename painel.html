@@ -261,6 +261,33 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .rec-status.visivel{display:block;animation:fadeIn .2s ease}
 .rec-timer{font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif}
 
+/* Kanban Board */
+.kanban{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.kanban-col{background:rgba(15,31,15,.3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;min-height:100px}
+.kanban-col-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);text-align:center}
+.kanban-col-title.pending{color:var(--amber)}
+.kanban-col-title.progress{color:#6AB0C8}
+.kanban-col-title.done{color:var(--green)}
+.kanban-card{padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;font-size:.75rem;line-height:1.4;cursor:pointer;transition:all .15s}
+.kanban-card:hover{border-color:var(--gold);transform:translateY(-1px)}
+.kanban-card-text{color:var(--text);margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.kanban-card-meta{font-size:.62rem;color:var(--muted)}
+.kanban-actions{display:flex;gap:4px;margin-top:4px}
+.kanban-btn{font-size:.6rem;padding:2px 6px;border-radius:4px;border:1px solid var(--border);color:var(--muted);background:none;cursor:pointer;transition:all .15s}
+.kanban-btn:hover{border-color:var(--gold);color:var(--gold)}
+@media(max-width:480px){.kanban{grid-template-columns:1fr}}
+
+/* CFO Meter */
+.cfo-card{background:linear-gradient(135deg,rgba(74,140,92,.06),rgba(197,165,114,.04));border:1px solid rgba(74,140,92,.2);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+.cfo-title{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:700;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.cfo-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(46,74,46,.3);font-size:.82rem}
+.cfo-row:last-child{border-bottom:none}
+.cfo-label{color:var(--muted)}
+.cfo-val{font-family:'Space Grotesk',sans-serif;font-weight:700;font-variant-numeric:tabular-nums}
+.cfo-val.profit{color:var(--green)}
+.cfo-val.loss{color:var(--red)}
+.cfo-val.neutral{color:var(--gold)}
+
 /* Profile Meter */
 .profile-meter{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px}
 .profile-meter-title{font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
@@ -845,7 +872,7 @@ c.innerHTML='<div class="prop-meta" style="margin-bottom:12px">'+escapeHtml(p.mu
 '<div class="detalhe-tabs"><button class="detalhe-tab ativo" onclick="switchDetalheTab(\'satelite\')">Satélite</button><button class="detalhe-tab" onclick="switchDetalheTab(\'diario\')">Diário</button><button class="detalhe-tab" onclick="switchDetalheTab(\'insumos\')">Insumos</button>'+(p._managed?'':'<button class="detalhe-tab" onclick="switchDetalheTab(\'equipe\')">Equipe</button>')+'</div>'+
 '<div class="tab-panel ativo" id="panelSatelite">'+
 '<div class="metrics-grid"><div class="metric-card"><div class="metric-label">NDVI</div><div class="metric-value" style="color:'+(hasNDVI?getNDVIColor(cls):'var(--muted)')+'">'+(hasNDVI?p.last_ndvi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">EVI</div><div class="metric-value" style="color:var(--green)">'+(p.last_evi!=null?p.last_evi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">NDWI</div><div class="metric-value" style="color:#4A90A4">'+(p.last_ndwi!=null?p.last_ndwi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">Nuvens</div><div class="metric-value">'+(p.last_cloud_coverage!=null?Math.round(p.last_cloud_coverage)+'%':'—')+'</div></div></div>'+
-riskHTML+buildCarbonCard(p)+
+riskHTML+buildCarbonCard(p)+buildCFOCard(p)+
 '<div class="ndvi-chart"><div class="ndvi-chart-title">Evolução NDVI</div><div id="chartSvg" style="text-align:center;padding:20px;color:var(--muted);font-size:.8rem">Carregando...</div></div>'+
 '<h3 style="font-size:1rem;margin:20px 0 12px">Alertas</h3><div id="detalheAlertas" style="color:var(--muted);font-size:.85rem">Carregando...</div></div>'+
 '<div class="tab-panel" id="panelDiario">'+
@@ -877,8 +904,9 @@ var items=r.data||[];if(items.length===0){el.innerHTML='<div class="timeline-emp
 var remoteHtml=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var isVoice=isLog&&item.content&&item.content.indexOf('🎙️')===0;var icon=isVoice?'&#127908;':isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var voiceBadge=isVoice?'<span class="voice-badge">&#127908; Ditado por voz</span>':'';var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
 var aiHtml=isLog&&!item.content.match(/^\[IA\]/)?renderAISuggestions(item.id,item.content):'';
 return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+voiceBadge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div>'+aiHtml+'<div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
+var kanbanHtml=buildKanbanBoard(items);
 var pendingLogs=await getAllPendingLogs();var pendingHtml=pendingLogs.filter(function(l){return l.property_id===pid}).map(function(l){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];return'<div class="timeline-item pending" data-local-id="'+l.localId+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(l.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(l.content)+'</div><div class="timeline-time">'+formatarDataHora(l.created_at)+'</div></div></div>'}).join('');
-el.innerHTML=pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
+el.innerHTML=kanbanHtml+pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
 
 function renderFieldLogsOnly(pid){return'<div class="timeline-empty">Timeline indisponível. Execute o SQL de field_logs no Supabase.</div>'}
 
@@ -1094,6 +1122,41 @@ var html='<img class="photo-thumb" src="'+State.pendingPhoto.base64+'">'+(State.
 return{text:text,html:html}}
 
 function clearPhoto(){State.pendingPhoto=null;document.getElementById('photoPreviewWrap').style.display='none';document.getElementById('photoGeoStamp').style.display='none';var inp=document.getElementById('diarioPhoto');if(inp)inp.value=''}
+
+/* ========== CFO VIRTUAL (EPIC 13) ========== */
+function buildCFOCard(p){
+if(!p.area_ha)return'';
+var crop=getCropMeta(p.crop_type);if(!crop||!crop.sacaValor)return'';
+var ndvi=p.last_ndvi||0.5;var yieldPct=Math.min(ndvi/0.8,1);
+var grossRevenue=Math.round(p.area_ha*crop.prodHa*yieldPct*crop.sacaValor);
+var grossRevenueUSD=Math.round(grossRevenue/State.forex.usd);
+var totalCost=0;
+State.invItems.forEach(function(it){if(it.custo_unitario){var used=Math.max(0,(it.quantidade||0));totalCost+=0}});
+var estimatedCostPerHa=crop.value==='soja_milho'?2800:crop.value==='cafe'?5500:crop.value==='pastagem'?600:crop.value==='fruticultura'?8000:1500;
+totalCost=Math.round(p.area_ha*estimatedCostPerHa*0.4);
+var margin=grossRevenue-totalCost;var marginPct=grossRevenue>0?Math.round(margin/grossRevenue*100):0;
+var cls=margin>0?'profit':'loss';
+return'<div class="cfo-card"><div class="cfo-title">&#128200; CFO Virtual — Margem Bruta</div>'+
+'<div class="cfo-row"><span class="cfo-label">Receita estimada (safra)</span><span class="cfo-val neutral">R$ '+formatarNumero(grossRevenue)+'</span></div>'+
+'<div class="cfo-row"><span class="cfo-label">Receita (USD)</span><span class="cfo-val neutral">$ '+formatarNumero(grossRevenueUSD)+'</span></div>'+
+'<div class="cfo-row"><span class="cfo-label">Custos operacionais est.</span><span class="cfo-val loss">- R$ '+formatarNumero(totalCost)+'</span></div>'+
+'<div class="cfo-row" style="border-top:2px solid rgba(74,140,92,.3);padding-top:10px;margin-top:4px"><span class="cfo-label" style="font-weight:700;color:var(--text)">Margem bruta prevista</span><span class="cfo-val '+cls+'">R$ '+formatarNumero(margin)+' ('+marginPct+'%)</span></div>'+
+'<div style="font-size:.5rem;color:rgba(168,158,144,.4);margin-top:8px;text-align:center">Projeção referencial. Não constitui recomendação financeira.</div></div>'}
+
+/* ========== KANBAN ENGINE (EPIC 13) ========== */
+function buildKanbanBoard(items){
+var logs=items.filter(function(i){return i.entry_type==='log'});
+var pending=logs.filter(function(l){return!l.kanban_status||l.kanban_status==='pendente'});
+var progress=logs.filter(function(l){return l.kanban_status==='em_andamento'});
+var done=logs.filter(function(l){return l.kanban_status==='resolvido'});
+function renderCards(arr){if(arr.length===0)return'<div style="font-size:.65rem;color:var(--muted);text-align:center;padding:8px">Vazio</div>';
+return arr.slice(0,10).map(function(l){return'<div class="kanban-card"><div class="kanban-card-text">'+escapeHtml(l.content)+'</div><div class="kanban-card-meta">'+(l.author_name||'')+(l.sector?' · '+l.sector:'')+'</div><div class="kanban-actions">'+(l.kanban_status!=='em_andamento'?'<button class="kanban-btn" onclick="updateKanban(\''+l.id+'\',\'em_andamento\')">▶ Iniciar</button>':'')+(l.kanban_status!=='resolvido'?'<button class="kanban-btn" onclick="updateKanban(\''+l.id+'\',\'resolvido\')">✓ Resolver</button>':'')+'</div></div>'}).join('')}
+return'<div class="kanban"><div class="kanban-col"><div class="kanban-col-title pending">Pendente ('+pending.length+')</div>'+renderCards(pending)+'</div><div class="kanban-col"><div class="kanban-col-title progress">Em Andamento ('+progress.length+')</div>'+renderCards(progress)+'</div><div class="kanban-col"><div class="kanban-col-title done">Resolvido ('+done.length+')</div>'+renderCards(done)+'</div></div>'}
+
+async function updateKanban(logId,status){
+try{var r=await sb.from('field_logs').update({kanban_status:status}).eq('id',logId);if(r.error)throw r.error;
+toast(status==='resolvido'?'Resolvido!':'Em andamento','ok');trackEvent('kanban_update',{status:status});
+if(State.selectedProperty)loadTimeline(State.selectedProperty)}catch(e){toast('Erro: '+e.message,'erro')}}
 
 /* ========== PSEUDO-IA PRESCRITIVA (EPIC 6) ========== */
 var AI_RULES=[
@@ -1614,7 +1677,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.nextTourStep=nextTourStep;window.endTour=endTour;window.abrirModalPerfil=abrirModalPerfil;window.fecharModalPerfil=fecharModalPerfil;window.salvarPerfil=salvarPerfil;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.updateKanban=updateKanban;window.nextTourStep=nextTourStep;window.endTour=endTour;window.abrirModalPerfil=abrirModalPerfil;window.fecharModalPerfil=fecharModalPerfil;window.salvarPerfil=salvarPerfil;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
 var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();

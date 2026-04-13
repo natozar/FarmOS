@@ -159,6 +159,12 @@ tr:hover td{background:rgba(197,165,114,.02)}
     <div class="stat"><div class="stat-label">Risco Total (R$)</div><div class="stat-val red" id="sRisk">-</div></div>
   </div>
 
+  <!-- HOLDING DASHBOARD -->
+  <div class="section" style="margin-bottom:16px">
+    <div class="section-header"><h2>Visão de Fundo (Holding)</h2></div>
+    <div class="section-body" id="holdingView" style="padding:12px"><div class="empty-row" style="padding:16px">Carregando portfolio...</div></div>
+  </div>
+
   <!-- TELEMETRY -->
   <div class="section" style="margin-bottom:16px">
     <div class="section-header"><h2>Telemetria de Comportamento</h2></div>
@@ -247,7 +253,7 @@ async function initDash(user){
   document.getElementById('authGate').style.display='none';
   document.getElementById('dashboard').classList.add('ativo');
   document.getElementById('gmUser').textContent=user.email;
-  loadStats();loadTable();loadRecentUsers();loadAlertFeed();loadTelemetry()}
+  loadStats();loadTable();loadRecentUsers();loadAlertFeed();loadTelemetry();loadHolding()}
 
 async function loadStats(){
   try{var r=await sb.rpc('admin_stats');if(r.error)throw r.error;var d=r.data[0]||{};
@@ -317,6 +323,19 @@ window.killProp=async function(pid,btn){
   try{var r=await sb.rpc('admin_kill_property',{p_property_id:pid});if(r.error)throw r.error;
   btn.textContent='KILLED';btn.className='kill-btn killed';loadStats();loadAlertFeed()}
   catch(e){btn.textContent='ERRO';setTimeout(function(){btn.textContent='KILL';btn.disabled=false},2000)}};
+
+async function loadHolding(){
+  var el=document.getElementById('holdingView');
+  try{var r=await sb.rpc('admin_dashboard_data');if(r.error)throw r.error;var rows=r.data||[];
+  if(rows.length===0){el.innerHTML='<div style="font-size:11px;color:var(--dim);text-align:center;padding:16px">Nenhuma propriedade ativa.</div>';return}
+  var totalHa=rows.reduce(function(s,r){return s+(r.area_ha||0)},0);
+  var totalRisk=rows.reduce(function(s,r){return s+(r.financial_risk||0)},0);
+  var html='<div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap"><div style="flex:1;min-width:100px;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--gold)">'+fmt(Math.round(totalHa))+'</div><div style="font-size:9px;color:var(--dim)">HECTARES TOTAL</div></div><div style="flex:1;min-width:100px;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--text)">'+rows.length+'</div><div style="font-size:9px;color:var(--dim)">PROPRIEDADES</div></div><div style="flex:1;min-width:100px;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--red)">R$ '+fmt(totalRisk)+'</div><div style="font-size:9px;color:var(--dim)">RISCO AGREGADO</div></div></div>';
+  html+='<div style="font-size:10px;color:var(--dim);margin-bottom:8px">RANKING POR RISCO FINANCEIRO</div>';
+  rows.forEach(function(row){var risk=row.financial_risk||0;var pct=totalRisk>0?Math.round(risk/totalRisk*100):0;var barW=Math.max(2,pct);
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px"><span style="width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--gold)">'+esc(row.property_nome)+'</span><div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+barW+'%;background:'+(risk>10000?'var(--red)':risk>0?'var(--gold)':'var(--green)')+';border-radius:4px"></div></div><span style="min-width:70px;text-align:right;color:'+(risk>0?'var(--red)':'var(--dim)')+'">R$ '+fmt(risk)+'</span></div>'});
+  el.innerHTML=html}
+  catch(e){el.innerHTML='<div style="font-size:11px;color:var(--red);padding:16px">Erro: '+esc(e.message)+'</div>'}}
 
 async function loadTelemetry(){
   var el=document.getElementById('telemetryData');
