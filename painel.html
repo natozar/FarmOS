@@ -261,6 +261,21 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .rec-status.visivel{display:block;animation:fadeIn .2s ease}
 .rec-timer{font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif}
 
+/* Livestock Satellite */
+.livestock-card{background:linear-gradient(135deg,rgba(139,105,60,.06),rgba(74,140,92,.04));border:1px solid rgba(139,105,60,.2);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+.livestock-title{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:700;color:#B8945A;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.livestock-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.livestock-metric{text-align:center;padding:10px;background:rgba(15,31,15,.4);border-radius:var(--radius-sm)}
+.livestock-metric-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.livestock-metric-val{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700}
+.livestock-metric-val.capacity{color:var(--green)}
+.livestock-metric-val.warning{color:var(--amber)}
+.livestock-metric-val.danger{color:var(--red)}
+.livestock-bar{height:8px;border-radius:4px;background:var(--border);overflow:hidden;margin-bottom:6px}
+.livestock-bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.livestock-detail{font-size:.72rem;color:var(--muted);line-height:1.5;text-align:center}
+@media(max-width:480px){.livestock-grid{grid-template-columns:1fr 1fr}}
+
 /* Kanban Board */
 .kanban{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
 .kanban-col{background:rgba(15,31,15,.3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;min-height:100px}
@@ -872,7 +887,7 @@ c.innerHTML='<div class="prop-meta" style="margin-bottom:12px">'+escapeHtml(p.mu
 '<div class="detalhe-tabs"><button class="detalhe-tab ativo" onclick="switchDetalheTab(\'satelite\')">Satélite</button><button class="detalhe-tab" onclick="switchDetalheTab(\'diario\')">Diário</button><button class="detalhe-tab" onclick="switchDetalheTab(\'insumos\')">Insumos</button>'+(p._managed?'':'<button class="detalhe-tab" onclick="switchDetalheTab(\'equipe\')">Equipe</button>')+'</div>'+
 '<div class="tab-panel ativo" id="panelSatelite">'+
 '<div class="metrics-grid"><div class="metric-card"><div class="metric-label">NDVI</div><div class="metric-value" style="color:'+(hasNDVI?getNDVIColor(cls):'var(--muted)')+'">'+(hasNDVI?p.last_ndvi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">EVI</div><div class="metric-value" style="color:var(--green)">'+(p.last_evi!=null?p.last_evi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">NDWI</div><div class="metric-value" style="color:#4A90A4">'+(p.last_ndwi!=null?p.last_ndwi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">Nuvens</div><div class="metric-value">'+(p.last_cloud_coverage!=null?Math.round(p.last_cloud_coverage)+'%':'—')+'</div></div></div>'+
-riskHTML+buildCarbonCard(p)+buildCFOCard(p)+
+riskHTML+buildLivestockCard(p)+buildCarbonCard(p)+buildCFOCard(p)+
 '<div class="ndvi-chart"><div class="ndvi-chart-title">Evolução NDVI</div><div id="chartSvg" style="text-align:center;padding:20px;color:var(--muted);font-size:.8rem">Carregando...</div></div>'+
 '<h3 style="font-size:1rem;margin:20px 0 12px">Alertas</h3><div id="detalheAlertas" style="color:var(--muted);font-size:.85rem">Carregando...</div></div>'+
 '<div class="tab-panel" id="panelDiario">'+
@@ -1123,10 +1138,54 @@ return{text:text,html:html}}
 
 function clearPhoto(){State.pendingPhoto=null;document.getElementById('photoPreviewWrap').style.display='none';document.getElementById('photoGeoStamp').style.display='none';var inp=document.getElementById('diarioPhoto');if(inp)inp.value=''}
 
+/* ========== LIVESTOCK SATELLITE (EPIC 14) ========== */
+function buildLivestockCard(p){
+if(!p.area_ha||!p.last_ndvi)return'';
+var crop=getCropMeta(p.crop_type);
+if(!crop||(crop.value!=='pastagem'))return'';
+var ndvi=p.last_ndvi;
+// Zootechnical model: NDVI → biomass → carrying capacity
+// Braquiária: NDVI 0.8 = ~4000 kg MS/ha, NDVI 0.3 = ~800 kg MS/ha
+// 1 UA (450kg) consumes ~12 kg MS/day → ~360 kg MS/month
+// Carrying capacity = biomass_available / monthly_consumption
+var biomassKgHa=Math.round(ndvi*5000);  // simplified linear: NDVI 1.0 = 5000 kg MS/ha
+var monthlyConsumptionUA=360;
+var capacityUAHa=Math.round(biomassKgHa/monthlyConsumptionUA*10)/10;
+var totalUA=Math.round(p.area_ha*capacityUAHa);
+var arrobaPerUA=18; // avg @/head at slaughter
+var totalArrobas=totalUA*arrobaPerUA;
+var revenueArrobas=Math.round(totalArrobas*State.forex.arroba);
+// Status thresholds
+var status=capacityUAHa>=2.5?'capacity':capacityUAHa>=1.2?'warning':'danger';
+var statusLabel=status==='capacity'?'Ótimo':status==='warning'?'Atenção':'Crítico';
+var barPct=Math.min(100,Math.round(capacityUAHa/4*100));
+var barColor=status==='capacity'?'var(--green)':status==='warning'?'var(--amber)':'var(--red)';
+return'<div class="livestock-card"><div class="livestock-title">&#128004; Lotação Estimada por Satélite</div>'+
+'<div class="livestock-grid"><div class="livestock-metric"><div class="livestock-metric-label">Biomassa est.</div><div class="livestock-metric-val">'+formatarNumero(biomassKgHa)+'</div><div class="livestock-metric-label">kg MS/ha</div></div>'+
+'<div class="livestock-metric"><div class="livestock-metric-label">Capacidade</div><div class="livestock-metric-val '+status+'">'+capacityUAHa.toFixed(1)+'</div><div class="livestock-metric-label">UA/ha</div></div>'+
+'<div class="livestock-metric"><div class="livestock-metric-label">Rebanho máx.</div><div class="livestock-metric-val '+status+'">'+formatarNumero(totalUA)+'</div><div class="livestock-metric-label">cabeças</div></div></div>'+
+'<div class="livestock-bar"><div class="livestock-bar-fill" style="width:'+barPct+'%;background:'+barColor+'"></div></div>'+
+'<div style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-bottom:10px"><span>0 UA/ha</span><span style="color:'+barColor+';font-weight:600">'+statusLabel+'</span><span>4.0 UA/ha</span></div>'+
+'<div class="livestock-grid" style="grid-template-columns:1fr 1fr"><div class="livestock-metric"><div class="livestock-metric-label">Potencial de abate</div><div class="livestock-metric-val" style="color:var(--gold)">'+formatarNumero(totalArrobas)+' @</div></div>'+
+'<div class="livestock-metric"><div class="livestock-metric-label">Receita potencial</div><div class="livestock-metric-val" style="color:var(--gold)">R$ '+formatarNumero(revenueArrobas)+'</div></div></div>'+
+'<div class="livestock-detail">Modelo zootécnico: NDVI '+ndvi.toFixed(2)+' → '+formatarNumero(biomassKgHa)+' kg MS/ha ÷ 360 kg/UA/mês = '+capacityUAHa.toFixed(1)+' UA/ha × '+formatarNumero(Math.round(p.area_ha))+' ha</div>'+
+'<div style="font-size:.5rem;color:rgba(168,158,144,.4);margin-top:8px;text-align:center">Estimativa baseada em modelo zootécnico simplificado. Não substitui avaliação presencial de forragem.</div></div>'}
+
 /* ========== CFO VIRTUAL (EPIC 13) ========== */
 function buildCFOCard(p){
 if(!p.area_ha)return'';
-var crop=getCropMeta(p.crop_type);if(!crop||!crop.sacaValor)return'';
+var crop=getCropMeta(p.crop_type);if(!crop)return'';
+if(crop.value==='pastagem'&&p.last_ndvi){
+var ndvi=p.last_ndvi;var biomass=Math.round(ndvi*5000);var capUA=Math.round(biomass/360*10)/10;
+var totalUA=Math.round(p.area_ha*capUA);var arrobas=totalUA*18;
+var revenue=Math.round(arrobas*State.forex.arroba);var costs=Math.round(p.area_ha*600*0.4);
+var margin=revenue-costs;var cls=margin>0?'profit':'loss';var pct=revenue>0?Math.round(margin/revenue*100):0;
+return'<div class="cfo-card"><div class="cfo-title">&#128200; CFO Virtual — Pecuária</div>'+
+'<div class="cfo-row"><span class="cfo-label">Receita potencial ('+formatarNumero(arrobas)+' @)</span><span class="cfo-val neutral">R$ '+formatarNumero(revenue)+'</span></div>'+
+'<div class="cfo-row"><span class="cfo-label">Custos operacionais est.</span><span class="cfo-val loss">- R$ '+formatarNumero(costs)+'</span></div>'+
+'<div class="cfo-row" style="border-top:2px solid rgba(74,140,92,.3);padding-top:10px;margin-top:4px"><span class="cfo-label" style="font-weight:700;color:var(--text)">Margem bruta prevista</span><span class="cfo-val '+cls+'">R$ '+formatarNumero(margin)+' ('+pct+'%)</span></div>'+
+'<div style="font-size:.5rem;color:rgba(168,158,144,.4);margin-top:8px;text-align:center">Projeção referencial. Não constitui recomendação financeira.</div></div>'}
+if(!crop.sacaValor)return'';
 var ndvi=p.last_ndvi||0.5;var yieldPct=Math.min(ndvi/0.8,1);
 var grossRevenue=Math.round(p.area_ha*crop.prodHa*yieldPct*crop.sacaValor);
 var grossRevenueUSD=Math.round(grossRevenue/State.forex.usd);
