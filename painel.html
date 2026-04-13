@@ -252,6 +252,38 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 /* Voice badge in timeline */
 .voice-badge{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;font-weight:600;padding:2px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(197,165,114,.12),rgba(74,140,92,.08));border:1px solid rgba(197,165,114,.2);color:var(--gold);margin-left:4px}
 
+/* Bloomberg Ticker */
+.ticker{display:flex;align-items:center;gap:12px;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;font-size:.72rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ticker-item{display:flex;align-items:center;gap:5px;color:var(--muted)}
+.ticker-label{font-weight:600;color:var(--text)}
+.ticker-val{font-family:'Space Grotesk',sans-serif;font-weight:700}
+.ticker-val.up{color:var(--green)}
+.ticker-val.down{color:var(--red)}
+.ticker-chg{font-size:.62rem;padding:1px 5px;border-radius:4px;font-weight:600}
+.ticker-chg.up{background:rgba(74,140,92,.12);color:var(--green)}
+.ticker-chg.down{background:rgba(196,90,74,.1);color:var(--red)}
+.ticker-sep{color:var(--border);font-size:.5rem}
+
+/* Carbon Card */
+.carbon-card{background:linear-gradient(135deg,rgba(197,165,114,.06),rgba(74,140,92,.04));border:1px solid rgba(197,165,114,.2);border-radius:var(--radius);padding:18px;margin-bottom:16px;position:relative;overflow:hidden}
+.carbon-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--green),var(--gold))}
+.carbon-title{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:700;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.carbon-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.carbon-metric{text-align:center;padding:10px;background:rgba(15,31,15,.4);border-radius:var(--radius-sm)}
+.carbon-metric-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.carbon-metric-val{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;color:var(--green)}
+.carbon-metric-val.gold{color:var(--gold)}
+.carbon-cta{display:block;width:100%;padding:10px;border-radius:var(--radius-sm);border:1px solid rgba(197,165,114,.25);background:rgba(197,165,114,.06);color:var(--gold);font-size:.78rem;font-weight:600;text-align:center;transition:all var(--transition)}
+.carbon-cta:hover{background:rgba(197,165,114,.12);border-color:var(--gold)}
+
+/* Geo Photo */
+.photo-input-wrap{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.photo-btn{display:flex;align-items:center;justify-content:center;gap:4px;padding:8px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);color:var(--muted);font-size:.75rem;font-weight:500;transition:all var(--transition);cursor:pointer}
+.photo-btn:hover{border-color:var(--gold);color:var(--gold)}
+.photo-preview{width:100%;max-height:180px;object-fit:cover;border-radius:var(--radius-sm);margin-top:6px;border:1px solid var(--border)}
+.geo-stamp{display:inline-flex;align-items:center;gap:4px;font-size:.65rem;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(74,144,164,.1);color:#6AB0C8;margin-top:4px}
+.photo-thumb{width:100%;max-height:140px;object-fit:cover;border-radius:var(--radius-sm);margin-top:6px;border:1px solid var(--border)}
+
 /* AI Suggestions */
 .ai-suggest{margin-top:8px;padding:10px 12px;background:rgba(15,31,15,.6);border:1px solid rgba(197,165,114,.15);border-radius:var(--radius-sm);position:relative;overflow:hidden}
 .ai-suggest::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(197,165,114,.3),rgba(74,140,92,.2),transparent)}
@@ -415,6 +447,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 
 <!-- PROPRIEDADES -->
 <div class="screen" id="tela-propriedades">
+  <div class="ticker" id="tickerBar"><span style="color:var(--muted)">Carregando cotações...</span></div>
   <div class="app-header">
     <div class="header-logo"><span class="l1">Agr</span><span class="l2">UAI</span></div>
     <div class="header-right">
@@ -740,11 +773,12 @@ c.innerHTML='<div class="prop-meta" style="margin-bottom:12px">'+escapeHtml(p.mu
 '<div class="detalhe-tabs"><button class="detalhe-tab ativo" onclick="switchDetalheTab(\'satelite\')">Satélite</button><button class="detalhe-tab" onclick="switchDetalheTab(\'diario\')">Diário</button><button class="detalhe-tab" onclick="switchDetalheTab(\'insumos\')">Insumos</button>'+(p._managed?'':'<button class="detalhe-tab" onclick="switchDetalheTab(\'equipe\')">Equipe</button>')+'</div>'+
 '<div class="tab-panel ativo" id="panelSatelite">'+
 '<div class="metrics-grid"><div class="metric-card"><div class="metric-label">NDVI</div><div class="metric-value" style="color:'+(hasNDVI?getNDVIColor(cls):'var(--muted)')+'">'+(hasNDVI?p.last_ndvi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">EVI</div><div class="metric-value" style="color:var(--green)">'+(p.last_evi!=null?p.last_evi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">NDWI</div><div class="metric-value" style="color:#4A90A4">'+(p.last_ndwi!=null?p.last_ndwi.toFixed(2):'—')+'</div></div><div class="metric-card"><div class="metric-label">Nuvens</div><div class="metric-value">'+(p.last_cloud_coverage!=null?Math.round(p.last_cloud_coverage)+'%':'—')+'</div></div></div>'+
-riskHTML+
+riskHTML+buildCarbonCard(p)+
 '<div class="ndvi-chart"><div class="ndvi-chart-title">Evolução NDVI</div><div id="chartSvg" style="text-align:center;padding:20px;color:var(--muted);font-size:.8rem">Carregando...</div></div>'+
 '<h3 style="font-size:1rem;margin:20px 0 12px">Alertas</h3><div id="detalheAlertas" style="color:var(--muted);font-size:.85rem">Carregando...</div></div>'+
 '<div class="tab-panel" id="panelDiario">'+
-'<div style="margin-bottom:10px"><select class="form-input" id="diarioSector" style="font-size:.8rem;padding:10px 14px">'+sectorOptions('operacional')+'</select></div>'+
+'<div style="display:flex;gap:8px;margin-bottom:10px;align-items:center"><select class="form-input" id="diarioSector" style="font-size:.8rem;padding:10px 14px;flex:1">'+sectorOptions('operacional')+'</select><label class="photo-btn" for="diarioPhoto">&#128247; Foto</label><input type="file" id="diarioPhoto" accept="image/*" capture="environment" style="display:none" onchange="onPhotoSelected(this)"></div>'+
+'<div id="photoPreviewWrap" style="display:none"><img id="photoPreview" class="photo-preview"><div id="photoGeoStamp" class="geo-stamp" style="display:none"></div></div>'+
 '<div class="diario-input-wrap"><textarea class="diario-input" id="diarioInput" placeholder="O que aconteceu hoje na fazenda?" rows="1" maxlength="1000"></textarea>'+(window.SpeechRecognition||window.webkitSpeechRecognition?'<button class="rec-btn" id="btnRec" onclick="toggleRecording()" title="Gravar áudio">&#127908;</button>':'')+'<button class="inv-toggle" id="btnInvToggle" onclick="toggleInvPicker()" title="Vincular insumo">&#128230;</button><button class="diario-send" id="btnDiarioSend" onclick="enviarLog()" title="Enviar">&#10148;</button></div>'+
 '<div class="rec-status" id="recStatus"><span>&#127908; Ouvindo... fale agora</span></div>'+
 '<div class="inv-picker" id="invPicker"><div class="inv-picker-title">Vincular insumo utilizado</div><div class="inv-list" id="invPickerList"><span style="color:var(--muted);font-size:.8rem">Carregando...</span></div><div class="inv-qty-row" id="invQtyRow" style="display:none"><label class="inv-qty-label">Quantidade usada:</label><input class="inv-qty-input" type="number" id="invQtyInput" min="0.1" step="0.1" placeholder="0"><span class="inv-qty-label" id="invQtyUnit">un</span><button class="btn-secondary" style="padding:8px 12px;font-size:.75rem" onclick="clearInvSelection()">Limpar</button></div></div>'+
@@ -776,7 +810,8 @@ el.innerHTML=pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pi
 
 function renderFieldLogsOnly(pid){return'<div class="timeline-empty">Timeline indisponível. Execute o SQL de field_logs no Supabase.</div>'}
 
-async function enviarLog(){if(isListening)stopListening();var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content)return;if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
+async function enviarLog(){if(isListening)stopListening();var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content&&!State.pendingPhoto)return;if(!content)content='[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
+var photoAppend=getPhotoAppend();content+=photoAppend.text;
 var btn=document.getElementById('btnDiarioSend');btn.disabled=true;
 var sectorSel=document.getElementById('diarioSector');var sector=sectorSel?sectorSel.value:'operacional';
 var invItem=State.selectedInvItem;var invQty=invItem?parseFloat(document.getElementById('invQtyInput').value)||0:0;
@@ -786,7 +821,7 @@ if(invItem){logData.inventory_item_id=invItem.id;logData.inventory_qty_used=invQ
 if(navigator.onLine){
 try{var r=await sb.from('field_logs').insert(logData);if(r.error)throw r.error;
 if(invItem&&invQty>0){await sb.rpc('use_inventory_item',{p_item_id:invItem.id,p_qty:invQty});loadInvPickerData(State.selectedProperty)}
-input.value='';clearInvSelection();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty)}catch(e){
+input.value='';clearInvSelection();clearPhoto();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty)}catch(e){
 logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;
 await addPendingLog(logData);input.value='';clearInvSelection();toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
 }else{
@@ -909,6 +944,66 @@ doc.setTextColor(168,158,144);doc.text('Laudo ESG — '+p.nome+' — '+(new Date
 var filename='Laudo_ESG_'+p.nome.replace(/[^a-zA-Z0-9]/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
 doc.save(filename);toast('Laudo gerado: '+filename,'ok')}catch(e){console.error('PDF error:',e);toast('Erro ao gerar PDF: '+e.message,'erro')}
 if(btn){btn.disabled=false;btn.innerHTML='<span class="btn-esg-icon">&#128196;</span> Emitir Laudo do Banco (ESG)'}}
+
+/* ========== BLOOMBERG TICKER (EPIC 7) ========== */
+State.forex={usd:5.20,soja_sc:135,arroba:310,updated:null};
+
+async function loadTicker(){
+try{var r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL');var d=await r.json();
+if(d&&d.USDBRL){var q=d.USDBRL;State.forex.usd=parseFloat(q.bid);State.forex.updated=q.create_date;
+var pctChg=parseFloat(q.pctChange);var dir=pctChg>=0?'up':'down';
+var bar=document.getElementById('tickerBar');if(bar){bar.innerHTML=
+'<span class="ticker-item"><span class="ticker-label">USD/BRL</span><span class="ticker-val '+dir+'">R$ '+parseFloat(q.bid).toFixed(2)+'</span><span class="ticker-chg '+dir+'">'+(pctChg>=0?'+':'')+pctChg.toFixed(2)+'%</span></span>'+
+'<span class="ticker-sep">|</span>'+
+'<span class="ticker-item"><span class="ticker-label">Soja 60kg</span><span class="ticker-val">R$ '+State.forex.soja_sc.toFixed(0)+'</span></span>'+
+'<span class="ticker-sep">|</span>'+
+'<span class="ticker-item"><span class="ticker-label">Boi @</span><span class="ticker-val">R$ '+State.forex.arroba.toFixed(0)+'</span></span>'+
+'<span class="ticker-sep">|</span>'+
+'<span class="ticker-item" style="font-size:.6rem;color:var(--border)">'+q.create_date.split(' ')[1]+'</span>'}}}
+catch(e){}}
+setInterval(loadTicker,300000);
+
+/* ========== CARBON CARD (EPIC 7) ========== */
+function buildCarbonCard(p){
+if(!p.area_ha||!p.last_ndvi)return'';
+var greenPct=p.last_ndvi>=0.6?0.7:p.last_ndvi>=0.4?0.4:0.15;
+var greenHa=Math.round(p.area_ha*greenPct);
+var co2Tons=greenHa*4;
+var pricePerTon=15;
+var usdVal=co2Tons*pricePerTon;
+var brlVal=Math.round(usdVal*State.forex.usd);
+return'<div class="carbon-card"><div class="carbon-title">&#127793; Capital ESG &amp; Carbono Oculto</div>'+
+'<div class="carbon-grid"><div class="carbon-metric"><div class="carbon-metric-label">Área preservada est.</div><div class="carbon-metric-val">'+formatarNumero(greenHa)+' ha</div></div>'+
+'<div class="carbon-metric"><div class="carbon-metric-label">CO₂ sequestrado/ano</div><div class="carbon-metric-val">'+formatarNumero(co2Tons)+' t</div></div>'+
+'<div class="carbon-metric"><div class="carbon-metric-label">Valor carbono (USD)</div><div class="carbon-metric-val gold">$ '+formatarNumero(usdVal)+'</div></div>'+
+'<div class="carbon-metric"><div class="carbon-metric-label">Valor carbono (BRL)</div><div class="carbon-metric-val gold">R$ '+formatarNumero(brlVal)+'</div></div></div>'+
+'<button class="carbon-cta" onclick="toast(\'Disponível na versão Premium — entre em contato\',\'info\')">Desbloquear Venda de Créditos na versão Premium</button></div>'}
+
+/* ========== GEO-CAPTURE CAMERA (EPIC 7) ========== */
+State.pendingPhoto=null;
+
+function onPhotoSelected(input){
+if(!input.files||!input.files[0])return;
+var file=input.files[0];var reader=new FileReader();
+reader.onload=function(){
+State.pendingPhoto={base64:reader.result,timestamp:new Date().toISOString(),lat:null,lng:null};
+document.getElementById('photoPreview').src=reader.result;
+document.getElementById('photoPreviewWrap').style.display='block';
+if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(pos){
+State.pendingPhoto.lat=pos.coords.latitude.toFixed(5);State.pendingPhoto.lng=pos.coords.longitude.toFixed(5);
+var stamp=document.getElementById('photoGeoStamp');stamp.textContent='📍 Coordenada: '+State.pendingPhoto.lat+', '+State.pendingPhoto.lng;stamp.style.display='inline-flex'},
+function(){var stamp=document.getElementById('photoGeoStamp');stamp.textContent='📍 GPS indisponível';stamp.style.display='inline-flex'},
+{enableHighAccuracy:true,timeout:10000})}};
+reader.readAsDataURL(file)}
+
+function getPhotoAppend(){
+if(!State.pendingPhoto)return{text:'',html:''};
+var geo=State.pendingPhoto.lat?' [📍 '+State.pendingPhoto.lat+', '+State.pendingPhoto.lng+']':'';
+var text=' [Foto anexada'+geo+']';
+var html='<img class="photo-thumb" src="'+State.pendingPhoto.base64+'">'+(State.pendingPhoto.lat?'<div class="geo-stamp">📍 Coordenada Blindada: '+State.pendingPhoto.lat+', '+State.pendingPhoto.lng+'</div>':'');
+return{text:text,html:html}}
+
+function clearPhoto(){State.pendingPhoto=null;document.getElementById('photoPreviewWrap').style.display='none';document.getElementById('photoGeoStamp').style.display='none';var inp=document.getElementById('diarioPhoto');if(inp)inp.value=''}
 
 /* ========== PSEUDO-IA PRESCRITIVA (EPIC 6) ========== */
 var AI_RULES=[
@@ -1099,7 +1194,7 @@ if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14})})}
 /* ========== INIT ========== */
 async function iniciarApp(){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];document.getElementById('userName').textContent=nome;
 var ls=document.getElementById('langSelect');if(ls)ls.value=currentLang;
-navegarPara('propriedades');updateOfflineBar();setTimeout(verificarInstall,3000);setTimeout(syncPendingLogs,1500)}
+navegarPara('propriedades');updateOfflineBar();loadTicker();setTimeout(verificarInstall,3000);setTimeout(syncPendingLogs,1500)}
 
 async function checkSession(){showLoading('Verificando sessão...');
 try{
@@ -1234,7 +1329,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.onPhotoSelected=onPhotoSelected;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
 var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();
