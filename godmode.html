@@ -159,6 +159,12 @@ tr:hover td{background:rgba(197,165,114,.02)}
     <div class="stat"><div class="stat-label">Risco Total (R$)</div><div class="stat-val red" id="sRisk">-</div></div>
   </div>
 
+  <!-- TELEMETRY -->
+  <div class="section" style="margin-bottom:16px">
+    <div class="section-header"><h2>Telemetria de Comportamento</h2></div>
+    <div class="section-body" id="telemetryData" style="max-height:200px;overflow-y:auto"><div class="empty-row" style="padding:16px">Carregando...</div></div>
+  </div>
+
   <!-- DOSSIE BANCARIO -->
   <div style="margin-bottom:16px"><button style="width:100%;padding:12px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:var(--mono);font-size:12px;border-radius:4px;cursor:pointer" onclick="window.open('/report.html?id='+prompt('Cole o UUID da propriedade:'),'_blank')">&#128209; Gerar Relatório de Auditação (Bancos/ESG)</button></div>
 
@@ -241,7 +247,7 @@ async function initDash(user){
   document.getElementById('authGate').style.display='none';
   document.getElementById('dashboard').classList.add('ativo');
   document.getElementById('gmUser').textContent=user.email;
-  loadStats();loadTable();loadRecentUsers();loadAlertFeed()}
+  loadStats();loadTable();loadRecentUsers();loadAlertFeed();loadTelemetry()}
 
 async function loadStats(){
   try{var r=await sb.rpc('admin_stats');if(r.error)throw r.error;var d=r.data[0]||{};
@@ -311,6 +317,14 @@ window.killProp=async function(pid,btn){
   try{var r=await sb.rpc('admin_kill_property',{p_property_id:pid});if(r.error)throw r.error;
   btn.textContent='KILLED';btn.className='kill-btn killed';loadStats();loadAlertFeed()}
   catch(e){btn.textContent='ERRO';setTimeout(function(){btn.textContent='KILL';btn.disabled=false},2000)}};
+
+async function loadTelemetry(){
+  var el=document.getElementById('telemetryData');
+  try{var r=await sb.rpc('admin_telemetry_summary');if(r.error)throw r.error;var rows=r.data||[];
+  if(rows.length===0){el.innerHTML='<div class="empty-row" style="padding:16px;font-size:11px">Nenhum evento registrado.</div>';return}
+  el.innerHTML='<table style="width:100%;font-size:11px"><thead><tr><th style="padding:6px 10px">Evento</th><th style="padding:6px 10px;text-align:right">Total</th><th style="padding:6px 10px;text-align:right">Sessões</th><th style="padding:6px 10px;text-align:right">7 dias</th></tr></thead><tbody>'+
+  rows.map(function(r){return'<tr><td style="padding:6px 10px;color:var(--gold)">'+esc(r.event_name)+'</td><td style="padding:6px 10px;text-align:right">'+fmt(r.total_count)+'</td><td style="padding:6px 10px;text-align:right">'+fmt(r.unique_sessions)+'</td><td style="padding:6px 10px;text-align:right">'+fmt(r.last_7d)+'</td></tr>'}).join('')+'</tbody></table>'}
+  catch(e){el.innerHTML='<div class="empty-row" style="padding:16px;font-size:11px;color:var(--red)">Execute SQL-EPIC12-TELEMETRY.sql</div>'}}
 
 function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
 

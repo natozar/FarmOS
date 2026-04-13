@@ -261,6 +261,15 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .rec-status.visivel{display:block;animation:fadeIn .2s ease}
 .rec-timer{font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif}
 
+/* Profile Meter */
+.profile-meter{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+.profile-meter-title{font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.profile-meter-pct{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--gold)}
+.profile-meter-track{height:6px;background:var(--border);border-radius:3px;margin-bottom:10px;overflow:hidden}
+.profile-meter-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--green));transition:width .5s ease}
+.profile-meter-hint{font-size:.72rem;color:var(--muted);line-height:1.5}
+.profile-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+
 /* Guided Tour */
 .tour-overlay{position:fixed;top:0;right:0;bottom:0;left:0;z-index:900;background:rgba(2,3,4,.82);transition:opacity .3s ease}
 .tour-spot{position:relative;z-index:910;box-shadow:0 0 0 4px var(--gold),0 0 0 9999px rgba(2,3,4,.82);border-radius:var(--radius);transition:box-shadow .4s ease}
@@ -815,7 +824,7 @@ if(props.length===0){c.innerHTML='<h2 class="page-title">Minhas Propriedades</h2
 props.forEach(function(p){p._risk=calcFinancialRisk(p)});
 props.sort(function(a,b){return b._risk-a._risk});
 var totalRisk=props.reduce(function(s,p){return s+p._risk},0);
-var html='<h2 class="page-title">Minhas Propriedades</h2>';
+var html='<h2 class="page-title">Minhas Propriedades</h2>'+buildProfileMeter();
 if(totalRisk>0){html+='<div style="padding:12px 16px;background:rgba(196,90,74,.06);border:1px solid rgba(196,90,74,.15);border-radius:var(--radius-sm);margin-bottom:16px;text-align:center"><span style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Risco total estimado</span><div style="font-family:Space Grotesk,sans-serif;font-size:1.4rem;font-weight:700;color:var(--red);margin-top:2px">R$ '+formatarNumero(totalRisk)+'</div><span style="font-size:.68rem;color:var(--muted)">Ordenado por prejuízo decrescente</span></div>'}
 props.forEach(function(p){var pid=p.property_id||p.id;var areaStr=p.area_ha?formatarNumero(Math.round(p.area_ha))+' ha':'';var hasNDVI=p.last_ndvi!=null;var cls=p.last_classification||'';
 var ndviHTML='';if(hasNDVI){var delta='';if(p.prev_ndvi!=null){var d=p.last_ndvi-p.prev_ndvi;delta='<span class="ndvi-delta '+(d>=0?'up':'down')+'">'+(d>=0?'+':'')+d.toFixed(2)+'</span>'}ndviHTML='<div class="ndvi-row"><div class="ndvi-bar-v" style="background:'+getNDVIHex(cls)+'"></div><div class="ndvi-info"><span class="ndvi-value" style="color:'+getNDVIColor(cls)+'">'+p.last_ndvi.toFixed(2)+'</span> <span class="ndvi-class" style="color:'+getNDVIColor(cls)+'">'+getNDVILabel(cls)+'</span>'+delta+'<span class="ndvi-date">'+diasAtras(p.last_reading_date)+'</span></div></div>'}else{ndviHTML='<div class="ndvi-row"><div class="ndvi-bar-v" style="background:var(--muted)"></div><div class="ndvi-info"><span class="ndvi-value" style="color:var(--muted)">—</span> <span class="ndvi-class" style="color:var(--muted)">Aguardando satélite</span><span class="ndvi-date">Primeira leitura em até 5 dias</span></div></div>'}
@@ -873,7 +882,7 @@ el.innerHTML=pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pi
 
 function renderFieldLogsOnly(pid){return'<div class="timeline-empty">Timeline indisponível. Execute o SQL de field_logs no Supabase.</div>'}
 
-async function enviarLog(){if(isListening)stopListening();var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content&&!State.pendingPhoto)return;if(!content)content='[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
+async function enviarLog(){if(isListening)stopListening();trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content&&!State.pendingPhoto)return;if(!content)content='[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
 var photoAppend=getPhotoAppend();content+=photoAppend.text;
 var btn=document.getElementById('btnDiarioSend');btn.disabled=true;
 var sectorSel=document.getElementById('diarioSector');var sector=sectorSel?sectorSel.value:'operacional';
@@ -1118,6 +1127,7 @@ return'<div class="ai-suggest"><div class="ai-suggest-title">&#10024; Resoluçõ
 actions.map(function(a,i){return'<button class="ai-action" onclick="executeAIAction(this,\''+escapeHtml(a)+'\',\''+logId+'\')">'+(i+1)+'. '+escapeHtml(a)+'</button>'}).join('')+'</div><div style="font-size:.55rem;color:rgba(168,158,144,.5);margin-top:8px;line-height:1.4">Aviso: Sugestões logísticas baseadas em processamento algorítmico interno. Não substitui e não atua como laudo técnico oficial Zootécnico, Agronômico ou Veterinário (Lei n° 5.194/66).</div></div>'}
 
 function executeAIAction(btn,action,logId){
+trackEvent('ai_action',{action:action});
 btn.classList.add('done');btn.textContent='✓ '+action;
 var siblings=btn.parentElement.querySelectorAll('.ai-action');siblings.forEach(function(s){if(s!==btn){s.style.opacity='.3';s.style.pointerEvents='none'}});
 toast('Ação registrada: '+action,'ok');
@@ -1272,10 +1282,54 @@ map.on('mouseenter','prop-fill',function(){map.getCanvas().style.cursor='pointer
 map.on('mouseleave','prop-fill',function(){map.getCanvas().style.cursor=''})}
 if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14});renderHeatmapLayer(map);initTimelapse(map,props)})}
 
+/* ========== TELEMETRY (EPIC 12) ========== */
+var _sid=localStorage.getItem('agruai_sid');if(!_sid){_sid='s_'+Date.now()+'_'+Math.random().toString(36).substr(2,8);localStorage.setItem('agruai_sid',_sid)}
+
+function trackEvent(name,data){
+try{sb.from('behavioral_telemetry').insert({session_id:_sid,event_name:name,event_data:data||{},property_id:State.selectedProperty||null}).then(function(){})}catch(e){}}
+
+/* ========== PROFILE ENRICHMENT (EPIC 12) ========== */
+var PROFILE_FIELDS=[
+{key:'marca_trator',label:'Marca do trator principal',placeholder:'Ex: John Deere, Massey Ferguson'},
+{key:'raca_gado',label:'Raça predominante do rebanho',placeholder:'Ex: Nelore, Angus, Girolando'},
+{key:'cabecas',label:'Total de cabeças (aprox.)',placeholder:'Ex: 2500',type:'number'},
+{key:'fornecedor_racao',label:'Fornecedor de ração/sal',placeholder:'Ex: Matsuda, Guabi, DSM'}
+];
+
+function calcProfileCompletion(){
+if(!State.user)return 0;
+var meta=State.user.user_metadata||{};var farm=meta.farm_profile||{};
+var total=4+PROFILE_FIELDS.length;var filled=0;
+if(meta.nome)filled++;if(meta.telefone)filled++;if(State.propriedades.length>0)filled++;
+var hasLog=localStorage.getItem('agruai_has_log');if(hasLog)filled++;
+PROFILE_FIELDS.forEach(function(f){if(farm[f.key])filled++});
+return Math.round(filled/total*100)}
+
+function buildProfileMeter(){
+var pct=calcProfileCompletion();
+var hint=pct>=100?'Perfil completo! A precisão dos seus relatórios está no máximo.':pct>=60?'Quase lá. Complete os dados operacionais para relatórios mais detalhados.':'Complete seu perfil para que os relatórios e alertas sejam mais relevantes para sua operação.';
+return'<div class="profile-meter"><div class="profile-meter-title"><span>Perfil da Operação</span><span class="profile-meter-pct">'+pct+'%</span></div><div class="profile-meter-track"><div class="profile-meter-fill" style="width:'+pct+'%"></div></div><div class="profile-meter-hint">'+hint+'</div>'+(pct<100?'<button class="btn-secondary" style="margin-top:10px;font-size:.75rem;padding:8px 14px" onclick="abrirModalPerfil()">Completar perfil</button>':'')+'</div>'}
+
+function abrirModalPerfil(){
+var meta=State.user.user_metadata||{};var farm=meta.farm_profile||{};
+var overlay=document.createElement('div');overlay.className='modal-overlay';overlay.id='modalPerfil';
+var fieldsHtml=PROFILE_FIELDS.map(function(f){return'<div class="form-group"><label class="form-label">'+f.label+'</label><input class="form-input" id="pf_'+f.key+'" type="'+(f.type||'text')+'" placeholder="'+f.placeholder+'" value="'+(farm[f.key]||'')+'"></div>'}).join('');
+overlay.innerHTML='<div class="modal-box"><h3 class="modal-title">Perfil da Operação</h3><p style="font-size:.8rem;color:var(--muted);margin-bottom:14px;line-height:1.5">Esses dados são opcionais e melhoram a relevância dos seus alertas e relatórios. Seus dados são protegidos pela LGPD.</p>'+fieldsHtml+'<div class="btn-row"><button class="btn-secondary" onclick="fecharModalPerfil()">Cancelar</button><button class="btn-primary" onclick="salvarPerfil()">Salvar</button></div></div>';
+overlay.addEventListener('click',function(e){if(e.target===overlay)fecharModalPerfil()});
+document.body.appendChild(overlay);trackEvent('profile_modal_open')}
+
+function fecharModalPerfil(){var m=document.getElementById('modalPerfil');if(m)m.remove()}
+
+async function salvarPerfil(){
+var farm={};PROFILE_FIELDS.forEach(function(f){var v=document.getElementById('pf_'+f.key);if(v&&v.value.trim())farm[f.key]=v.value.trim()});
+try{var r=await sb.auth.updateUser({data:{farm_profile:farm}});if(r.error)throw r.error;
+State.user=r.data.user;toast('Perfil atualizado!','ok');fecharModalPerfil();trackEvent('profile_saved',farm);
+if(State.tela==='propriedades')renderPropriedades()}catch(e){toast('Erro: '+e.message,'erro')}}
+
 /* ========== INIT ========== */
 async function iniciarApp(){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];document.getElementById('userName').textContent=nome;
 var ls=document.getElementById('langSelect');if(ls)ls.value=currentLang;
-navegarPara('propriedades');updateOfflineBar();loadTicker();startBackgroundTracking();requestNotifPermission();setTimeout(syncPendingLogs,1500);setTimeout(function(){if(!localStorage.getItem('agruai_tour_done')){startTour()}else{setTimeout(verificarInstall,1000)}},2500)}
+navegarPara('propriedades');trackEvent('login',{props:State.propriedades.length});updateOfflineBar();loadTicker();startBackgroundTracking();requestNotifPermission();setTimeout(syncPendingLogs,1500);setTimeout(function(){if(!localStorage.getItem('agruai_tour_done')){startTour()}else{setTimeout(verificarInstall,1000)}},2500)}
 
 async function checkSession(){showLoading('Verificando sessão...');
 try{
@@ -1373,6 +1427,7 @@ rec.onend=function(){if(isListening){stopListening()}};
 return rec}
 
 function toggleRecording(){
+trackEvent('mic_toggle',{listening:!isListening});
 if(isListening){stopListening();return}
 if(!speechRec){speechRec=initSpeechRecognition()}
 if(!speechRec){toast('Reconhecimento de voz não disponível neste navegador','erro');return}
@@ -1415,6 +1470,7 @@ State.timelapseData=[];
 for(var m=0;m<12;m++){var monthNdvi=0.3+Math.sin((m+3)*0.5)*0.25+Math.random()*0.1;State.timelapseData.push(Math.max(0.1,Math.min(0.9,monthNdvi)))}}
 
 function onTimelapseChange(val){
+trackEvent('timelapse_slide',{month:parseInt(val)});
 var idx=parseInt(val);var ndvi=State.timelapseData[idx]||0.5;
 var months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 var d=new Date();d.setMonth(d.getMonth()-(11-idx));
@@ -1439,6 +1495,7 @@ function warRoomEscHandler(e){if(e.key==='Escape')toggleWarRoom()}
 /* ========== QR SCANNER (EPIC 8) ========== */
 var html5QrScanner=null;
 function iniciarScanner(){
+trackEvent('scanner_open');
 var container=document.getElementById('scannerContainer');if(!container)return;
 if(html5QrScanner){html5QrScanner.stop().then(function(){html5QrScanner=null;container.innerHTML=''}).catch(function(){});return}
 try{
@@ -1554,7 +1611,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.nextTourStep=nextTourStep;window.endTour=endTour;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.nextTourStep=nextTourStep;window.endTour=endTour;window.abrirModalPerfil=abrirModalPerfil;window.fecharModalPerfil=fecharModalPerfil;window.salvarPerfil=salvarPerfil;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
 var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();
