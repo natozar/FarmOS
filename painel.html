@@ -1286,7 +1286,7 @@ if(!bounds.isEmpty())map.fitBounds(bounds,{padding:60,maxZoom:14});renderHeatmap
 var _sid=localStorage.getItem('agruai_sid');if(!_sid){_sid='s_'+Date.now()+'_'+Math.random().toString(36).substr(2,8);localStorage.setItem('agruai_sid',_sid)}
 
 function trackEvent(name,data){
-try{sb.from('behavioral_telemetry').insert({session_id:_sid,event_name:name,event_data:data||{},property_id:State.selectedProperty||null}).then(function(){})}catch(e){}}
+try{sb.from('behavioral_telemetry').insert({session_id:_sid,event_name:name,event_data:data||{},property_id:State.selectedProperty||null}).then(function(){}).catch(function(){})}catch(e){}}
 
 /* ========== PROFILE ENRICHMENT (EPIC 12) ========== */
 var PROFILE_FIELDS=[
