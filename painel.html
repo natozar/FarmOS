@@ -882,7 +882,7 @@ el.innerHTML=pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pi
 
 function renderFieldLogsOnly(pid){return'<div class="timeline-empty">Timeline indisponível. Execute o SQL de field_logs no Supabase.</div>'}
 
-async function enviarLog(){if(isListening)stopListening();trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content&&!State.pendingPhoto)return;if(!content)content='[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
+async function enviarLog(){if(isListening)stopListening();trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content&&!State.pendingPhoto)return;if(!content)content='[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}if(!State.user){toast('Sessão expirada. Faça login novamente.','erro');navegarPara('login');return}
 var photoAppend=getPhotoAppend();content+=photoAppend.text;
 var btn=document.getElementById('btnDiarioSend');btn.disabled=true;
 var sectorSel=document.getElementById('diarioSector');var sector=sectorSel?sectorSel.value:'operacional';
@@ -1134,7 +1134,7 @@ toast('Ação registrada: '+action,'ok');
 if(logId&&logId!=='undefined'){
 try{sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,
 content:'[IA] Ação executada: '+action+' (ref: log '+logId.substring(0,8)+')',
-sector:'operacional'}).then(function(){if(State.selectedProperty)loadTimeline(State.selectedProperty)})}catch(e){}}}
+sector:'operacional'}).then(function(){if(State.selectedProperty)loadTimeline(State.selectedProperty)}).catch(function(){})}catch(e){}}}
 
 /* ========== INVENTARIO (EPIC 2) ========== */
 var INV_CATS=[{v:'semente',l:'Semente'},{v:'fertilizante',l:'Fertilizante'},{v:'defensivo',l:'Defensivo'},{v:'combustivel',l:'Combustível'},{v:'peca',l:'Peça/Reposição'},{v:'racao',l:'Ração'},{v:'medicamento',l:'Medicamento'},{v:'outro',l:'Outro'}];
@@ -1251,7 +1251,7 @@ if(State.cadData.car_code){buscarCAR(State.cadData.car_code,map,draw)}}
 
 function updateArea(e){var data=State.drawInstance.getAll();if(data.features.length>0){var poly=data.features[data.features.length-1];State.drawnGeoJSON=poly.geometry;var area=turf.area(poly)/10000;State.cadData.area_ha=area;document.getElementById('areaDisplay').textContent='Área: '+formatarNumero(Math.round(area))+' hectares';document.getElementById('btnSalvarProp').disabled=false}else{State.drawnGeoJSON=null;document.getElementById('btnSalvarProp').disabled=true}}
 
-async function geocodeMunicipio(query,map){try{var r=await fetch('https://api.mapbox.com/geocoding/v5/mapbox.places/'+encodeURIComponent(query)+'.json?access_token='+MAPBOX_TOKEN+'&limit=1');var d=await r.json();if(d.features&&d.features.length>0){var c=d.features[0].center;map.flyTo({center:c,zoom:10})}}catch(e){}}
+async function geocodeMunicipio(query,map){try{var gc=new AbortController();setTimeout(function(){gc.abort()},6000);var r=await fetch('https://api.mapbox.com/geocoding/v5/mapbox.places/'+encodeURIComponent(query)+'.json?access_token='+MAPBOX_TOKEN+'&limit=1',{signal:gc.signal});var d=await r.json();if(d.features&&d.features.length>0){var c=d.features[0].center;map.flyTo({center:c,zoom:10})}}catch(e){}}
 
 async function buscarCAR(code,map,draw){try{toast('Buscando CAR no SICAR...','info');var url='https://geoserver.car.gov.br/geoserver/sicar/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=sicar:imovel&CQL_FILTER=cod_imovel=%27'+encodeURIComponent(code)+'%27&outputFormat=application/json';var ctrl=new AbortController();var timer=setTimeout(function(){ctrl.abort()},8000);var r=await fetch(url,{signal:ctrl.signal});clearTimeout(timer);var d=await r.json();
 if(d.features&&d.features.length>0){var feat=d.features[0];draw.add(feat);State.drawnGeoJSON=feat.geometry;var area=turf.area(feat)/10000;State.cadData.area_ha=area;document.getElementById('areaDisplay').textContent='Área: '+formatarNumero(Math.round(area))+' hectares (CAR)';document.getElementById('btnSalvarProp').disabled=false;var bbox=turf.bbox(feat);map.fitBounds([[bbox[0],bbox[1]],[bbox[2],bbox[3]]],{padding:40});toast('Perímetro do CAR carregado!','ok')}else{toast('CAR não encontrado. Desenhe manualmente.','info')}}catch(e){toast('Não foi possível buscar o CAR. Desenhe manualmente.','info')}}
@@ -1311,6 +1311,7 @@ var hint=pct>=100?'Perfil completo! A precisão dos seus relatórios está no m�
 return'<div class="profile-meter"><div class="profile-meter-title"><span>Perfil da Operação</span><span class="profile-meter-pct">'+pct+'%</span></div><div class="profile-meter-track"><div class="profile-meter-fill" style="width:'+pct+'%"></div></div><div class="profile-meter-hint">'+hint+'</div>'+(pct<100?'<button class="btn-secondary" style="margin-top:10px;font-size:.75rem;padding:8px 14px" onclick="abrirModalPerfil()">Completar perfil</button>':'')+'</div>'}
 
 function abrirModalPerfil(){
+if(!State.user){toast('Sessão expirada','erro');return}
 var meta=State.user.user_metadata||{};var farm=meta.farm_profile||{};
 var overlay=document.createElement('div');overlay.className='modal-overlay';overlay.id='modalPerfil';
 var fieldsHtml=PROFILE_FIELDS.map(function(f){return'<div class="form-group"><label class="form-label">'+f.label+'</label><input class="form-input" id="pf_'+f.key+'" type="'+(f.type||'text')+'" placeholder="'+f.placeholder+'" value="'+(farm[f.key]||'')+'"></div>'}).join('');
@@ -1355,7 +1356,8 @@ req.onsuccess=function(e){offlineDB=e.target.result;resolve(offlineDB)};
 req.onerror=function(){reject(req.error)}})}
 
 function addPendingAudio(audio){return openOfflineDB().then(function(db){return new Promise(function(resolve,reject){
-var tx=db.transaction('pending_audio','readwrite');tx.objectStore('pending_audio').put(audio);
+var tx=db.transaction('pending_audio','readwrite');var store=tx.objectStore('pending_audio');store.put(audio);
+store.getAll().onsuccess=function(e){var all=e.target.result;if(all.length>50){for(var i=0;i<all.length-50;i++){store.delete(all[i].audioId)}}};
 tx.oncomplete=function(){resolve()};tx.onerror=function(){reject(tx.error)}})})}
 
 function getAllPendingAudio(){return openOfflineDB().then(function(db){return new Promise(function(resolve,reject){
@@ -1372,7 +1374,8 @@ req.onsuccess=function(){resolve(req.result||null)};req.onerror=function(){rejec
 
 
 function addPendingLog(log){return openOfflineDB().then(function(db){return new Promise(function(resolve,reject){
-var tx=db.transaction('pending_logs','readwrite');tx.objectStore('pending_logs').put(log);
+var tx=db.transaction('pending_logs','readwrite');var store=tx.objectStore('pending_logs');store.put(log);
+store.getAll().onsuccess=function(e){var all=e.target.result;if(all.length>200){for(var i=0;i<all.length-200;i++){store.delete(all[i].localId)}}};
 tx.oncomplete=function(){resolve()};tx.onerror=function(){reject(tx.error)}})})}
 
 function getAllPendingLogs(){return openOfflineDB().then(function(db){return new Promise(function(resolve,reject){
@@ -1417,7 +1420,7 @@ for(var i=e.resultIndex;i<e.results.length;i++){var t=e.results[i][0].transcript
 if(final)finalText+=final;
 if(inputEl){inputEl.value=finalText+(interim?' '+interim:'');inputEl.style.height='auto';inputEl.style.height=Math.min(inputEl.scrollHeight,120)+'px'}};
 
-rec.onerror=function(e){console.error('[speech] Error:',e.error);
+rec.onerror=function(e){
 if(e.error==='not-allowed'){toast('Permissão de microfone negada','erro')}
 else if(e.error==='no-speech'){toast('Nenhuma fala detectada — tente novamente','info')}
 else if(e.error!=='aborted'){toast('Erro de reconhecimento: '+e.error,'erro')}
@@ -1508,11 +1511,11 @@ var matched=State.invItems.find(function(it){return it.nome.toLowerCase().indexO
 if(matched){toast('Item encontrado: '+matched.nome+' — '+formatarNumero(matched.quantidade)+' '+matched.unidade,'ok');
 try{if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(pos){
 var logContent='[Scanner] Baixa automática: '+matched.nome+' | EAN: '+decoded+' [📍 '+pos.coords.latitude.toFixed(5)+', '+pos.coords.longitude.toFixed(5)+']';
-sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,content:logContent,sector:'operacional'});
-sb.rpc('use_inventory_item',{p_item_id:matched.id,p_qty:1}).then(function(){loadInsumos(State.selectedProperty);loadInvPickerData(State.selectedProperty)});
+sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,content:logContent,sector:'operacional'}).catch(function(){});
+sb.rpc('use_inventory_item',{p_item_id:matched.id,p_qty:1}).then(function(){loadInsumos(State.selectedProperty);loadInvPickerData(State.selectedProperty)}).catch(function(){});
 toast('Estoque atualizado + GPS registrado','ok')},function(){
-sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,content:'[Scanner] Baixa: '+matched.nome+' | EAN: '+decoded,sector:'operacional'});
-sb.rpc('use_inventory_item',{p_item_id:matched.id,p_qty:1}).then(function(){loadInsumos(State.selectedProperty)})},{enableHighAccuracy:true,timeout:8000})}}catch(e){}}
+sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,content:'[Scanner] Baixa: '+matched.nome+' | EAN: '+decoded,sector:'operacional'}).catch(function(){});
+sb.rpc('use_inventory_item',{p_item_id:matched.id,p_qty:1}).then(function(){loadInsumos(State.selectedProperty)}).catch(function(){})},{enableHighAccuracy:true,timeout:8000})}}catch(e){}}
 else{toast('Código '+decoded+' não encontrado no estoque','info')}},
 function(){}).catch(function(e){toast('Câmera não disponível: '+(e.message||e),'erro')})}catch(e){toast('Scanner não suportado neste navegador','erro')}}
 
