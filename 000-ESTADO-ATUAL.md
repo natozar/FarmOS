@@ -60,10 +60,13 @@
 - Playwright 265 testes × 5 browsers
 - Stress audit: 0 crashes, 0 CORS, 0 RLS 403, 0 unhandled promises
 
-## SQLs Pendentes
+## Migrations
 
-Verificar execução no Supabase SQL Editor:
-- `SQL-EPIC12-TELEMETRY.sql`
-- `SQL-EPIC13-KANBAN.sql`
+Histórico completo em `supabase/migrations/` (21 migrations numeradas).
+Seed de demo em `supabase/seeds/demo_fazenda.sql`.
+
+Pendente de verificação no Supabase SQL Editor:
+- `0017_epic12_telemetry.sql`
+- `0018_epic13_kanban.sql`
 
 ## Custo: R$ 175/mês (Supabase Pro). Todo o resto: R$ 0.
