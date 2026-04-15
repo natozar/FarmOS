@@ -18,12 +18,11 @@ RETURNS TABLE (
   sector TEXT, severity TEXT, kanban_status TEXT, created_at TIMESTAMPTZ
 ) AS $$
   SELECT fl.id, 'log'::TEXT, fl.content,
-    COALESCE(p.raw_user_meta_data->>'nome', u.email)::TEXT,
+    COALESCE(u.raw_user_meta_data->>'nome', u.email)::TEXT,
     COALESCE(fl.sector, pm.sector, 'operacional')::TEXT, NULL::TEXT,
     COALESCE(fl.kanban_status, 'pendente')::TEXT, fl.created_at
   FROM field_logs fl
   JOIN auth.users u ON u.id = fl.author_id
-  LEFT JOIN profiles p ON p.id = fl.author_id
   LEFT JOIN property_managers pm ON pm.manager_email = u.email AND pm.property_id = fl.property_id
   WHERE fl.property_id = p_property_id
   UNION ALL
