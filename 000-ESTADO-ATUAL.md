@@ -52,8 +52,7 @@
 
 ## Credenciais
 
-- CEO: `chatsagrado@gmail.com` / `Agr2026ceo`
-- Teste: `fazendeiro.teste@agruai.com` / `AgrUAI2026!`
+Ver gerenciador de senhas local — não versionar no repo.
 
 ## Testes
 
@@ -62,11 +61,7 @@
 
 ## Migrations
 
-Histórico completo em `supabase/migrations/` (21 migrations numeradas).
+Histórico completo em `supabase/migrations/` (21 migrations numeradas, todas aplicadas em produção).
 Seed de demo em `supabase/seeds/demo_fazenda.sql`.
-
-Pendente de verificação no Supabase SQL Editor:
-- `0017_epic12_telemetry.sql`
-- `0018_epic13_kanban.sql`
 
 ## Custo: R$ 175/mês (Supabase Pro). Todo o resto: R$ 0.
