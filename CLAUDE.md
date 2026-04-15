@@ -124,24 +124,11 @@ Fontes: Space Grotesk (headings), Inter (body). Tema escuro.
 
 - `clube-prime` (ref: mrourzdxrahpysscckxm) — Supabase free tier esgotado, sem dados. Pendente: pausar no dashboard.
 
-## PROMPTs (instruções para Claude Code)
+## PROMPTs históricos
 
-| Prompt | Descrição | Status |
-|--------|-----------|--------|
-| PROMPT-04 | Deploy da landing page | Executado |
-| PROMPT-05 | Botão WhatsApp share na confirmação | Executado |
-| PROMPT-06 | Tela obrigado premium | Criado (execução pendente) |
-| PROMPT-08 | Painel de produção (painel.html) | Executado |
-| PROMPT-11 | Fix API key + limpeza de arquivos obsoletos | Executado |
-| PROMPT-12 | Enriquecer LP (seções, FAQ, SEO, mockup) | Executado |
-| PROMPT-13 | Popup inteligente de instalação PWA na landing | Executado |
-| PROMPT-14 | Pipeline de satélite (Edge Function + Copernicus) | Executado |
-| PROMPT-15 | Exibir dados de satélite no painel (NDVI, gráficos, alertas) | Criado (depende do PROMPT-14) |
-| PROMPT-16 | Executar SQL (colunas, RPCs, pg_cron) | Executado |
-| PROMPT-17 | Teste completo de produção | Criado (próximo passo) |
-| PROMPT-18 | Fix trigger handle_new_user (signup 500) | Executado |
-
-Prompts executados e removidos do repo: 07 (migração Supabase), 09 (desativar clube-prime), 10 (fix API key).
+Os arquivos de prompts que sobreviveram estão arquivados em
+`docs/prompts-history/` (14, 15, 16, 17). São registro de intenção, não
+código ativo — o trabalho deles está refletido nos 15 épicos entregues.
 
 ## Histórico de incidentes
 
