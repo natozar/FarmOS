@@ -83,6 +83,12 @@ Todas as tabelas têm Row Level Security. Propriedades e leituras filtradas por 
 | `godmode.html` | Painel admin CEO (chatsagrado@gmail.com only) | Produção |
 | `vercel.json` | Config de deploy Vercel (rewrites, headers, security) | Produção |
 
+## SQL
+
+- `supabase/migrations/` — histórico de SQLs já executados no banco (21 migrations numeradas, NÃO re-executar). Ver README da pasta.
+- `supabase/seeds/demo_fazenda.sql` — seed de dados de demonstração.
+- Novos SQLs devem entrar como próxima migration numerada e ser aplicados manualmente no SQL Editor.
+
 ## Design tokens
 
 ```css
