@@ -10,7 +10,7 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 - **Backend:** Supabase Pro (PostgreSQL + PostGIS + Auth + RLS)
 - **Mapas:** Mapbox GL JS + GL Draw (desenho de polígonos)
 - **Geoespacial:** PostGIS (geometrias MultiPolygon SRID 4326), Turf.js (cálculos client-side)
-- **Deploy:** GitHub Pages (agruai.com)
+- **Deploy:** Vercel (auto-deploy via GitHub push)
 - **Domínio:** agruai.com
 
 ## Supabase (projeto: agruai-prod)
@@ -148,10 +148,8 @@ Prompts executados e removidos do repo: 07 (migração Supabase), 09 (desativar 
 - **API key com typo:** A anon key do Supabase tinha 1 caractere errado (posição 80 do JWT: `2` em vez de `v`), herdado de extração via Chrome que bloqueava JWTs. Corrigido no PROMPT-11. A versão deployada do painel.html nunca teve o erro — o Code gerou a key correta independentemente.
 - **Signup 500 (trigger sem SECURITY DEFINER):** O trigger `handle_new_user` falhava ao inserir em `profiles` porque o RLS bloqueava o INSERT feito pelo contexto de auth. Corrigido no PROMPT-18 adicionando `SECURITY DEFINER` e `SET search_path = public`. Policies de profiles: `users_own_profile` (ALL) + `allow_trigger_insert` (INSERT).
 
-## Próximos passos
+## Estado atual
 
-1. **PROMPT-17 — Teste completo de produção** — Lighthouse, Playwright, verificação de secrets, RPCs, Edge Function com resposta JSON completa.
-2. **PROMPT-15 — Dados de satélite no painel** — Mostrar NDVI nos cards, colorir mapa por saúde, gráficos temporais, tela de alertas.
-3. **Google Auth** — Login social no painel (OAuth Google via Supabase).
-4. **Notificações push** — Quando alerta é criado, enviar push notification via service worker.
-5. **Pausar clube-prime** — Acessar dashboard Supabase e pausar projeto antigo (manual).
+Ver `000-ESTADO-ATUAL.md` para o snapshot vivo — stack, 15 épicos concluídos,
+tabelas, RPCs, custo e pontos de atenção. Esse arquivo é atualizado a cada
+entrega significativa e deve ser consultado antes de começar trabalho novo.
