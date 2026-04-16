@@ -3,8 +3,8 @@
 
 User-agent: *
 Allow: /
-Allow: /blog.html
-Allow: /artigo.html
+Allow: /blog
+Allow: /blog/*
 Allow: /en
 Allow: /es
 Allow: /favicon.svg
@@ -20,6 +20,7 @@ Disallow: /app.html
 Disallow: /cartao-agruai.html
 Disallow: /FarmOS-latest/
 Disallow: /sw.js
+Disallow: /api/
 
 # Sitemap
 Sitemap: https://agruai.com/sitemap.xml
