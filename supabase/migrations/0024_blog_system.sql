@@ -1,0 +1,56 @@
+-- ============================================================
+-- Migration 0024: Blog system — articles, cotações, newsletter
+-- NOTA: Já executado pelo Claude via Supabase Dashboard com os nomes abaixo.
+-- Este arquivo documenta o schema real. NÃO re-executar.
+-- ============================================================
+
+-- === artigos ===
+-- id            UUID PK
+-- titulo        TEXT NOT NULL
+-- slug          TEXT UNIQUE NOT NULL
+-- conteudo      TEXT NOT NULL (markdown com placeholders {{cotacao:xxx}})
+-- resumo        TEXT NOT NULL
+-- categoria     TEXT NOT NULL (pecuaria, graos, cafe, cana, tecnologia, mercado)
+-- tags          TEXT[]
+-- foto_url      TEXT (URL Pexels)
+-- foto_credito  TEXT
+-- autor         TEXT
+-- publicado     BOOLEAN DEFAULT true
+-- destaque      BOOLEAN DEFAULT false
+-- views         INTEGER DEFAULT 0
+-- created_at    TIMESTAMPTZ DEFAULT now()
+-- updated_at    TIMESTAMPTZ DEFAULT now()
+--
+-- RLS: SELECT público (publicado=true), INSERT/UPDATE/DELETE service_role only
+-- Índices: slug, created_at, publicado, categoria
+
+-- === cotacoes ===
+-- id            UUID PK
+-- commodity     TEXT NOT NULL (Boi Gordo, Soja, Milho, Café Arábica, Algodão, Trigo, Arroz, Açúcar VHP, Etanol, USD/BRL)
+-- preco         NUMERIC NOT NULL
+-- moeda         TEXT DEFAULT 'BRL'
+-- unidade       TEXT (arroba, saca 60kg, etc)
+-- variacao_pct  NUMERIC
+-- fonte         TEXT (CEPEA, BCB, etc)
+-- referencia    DATE
+-- created_at    TIMESTAMPTZ DEFAULT now()
+--
+-- RLS: SELECT público, INSERT/UPDATE/DELETE service_role only
+-- Índices: commodity, referencia, created_at
+
+-- === newsletter ===
+-- id            UUID PK
+-- email         TEXT UNIQUE NOT NULL
+-- nome          TEXT
+-- ativo         BOOLEAN DEFAULT true
+-- created_at    TIMESTAMPTZ DEFAULT now()
+--
+-- RLS: INSERT público, SELECT service_role only
+
+-- === RPC ===
+-- increment_visitas(article_slug TEXT) — incrementa views no artigo
+
+-- === pg_cron ===
+-- Job: agruai-generate-daily-article
+-- Schedule: 0 9 * * * (09:00 UTC / 06:00 BRT)
+-- Action: POST /functions/v1/generate-daily-article

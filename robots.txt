@@ -1,0 +1,19 @@
+# AgrUAI — robots.txt
+# https://agruai.com/robots.txt
+
+User-agent: *
+Allow: /landing.html
+Allow: /blog.html
+Allow: /artigo.html
+Allow: /favicon.svg
+Allow: /og-image.png
+Allow: /logo-full.svg
+
+# App pages (require auth, no value for indexing)
+Disallow: /index.html
+Disallow: /cartao-agruai.html
+Disallow: /FarmOS-latest/
+Disallow: /sw.js
+
+# Sitemap
+Sitemap: https://agruai.com/sitemap.xml
