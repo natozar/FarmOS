@@ -592,12 +592,18 @@ function carregarRelacionados(categoria,currentId){
 }
 
 /* === Ticker === */
+var TK_MAP={
+  'Boi Gordo':'boi','Soja':'soja','Milho':'milho',
+  'Café Arábica':'cafe','USD/BRL':'dolar'
+};
+
 function montarTicker(){
   var items=[{label:'Boi Gordo',id:'boi'},{label:'Soja',id:'soja'},{label:'Milho',id:'milho'},{label:'Café',id:'cafe'},{label:'Dólar',id:'dolar'}];
   var html='';
   for(var i=0;i<2;i++){
+    var suf=i>0?'-dup':'';
     items.forEach(function(it,idx){
-      html+='<div class="ticker-item"><span class="ticker-label">'+it.label+'</span><span class="ticker-value">—</span></div>';
+      html+='<div class="ticker-item"><span class="ticker-label">'+it.label+'</span><span class="ticker-value" id="tk-'+it.id+suf+'">—</span><span class="ticker-change" id="tk-'+it.id+'-chg'+suf+'"></span></div>';
       if(idx<items.length-1)html+='<div class="ticker-sep"></div>';
     });
     if(i===0)html+='<div class="ticker-sep"></div>';
@@ -605,8 +611,33 @@ function montarTicker(){
   document.getElementById('ticker').innerHTML=html;
 }
 
+function preencherTicker(){
+  fetch(SUPA_URL+'/rest/v1/cotacoes?order=created_at.desc&limit=20',{
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+  }).then(function(r){return r.json()}).then(function(rows){
+    if(!rows||!rows.length)return;
+    var seen={};
+    rows.forEach(function(r){if(!seen[r.commodity])seen[r.commodity]=r});
+    Object.keys(TK_MAP).forEach(function(name){
+      var id=TK_MAP[name];
+      var row=seen[name];
+      if(!row)return;
+      var preco=formatBRL(row.preco);
+      var chg=formatChange(row.variacao_pct||0);
+      ['','−dup'].forEach(function(suf){
+        var s=suf===''?'':'-dup';
+        var el=document.getElementById('tk-'+id+s);
+        var ch=document.getElementById('tk-'+id+'-chg'+s);
+        if(el)el.textContent=preco;
+        if(ch)ch.innerHTML=chg;
+      });
+    });
+  }).catch(function(){});
+}
+
 /* === Init === */
 montarTicker();
+preencherTicker();
 carregarArtigo();
 carregarCotacoesSidebar();
 </script>

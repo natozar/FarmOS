@@ -268,11 +268,11 @@ function formatChange(v){
 
 /* Map commodity name → DOM ids */
 var COT_MAP={
-  'Boi Gordo':{val:'cot-boi',chg:'cot-boi-chg',date:'cot-boi-date',unit:'@/arroba'},
-  'Soja':{val:'cot-soja',chg:'cot-soja-chg',date:'cot-soja-date',unit:'saca 60kg'},
-  'Milho':{val:'cot-milho',chg:'cot-milho-chg',date:'cot-milho-date',unit:'saca 60kg'},
-  'Café Arábica':{val:'cot-cafe',chg:'cot-cafe-chg',date:'cot-cafe-date',unit:'saca 60kg'},
-  'USD/BRL':{val:'cot-dolar',chg:'cot-dolar-chg',date:'cot-dolar-date',unit:'PTAX'}
+  'Boi Gordo':{val:'cot-boi',chg:'cot-boi-chg',date:'cot-boi-date',unit:'@/arroba',tk:'tk-boi',tkChg:'tk-boi-chg',tkDup:'tk-boi-dup',tkDupChg:'tk-boi-chg-dup'},
+  'Soja':{val:'cot-soja',chg:'cot-soja-chg',date:'cot-soja-date',unit:'saca 60kg',tk:'tk-soja',tkChg:'tk-soja-chg',tkDup:'tk-soja-dup',tkDupChg:'tk-soja-chg-dup'},
+  'Milho':{val:'cot-milho',chg:'cot-milho-chg',date:'cot-milho-date',unit:'saca 60kg',tk:'tk-milho',tkChg:'tk-milho-chg',tkDup:'tk-milho-dup',tkDupChg:'tk-milho-chg-dup'},
+  'Café Arábica':{val:'cot-cafe',chg:'cot-cafe-chg',date:'cot-cafe-date',unit:'saca 60kg',tk:'tk-cafe',tkChg:'tk-cafe-chg',tkDup:'tk-cafe-dup',tkDupChg:'tk-cafe-chg-dup'},
+  'USD/BRL':{val:'cot-dolar',chg:'cot-dolar-chg',date:'cot-dolar-date',unit:'PTAX',tk:'tk-dolar',tkChg:'tk-dolar-chg',tkDup:'tk-dolar-dup',tkDupChg:'tk-dolar-chg-dup'}
 };
 
 function carregarCotacoes(){
@@ -280,23 +280,32 @@ function carregarCotacoes(){
     headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
   }).then(function(r){return r.json()}).then(function(rows){
     if(!rows||!rows.length)return;
-    /* Get latest row per commodity */
     var seen={};
     rows.forEach(function(row){
-      if(!seen[row.commodity]){
-        seen[row.commodity]=row;
-      }
+      if(!seen[row.commodity])seen[row.commodity]=row;
     });
     Object.keys(COT_MAP).forEach(function(name){
       var m=COT_MAP[name];
       var row=seen[name];
       if(!row)return;
+      var preco=formatBRL(row.preco);
+      var chgHtml=formatChange(row.variacao_pct||0);
+      /* Cards expandidos */
       var el=document.getElementById(m.val);
       var chg=document.getElementById(m.chg);
       var dt=document.getElementById(m.date);
-      if(el)el.textContent=formatBRL(row.preco);
-      if(chg)chg.innerHTML=formatChange(row.variacao_pct||0);
+      if(el)el.textContent=preco;
+      if(chg)chg.innerHTML=chgHtml;
       if(dt)dt.textContent=m.unit+' — '+(row.fonte||'CEPEA');
+      /* Ticker (original + duplicata para scroll infinito) */
+      var tk=document.getElementById(m.tk);
+      var tkC=document.getElementById(m.tkChg);
+      var tkD=document.getElementById(m.tkDup);
+      var tkDC=document.getElementById(m.tkDupChg);
+      if(tk)tk.textContent=preco;
+      if(tkC)tkC.innerHTML=chgHtml;
+      if(tkD)tkD.textContent=preco;
+      if(tkDC)tkDC.innerHTML=chgHtml;
     });
   }).catch(function(){});
 }
