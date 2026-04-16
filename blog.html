@@ -352,7 +352,7 @@ function carregarArtigos(){
       var minutos=Math.max(2,Math.round((a.conteudo||'').split(/\s+/).length/200));
       var card=document.createElement('a');
       card.className='article-card';
-      card.href='/blog/'+a.slug;
+      card.href='artigo.html?slug='+a.slug;
       card.innerHTML='<img class="article-thumb" src="'+(a.foto_url||'')+'" alt="'+(a.titulo||'')+'" loading="lazy">'
         +'<div class="article-body">'
         +'<div class="article-meta"><span class="article-cat">'+(a.categoria||'agro')+'</span><span class="article-date">'+dataFormatada+'</span><span class="article-read">'+minutos+' min</span></div>'
