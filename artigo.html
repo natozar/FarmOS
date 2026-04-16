@@ -413,11 +413,58 @@ function renderArticle(a){
     +(a.foto_url?'<img class="article-cover" src="'+a.foto_url+'" alt="'+a.titulo+'">'
     +'<p class="article-cover-credit">'+(a.foto_credito||'Foto: Pexels (uso livre)')+'</p>':'');
 
-  /* Content — inject ads between paragraphs */
+  /* Content — inject ads between paragraphs (every 3 paragraphs) */
   var conteudo=a.conteudo||'';
   var paragraphs=conteudo.split('\n\n');
-  var midPoint=Math.floor(paragraphs.length/2);
   var html='';
+  var paraCount=0; /* count only real paragraphs, not headers */
+  var adIndex=0;
+
+  /* Bank of ad variations — rotates through them */
+  var ADS=[
+    {
+      icon:'<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/><rect x="17.5" y="2" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/><rect x="2" y="17.5" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/><rect x="17.5" y="17.5" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/></svg>',
+      title:'Todas as suas fazendas. Uma tela.',
+      text:'Dashboard unificado para proprietários de múltiplas fazendas. Compare propriedades e identifique problemas antes que virem prejuízo.',
+      cta:'Conhecer o dashboard &rarr;'
+    },
+    {
+      icon:'<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="16" cy="10" rx="12" ry="5.5" stroke="#C5A572" stroke-width="1.5" stroke-dasharray="3 2.5" opacity=".7"/><circle cx="25" cy="7" r="2.5" fill="#C5A572"/><line x1="25" y1="9.5" x2="18" y2="23" stroke="#C5A572" stroke-width="1.2" stroke-dasharray="2 2.5" opacity=".5"/><path d="M4 26 Q10 21 16 23 Q22 25 28 21" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round"/></svg>',
+      title:'Imagens de satélite a cada 5 dias',
+      text:'Veja a saúde real da pastagem e da lavoura com dados Sentinel-2. Sem depender de foto de WhatsApp.',
+      cta:'Ver como funciona &rarr;'
+    },
+    {
+      icon:'<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="9" stroke="#C5A572" stroke-width="1.5"/><line x1="20.5" y1="20.5" x2="28" y2="28" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round"/><polyline points="8,17 11,12 15,15 20,9" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+      title:'I.A. que fala a língua do campo',
+      text:'Alertas automáticos e relatórios que traduzem dados de satélite em ação: onde irrigar, quando mover gado, qual área investigar.',
+      cta:'Saber mais &rarr;'
+    },
+    {
+      icon:'<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 26V10l10-6 10 6v16" stroke="#C5A572" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 26h20" stroke="#C5A572" stroke-width="1.5"/><rect x="12" y="18" width="8" height="8" rx="1" stroke="#C5A572" stroke-width="1.5"/><line x1="16" y1="4" x2="16" y2="10" stroke="#C5A572" stroke-width="1" opacity=".4" stroke-dasharray="2 2"/></svg>',
+      title:'Gestão à distância que funciona',
+      text:'Proprietários que administram 5, 10 ou 20 fazendas não podem estar em todas ao mesmo tempo. A AgrUAI resolve isso.',
+      cta:'Programa de Acesso Antecipado &rarr;'
+    },
+    {
+      icon:'<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="6" width="24" height="16" rx="3" stroke="#C5A572" stroke-width="1.5"/><path d="M4 12h24" stroke="#C5A572" stroke-width="1" opacity=".3"/><circle cx="10" cy="18" r="2" stroke="#C5A572" stroke-width="1.2"/><path d="M14 17h8" stroke="#C5A572" stroke-width="1.2" stroke-linecap="round" opacity=".5"/><path d="M14 19h5" stroke="#C5A572" stroke-width="1" stroke-linecap="round" opacity=".3"/></svg>',
+      title:'Sem custo na fase pioneira',
+      text:'10 proprietários estão ajudando a construir a plataforma definitiva de inteligência rural. Garanta sua vaga.',
+      cta:'Garantir minha vaga &rarr;'
+    }
+  ];
+
+  function getNextAd(){
+    var ad=ADS[adIndex % ADS.length];
+    adIndex++;
+    return '<div class="ad-inline">'
+      +'<div class="ad-inline-icon">'+ad.icon+'</div>'
+      +'<div class="ad-inline-text">'
+      +'<h4>'+ad.title+'</h4>'
+      +'<p>'+ad.text+'</p>'
+      +'<a href="landing.html#reserva">'+ad.cta+'</a>'
+      +'</div></div>';
+  }
 
   for(var i=0;i<paragraphs.length;i++){
     var p=paragraphs[i].trim();
@@ -435,17 +482,12 @@ function renderArticle(a){
       html+='<ul>'+items+'</ul>';
     }else{
       html+='<p>'+p+'</p>';
+      paraCount++;
     }
 
-    /* AD between paragraphs (at midpoint) */
-    if(i===midPoint){
-      html+='<div class="ad-inline">'
-        +'<div class="ad-inline-icon"><svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/><rect x="17.5" y="2" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/><rect x="2" y="17.5" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/><rect x="17.5" y="17.5" width="12.5" height="12.5" rx="2.5" stroke="#C5A572" stroke-width="1.5"/></svg></div>'
-        +'<div class="ad-inline-text">'
-        +'<h4>Todas as suas fazendas. Uma tela.</h4>'
-        +'<p>A gestão à distância de propriedades rurais exige dados confiáveis. Com imagens de satélite atualizadas a cada 5 dias, você acompanha a saúde de cada hectare sem depender de relatos.</p>'
-        +'<a href="landing.html#reserva">Saber mais sobre o AgrUAI &rarr;</a>'
-        +'</div></div>';
+    /* Inject ad every 3 paragraphs */
+    if(paraCount>0 && paraCount%3===0 && i<paragraphs.length-1){
+      html+=getNextAd();
     }
   }
 
