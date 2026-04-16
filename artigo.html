@@ -385,17 +385,29 @@ function renderArticle(a){
   /* JSON-LD */
   document.getElementById('articleSchema').textContent=JSON.stringify({
     "@context":"https://schema.org",
-    "@type":"NewsArticle",
-    "headline":a.titulo,
-    "description":a.resumo,
-    "image":a.foto_url||'',
-    "datePublished":a.created_at,
-    "dateModified":a.updated_at||a.created_at,
-    "author":{"@type":"Organization","name":"AgrUAI","url":"https://agruai.com"},
-    "publisher":{"@type":"Organization","name":"AgrUAI","logo":{"@type":"ImageObject","url":"https://agruai.com/logo-full.svg"}},
-    "mainEntityOfPage":{"@type":"WebPage","@id":url},
-    "inLanguage":"pt-BR",
-    "keywords":(a.tags||[]).join(', ')
+    "@graph":[
+      {
+        "@type":"NewsArticle",
+        "headline":a.titulo,
+        "description":a.resumo,
+        "image":a.foto_url||'',
+        "datePublished":a.created_at,
+        "dateModified":a.updated_at||a.created_at,
+        "author":{"@type":"Organization","name":"AgrUAI","url":"https://agruai.com"},
+        "publisher":{"@type":"Organization","name":"AgrUAI","logo":{"@type":"ImageObject","url":"https://agruai.com/logo-full.svg"}},
+        "mainEntityOfPage":{"@type":"WebPage","@id":url},
+        "inLanguage":"pt-BR",
+        "keywords":(a.tags||[]).join(', ')
+      },
+      {
+        "@type":"BreadcrumbList",
+        "itemListElement":[
+          {"@type":"ListItem","position":1,"name":"AgrUAI","item":"https://agruai.com/"},
+          {"@type":"ListItem","position":2,"name":"Blog","item":"https://agruai.com/blog"},
+          {"@type":"ListItem","position":3,"name":a.titulo,"item":url}
+        ]
+      }
+    ]
   });
 
   /* Breadcrumb */

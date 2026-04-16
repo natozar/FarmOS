@@ -3,7 +3,9 @@
     { "source": "/", "destination": "/landing.html" },
     { "source": "/en", "destination": "/landing-en.html" },
     { "source": "/es", "destination": "/landing-es.html" },
-    { "source": "/blog/:slug", "destination": "/api/artigo?slug=:slug" }
+    { "source": "/blog", "destination": "/blog.html" },
+    { "source": "/blog/:slug", "destination": "/api/artigo?slug=:slug" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" }
   ],
   "headers": [
     {

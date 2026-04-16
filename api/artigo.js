@@ -86,15 +86,27 @@ module.exports = async (req, res) => {
 <script type="application/ld+json">
 ${JSON.stringify({
   "@context": "https://schema.org",
-  "@type": "NewsArticle",
-  "headline": article.titulo,
-  "description": article.resumo,
-  "image": article.foto_url || '',
-  "datePublished": date,
-  "author": { "@type": "Organization", "name": "AgrUAI", "url": "https://agruai.com" },
-  "publisher": { "@type": "Organization", "name": "AgrUAI", "logo": { "@type": "ImageObject", "url": "https://agruai.com/logo-full.svg" } },
-  "mainEntityOfPage": { "@type": "WebPage", "@id": url },
-  "inLanguage": "pt-BR"
+  "@graph": [
+    {
+      "@type": "NewsArticle",
+      "headline": article.titulo,
+      "description": article.resumo,
+      "image": article.foto_url || '',
+      "datePublished": date,
+      "author": { "@type": "Organization", "name": "AgrUAI", "url": "https://agruai.com" },
+      "publisher": { "@type": "Organization", "name": "AgrUAI", "logo": { "@type": "ImageObject", "url": "https://agruai.com/logo-full.svg" } },
+      "mainEntityOfPage": { "@type": "WebPage", "@id": url },
+      "inLanguage": "pt-BR"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "AgrUAI", "item": "https://agruai.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://agruai.com/blog" },
+        { "@type": "ListItem", "position": 3, "name": article.titulo, "item": url }
+      ]
+    }
+  ]
 })}
 </script>
 
