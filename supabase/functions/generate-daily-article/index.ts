@@ -256,9 +256,9 @@ Responda APENAS com o JSON, sem markdown code blocks.`;
 }
 
 // ============================================================
-// 4. FETCH PHOTO FROM PEXELS
+// 4. FETCH PHOTO FROM PEXELS → DOWNLOAD → UPLOAD TO SUPABASE STORAGE
 // ============================================================
-async function fetchPexelsPhoto(query: string): Promise<{ url: string; credit: string }> {
+async function fetchPexelsPhoto(query: string, slug: string): Promise<{ url: string; credit: string }> {
   try {
     const res = await fetch(
       `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=5&orientation=landscape`,
@@ -267,10 +267,43 @@ async function fetchPexelsPhoto(query: string): Promise<{ url: string; credit: s
     const data = await res.json();
     if (data.photos?.length > 0) {
       const photo = data.photos[Math.floor(Math.random() * Math.min(5, data.photos.length))];
-      return {
-        url: photo.src.large2x || photo.src.large || photo.src.original,
-        credit: `Foto: ${photo.photographer} via Pexels (uso livre)`,
-      };
+      const pexelsUrl = photo.src.large2x || photo.src.large || photo.src.original;
+      const credit = `Foto: ${photo.photographer} via Pexels (uso livre)`;
+
+      // Download the image
+      const imgRes = await fetch(pexelsUrl);
+      if (!imgRes.ok) {
+        console.error("[pexels] Download failed:", imgRes.status);
+        return { url: pexelsUrl, credit };
+      }
+      const imgBuffer = await imgRes.arrayBuffer();
+      const contentType = imgRes.headers.get("content-type") || "image/jpeg";
+      const ext = contentType.includes("png") ? "png" : "jpg";
+      const fileName = `blog/${slug}.${ext}`;
+
+      // Upload to Supabase Storage (bucket: blog-images)
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("blog-images")
+        .upload(fileName, imgBuffer, {
+          contentType,
+          upsert: true,
+        });
+
+      if (uploadError) {
+        console.error("[storage] Upload error:", uploadError.message);
+        // Fallback to Pexels URL if upload fails
+        return { url: pexelsUrl, credit };
+      }
+
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from("blog-images")
+        .getPublicUrl(fileName);
+
+      const permanentUrl = publicUrlData?.publicUrl || pexelsUrl;
+      console.log(`[storage] Uploaded: ${permanentUrl}`);
+
+      return { url: permanentUrl, credit };
     }
   } catch (e) {
     console.error("Pexels fetch failed:", e);
@@ -306,8 +339,8 @@ Deno.serve(async (req) => {
     const article = await generateArticle(headlines, cotacoes);
     console.log(`[claude] Generated: ${article.titulo}`);
 
-    // Step 4: Fetch photo
-    const photo = await fetchPexelsPhoto(article.pexels_query);
+    // Step 4: Fetch photo → download → upload to Supabase Storage
+    const photo = await fetchPexelsPhoto(article.pexels_query, article.slug);
     console.log(`[pexels] Photo: ${photo.url ? "found" : "not found"}`);
 
     // Step 5: Save to Supabase

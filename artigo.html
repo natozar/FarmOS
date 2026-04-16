@@ -367,7 +367,7 @@ function renderArticle(a){
   var dataFormatada=new Date(a.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
   var palavras=(a.conteudo||'').split(/\s+/).length;
   var minutos=Math.max(2,Math.round(palavras/200));
-  var url='https://agruai.com/artigo.html?slug='+a.slug;
+  var url='https://agruai.com/blog/'+a.slug;
 
   /* SEO tags */
   document.getElementById('pageTitle').textContent=a.titulo+' — Blog AgrUAI';
@@ -581,7 +581,7 @@ function carregarRelacionados(categoria,currentId){
     artigos.forEach(function(a){
       var card=document.createElement('a');
       card.className='related-card';
-      card.href='artigo.html?slug='+a.slug;
+      card.href='/blog/'+a.slug;
       card.innerHTML='<img src="'+(a.foto_url||'')+'" alt="'+a.titulo+'" loading="lazy">'
         +'<div class="r-body"><span class="r-cat">'+(a.categoria||'agro')+'</span><h4>'+a.titulo+'</h4></div>';
       grid.appendChild(card);
