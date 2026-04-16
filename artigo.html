@@ -624,8 +624,8 @@ function preencherTicker(){
       if(!row)return;
       var preco=formatBRL(row.preco);
       var chg=formatChange(row.variacao_pct||0);
-      ['','−dup'].forEach(function(suf){
-        var s=suf===''?'':'-dup';
+      ['','-dup'].forEach(function(suf){
+        var s=suf;
         var el=document.getElementById('tk-'+id+s);
         var ch=document.getElementById('tk-'+id+'-chg'+s);
         if(el)el.textContent=preco;
