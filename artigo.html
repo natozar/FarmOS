@@ -344,6 +344,12 @@ var SUPA_URL='https://kyvbnntoxslrtrsiejzc.supabase.co';
 var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5dmJubnRveHNscnRyc2llanpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjQ1NDcsImV4cCI6MjA5MTQ0MDU0N30.Dx-9SKxWfAoxXg3gzx3NpzJD1taZgkQCCjwDXlY9J6I';
 
 function formatBRL(v){return 'R$ '+Number(v).toFixed(2).replace('.',',')}
+function formatChange(v){
+  var n=Number(v);
+  if(n>0) return '<span class="ticker-up">+'+n.toFixed(2)+'%</span>';
+  if(n<0) return '<span class="ticker-down">'+n.toFixed(2)+'%</span>';
+  return '<span style="color:#A89E90">0,00%</span>';
+}
 
 /* === Get slug from URL === */
 var params=new URLSearchParams(window.location.search);
