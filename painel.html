@@ -195,9 +195,10 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .diario-input{flex:1;min-height:44px;max-height:120px;padding:12px 14px;background:rgba(15,31,15,.6);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.88rem;resize:vertical;line-height:1.4;transition:border-color var(--transition)}
 .diario-input:focus{border-color:var(--gold)}
 .diario-input::placeholder{color:var(--muted)}
-.diario-send{min-width:44px;min-height:44px;background:var(--gold);color:var(--dark);border-radius:var(--radius-sm);font-size:1.1rem;font-weight:700;transition:all var(--transition);display:flex;align-items:center;justify-content:center}
-.diario-send:hover{background:#B8945A}
-.diario-send:disabled{opacity:.4;cursor:not-allowed}
+.diario-send{min-height:44px;padding:0 16px;background:var(--gold);color:var(--dark);border-radius:var(--radius-sm);font-size:.88rem;font-weight:700;transition:all var(--transition);display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;flex-shrink:0}
+.diario-send:hover{background:#B8945A;transform:translateY(-1px);box-shadow:0 2px 8px rgba(197,165,114,.35)}
+.diario-send:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.diario-send .arrow{font-size:1.05rem;line-height:1}
 
 .timeline-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid rgba(46,74,46,.4);position:relative}
 .timeline-item:last-child{border-bottom:none}
@@ -1012,7 +1013,7 @@ riskHTML+buildWeatherCard()+buildLivestockCard(p)+buildCarbonCard(p)+buildCFOCar
 '<div class="tab-panel" id="panelDiario">'+
 '<div style="display:flex;gap:8px;margin-bottom:10px;align-items:center"><select class="form-input" id="diarioSector" style="font-size:.8rem;padding:10px 14px;flex:1">'+sectorOptions('operacional')+'</select><label class="photo-btn" for="diarioPhoto">&#128247; Foto</label><input type="file" id="diarioPhoto" accept="image/*" capture="environment" style="display:none" onchange="onPhotoSelected(this)"></div>'+
 '<div id="photoPreviewWrap" style="display:none"><img id="photoPreview" class="photo-preview"><div id="photoGeoStamp" class="geo-stamp" style="display:none"></div></div>'+
-'<div class="diario-input-wrap"><textarea class="diario-input" id="diarioInput" placeholder="O que aconteceu hoje na fazenda?" rows="1" maxlength="1000"></textarea>'+(window.SpeechRecognition||window.webkitSpeechRecognition?'<button class="rec-btn" id="btnRec" onclick="toggleRecording()" title="Gravar áudio">&#127908;</button>':'')+'<button class="inv-toggle" id="btnInvToggle" onclick="toggleInvPicker()" title="Vincular insumo">&#128230;</button><button class="diario-send" id="btnDiarioSend" onclick="enviarLog()" title="Enviar">&#10148;</button></div>'+
+'<div class="diario-input-wrap"><textarea class="diario-input" id="diarioInput" placeholder="O que aconteceu hoje na fazenda?" rows="1" maxlength="1000"></textarea>'+(window.SpeechRecognition||window.webkitSpeechRecognition?'<button class="rec-btn" id="btnRec" onclick="toggleRecording()" title="Gravar áudio">&#127908;</button>':'')+'<button class="inv-toggle" id="btnInvToggle" onclick="toggleInvPicker()" title="Vincular insumo">&#128230;</button><button class="diario-send" id="btnDiarioSend" onclick="enviarLog()" title="Enviar">Enviar <span class="arrow">&#10148;</span></button></div>'+
 '<div class="rec-status" id="recStatus"><span>&#127908; Ouvindo... fale agora</span></div>'+
 '<div class="inv-picker" id="invPicker"><div class="inv-picker-title">Vincular insumo utilizado</div><div class="inv-list" id="invPickerList"><span style="color:var(--muted);font-size:.8rem">Carregando...</span></div><div class="inv-qty-row" id="invQtyRow" style="display:none"><label class="inv-qty-label">Quantidade usada:</label><input class="inv-qty-input" type="number" id="invQtyInput" min="0.1" step="0.1" placeholder="0"><span class="inv-qty-label" id="invQtyUnit">un</span><button class="btn-secondary" style="padding:8px 12px;font-size:.75rem" onclick="clearInvSelection()">Limpar</button></div></div>'+
 '<div id="timelineContainer"><div style="text-align:center;padding:20px"><div class="spinner"></div></div></div></div>'+
