@@ -81,7 +81,7 @@ test.describe('Login do gestor e visão das propriedades', () => {
 });
 
 test.describe('Área do Gestor (sandbox)', () => {
-  test('menu do usuário tem o atalho e a tela abre com as 4 seções', async ({ page }) => {
+  test('menu do usuário tem o atalho e a tela abre com as 3 seções', async ({ page }) => {
     await loginComoGestor(page);
 
     // Abre o menu do usuário
@@ -92,23 +92,11 @@ test.describe('Área do Gestor (sandbox)', () => {
 
     await expect(page.locator('#tela-gestor.ativo')).toBeVisible();
 
-    // Confere as 4 seções pelo título
+    // Confere as 3 seções pelo título (IA foi removida — é ferramenta do fazendeiro)
     await expect(page.getByText(/Foto \(câmera\)/)).toBeVisible();
     await expect(page.getByText(/Imagem \(galeria\)/)).toBeVisible();
     await expect(page.getByText(/Áudio \+ Transcrição/)).toBeVisible();
-    await expect(page.getByText(/Sugestões da IA/)).toBeVisible();
-  });
-
-  test('IA rule-based: exemplo "fogo" dispara match (não fallback)', async ({ page }) => {
-    await loginComoGestor(page);
-    await page.locator('#btnUser').click();
-    await page.getByRole('button', { name: /Área do Gestor/i }).click();
-    await expect(page.locator('#tela-gestor.ativo')).toBeVisible();
-
-    await page.getByRole('button', { name: 'Exemplo fogo' }).click();
-    await page.getByRole('button', { name: /Rule-based/i }).click();
-    await expect(page.locator('#gAIBadge')).toHaveText(/Match/i);
-    await expect(page.locator('.gestor-ai-chip').first()).toBeVisible();
+    await expect(page.getByText(/Sugestões da IA/)).toHaveCount(0);
   });
 });
 
