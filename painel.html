@@ -1079,14 +1079,20 @@ async function uploadFieldLogAudio(blob){
 }
 
 async function enviarLog(){
-// Se ainda estava gravando, encerra
+// Se ainda estava gravando, encerra e espera a transcricao Whisper completar.
 if(isListening)stopListening();
-// MediaRecorder.stop() e async — espera o blob finalizar SEMPRE (sem isto race condition)
-if(State.diarioAudioReady){try{await State.diarioAudioReady}catch(_){}}
-trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();var hasAudio=!!State.diarioAudio;if(!content&&!State.pendingPhoto&&!hasAudio)return;if(!content)content=hasAudio?'🎙️ [áudio aguardando transcrição]':'[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}if(!State.user){toast('Sessão expirada. Faça login novamente.','erro');navegarPara('login');return}
+if(State.diarioAudioReady){
+  var inp=document.getElementById('diarioInput');
+  if(inp&&inp.getAttribute('data-transcribing'))toast('Aguardando Whisper terminar...','info');
+  try{await State.diarioAudioReady}catch(_){}
+}
+trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();
+if(!content&&!State.pendingPhoto)return;
+if(!content)content='[Foto sem descrição]';
+if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}
+if(!State.user){toast('Sessão expirada. Faça login novamente.','erro');navegarPara('login');return}
 var photoAppend=getPhotoAppend();content+=photoAppend.text;
 var photoBase64=State.pendingPhoto?State.pendingPhoto.base64:null;
-var audioBlob=State.diarioAudio;
 var btn=document.getElementById('btnDiarioSend');btn.disabled=true;
 var sectorSel=document.getElementById('diarioSector');var sector=sectorSel?sectorSel.value:'operacional';
 var invItem=State.selectedInvItem;var invQty=invItem?parseFloat(document.getElementById('invQtyInput').value)||0:0;
@@ -1096,18 +1102,14 @@ if(invItem){logData.inventory_item_id=invItem.id;logData.inventory_qty_used=invQ
 if(navigator.onLine){
 try{
 if(photoBase64){try{var up=await uploadFieldLogPhoto(photoBase64);if(up&&up.url)logData.photo_url=up.url}catch(upErr){console.warn('Photo upload failed:',upErr);toast('Foto não pôde ser enviada — log salvo sem foto','info')}}
-var audioPath=null;
-if(audioBlob){try{var aup=await uploadFieldLogAudio(audioBlob);if(aup&&aup.url){logData.audio_url=aup.url;audioPath=aup.path}}catch(aErr){console.warn('Audio upload failed:',aErr);toast('Áudio não pôde ser enviado — log salvo sem áudio','info')}}
 var r=await sb.from('field_logs').insert(logData).select('id').single();if(r.error)throw r.error;
-var insertedLogId=r.data&&r.data.id;
 if(invItem&&invQty>0){await sb.rpc('use_inventory_item',{p_item_id:invItem.id,p_qty:invQty});loadInvPickerData(State.selectedProperty)}
 checkEmergencyNotification(content);checkDieselAnomaly(content);input.value='';clearInvSelection();clearPhoto();clearDiarioAudio();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty);
-// Fire-and-forget: se tem audio e o log foi inserido, tenta Whisper em background pra enriquecer o texto
-if(audioPath&&insertedLogId){toast('✨ Transcrevendo áudio com Whisper...','info');callTranscribeAudio(audioPath,insertedLogId).then(function(t){if(t&&t.transcription){toast('✨ Transcrito: "'+t.transcription.slice(0,50)+(t.transcription.length>50?'...':'')+'"','ok');if(t.log_updated)loadTimeline(State.selectedProperty)}else{toast('Whisper retornou vazio','info')}}).catch(function(e){console.error('[diario] whisper failed:',e);toast('Whisper falhou: '+(e.message||e),'erro')})}}catch(e){
-logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;logData._photoBase64=photoBase64;logData._audioBlob=audioBlob;
+}catch(e){
+logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;logData._photoBase64=photoBase64;
 await addPendingLog(logData);input.value='';clearInvSelection();clearPhoto();clearDiarioAudio();toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
 }else{
-logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;logData._photoBase64=photoBase64;logData._audioBlob=audioBlob;
+logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;logData._photoBase64=photoBase64;
 await addPendingLog(logData);input.value='';clearInvSelection();clearPhoto();clearDiarioAudio();toast('Salvo offline — será enviado quando conectar','info');renderPendingInTimeline(logData)}
 btn.disabled=false}
 
@@ -2032,7 +2034,7 @@ async function startDiarioAudioCapture(){
       if(MediaRecorder.isTypeSupported('audio/mp4'))mime='audio/mp4';else mime='';
     }
     var rec=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
-    // Promise que resolve quando onstop roda e o Blob esta montado
+    // Promise que resolve DEPOIS da transcricao Whisper terminar (ou falhar)
     State.diarioAudioReady=new Promise(function(resolve){
       rec.ondataavailable=function(e){if(e.data&&e.data.size>0)State.diarioAudioChunks.push(e.data)};
       rec.onstop=function(){
@@ -2043,10 +2045,9 @@ async function startDiarioAudioCapture(){
         var blob=new Blob(State.diarioAudioChunks,{type:type});
         State.diarioAudio=blob;
         State.diarioAudioChunks=[];
-        var input=document.getElementById('diarioInput');
-        if(input)input.setAttribute('data-has-audio','1');
-        toast('🎙️ Áudio gravado ('+(blob.size/1024).toFixed(0)+' KB) — será transcrito no envio','info');
-        resolve(blob);
+        // Auto-transcrever e preencher o textarea com o resultado do Whisper.
+        // Depois disso, o blob e descartado — audio e ferramenta de transcricao, nao evidencia.
+        transcribeAndFillTextarea(blob).finally(function(){resolve(blob)});
       };
       rec.onerror=function(e){console.warn('[diario] MediaRecorder error:',e.error);resolve(null)};
     });
@@ -2055,6 +2056,38 @@ async function startDiarioAudioCapture(){
   }catch(e){
     console.warn('[diario] audio capture failed:',e.message||e);
     toast('Gravação de áudio não disponível: '+(e.message||e.name),'info');
+  }
+}
+
+async function transcribeAndFillTextarea(blob){
+  if(!blob||blob.size<500)return;
+  var inp=document.getElementById('diarioInput');
+  var webSpeechText=inp?inp.value.trim():'';
+  toast('🎙️ Transcrevendo com Whisper...','info');
+  // Marca o textarea como "transcrevendo" pra feedback visual
+  if(inp){inp.setAttribute('data-transcribing','1');inp.placeholder='Transcrevendo áudio...'}
+  try{
+    var up=await uploadFieldLogAudio(blob);
+    if(!up||!up.url)throw new Error('upload falhou');
+    var res=await callTranscribeAudio(up.path,null);
+    if(!res||!res.transcription)throw new Error('resposta vazia');
+    if(inp){
+      inp.value=res.transcription;
+      inp.style.height='auto';
+      inp.style.height=Math.min(inp.scrollHeight,200)+'px';
+    }
+    toast('✨ Transcrito: "'+res.transcription.slice(0,60)+(res.transcription.length>60?'...':'')+'" — revise e envie','ok');
+    // Apaga o audio do Storage — nao precisamos mais do arquivo, so da transcricao
+    try{await sb.storage.from('field-media').remove([up.path])}catch(_){}
+  }catch(e){
+    console.warn('[diario] transcribe failed:',e.message||e);
+    if(webSpeechText){
+      toast('Whisper falhou — mantendo transcrição ao vivo do navegador','info');
+    }else{
+      toast('Whisper falhou: '+(e.message||e)+'. Digite manualmente ou grave de novo.','erro');
+    }
+  }finally{
+    if(inp){inp.removeAttribute('data-transcribing');inp.placeholder='O que aconteceu hoje na fazenda?'}
   }
 }
 
