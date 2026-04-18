@@ -5,7 +5,12 @@
     { "source": "/es", "destination": "/landing-es.html" },
     { "source": "/blog", "destination": "/blog.html" },
     { "source": "/blog/:slug", "destination": "/api/artigo?slug=:slug" },
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" }
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/app", "destination": "/painel.html" },
+    { "source": "/painel", "destination": "/painel.html" },
+    { "source": "/entrar", "destination": "/painel.html" },
+    { "source": "/fazenda", "destination": "/painel.html" },
+    { "source": "/index.html", "destination": "/painel.html" }
   ],
   "headers": [
     {

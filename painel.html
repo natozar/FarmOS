@@ -1983,9 +1983,14 @@ if(active){navegarPara('mapa');
 var totalRisk=State.propriedades.reduce(function(s,p){return s+(p._risk||0)},0);
 document.getElementById('warRisk').textContent='R$ '+formatarNumero(totalRisk);
 document.getElementById('warProps').textContent=State.propriedades.length;
-document.addEventListener('keydown',warRoomEscHandler)}
-else{document.removeEventListener('keydown',warRoomEscHandler)}}
+document.addEventListener('keydown',warRoomEscHandler);
+try{history.pushState({warRoom:true},'',location.href)}catch(_){}
+window.addEventListener('popstate',warRoomPopHandler)}
+else{document.removeEventListener('keydown',warRoomEscHandler);
+window.removeEventListener('popstate',warRoomPopHandler);
+try{if(history.state&&history.state.warRoom)history.back()}catch(_){}}}
 function warRoomEscHandler(e){if(e.key==='Escape')toggleWarRoom()}
+function warRoomPopHandler(){if(document.body.classList.contains('war-room-mode')){document.body.classList.remove('war-room-mode');document.removeEventListener('keydown',warRoomEscHandler);window.removeEventListener('popstate',warRoomPopHandler)}}
 
 /* ========== QR SCANNER (EPIC 8) ========== */
 var html5QrScanner=null;
