@@ -1036,19 +1036,52 @@ async function loadTimeline(pid){var el=document.getElementById('timelineContain
 try{var r=await sb.rpc('get_property_timeline',{p_property_id:pid,p_limit:30});
 if(r.error){el.innerHTML=renderFieldLogsOnly(pid);return}
 var items=r.data||[];if(items.length===0){el.innerHTML='<div class="timeline-empty">Nenhum registro ainda.<br>Use o campo acima para registrar o que aconteceu na fazenda.</div>';return}
-var remoteHtml=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var isVoice=isLog&&item.content&&item.content.indexOf('🎙️')===0;var hasPhoto=isLog&&item.photo_url;var icon=hasPhoto?'&#128247;':isVoice?'&#127908;':isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var voiceBadge=isVoice?'<span class="voice-badge">&#127908; Ditado por voz</span>':'';var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
+var remoteHtml=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var isVoice=isLog&&item.content&&item.content.indexOf('🎙️')===0;var hasPhoto=isLog&&item.photo_url;var hasAudio=isLog&&item.audio_url;var icon=hasAudio?'&#127908;':hasPhoto?'&#128247;':isVoice?'&#127908;':isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var voiceBadge=isVoice?'<span class="voice-badge">&#127908; Ditado por voz</span>':'';var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
 var aiHtml=isLog&&!item.content.match(/^\[IA\]/)?renderAISuggestions(item.id,item.content):'';
 var photoHtml=hasPhoto?'<a href="'+escapeHtml(item.photo_url)+'" target="_blank" rel="noopener"><img class="photo-thumb" src="'+escapeHtml(item.photo_url)+'" alt="Foto do registro" loading="lazy"></a>':'';
-return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+voiceBadge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div>'+photoHtml+aiHtml+'<div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
+var audioHtml=hasAudio?'<div style="margin-top:8px"><audio controls preload="none" src="'+escapeHtml(item.audio_url)+'" style="width:100%;max-width:400px;height:36px"></audio><button class="ai-deepen" onclick="reTranscribeLog(this,\''+item.id+'\',\''+escapeHtml(item.audio_url)+'\')" style="margin-left:8px;font-size:.68rem;color:var(--gold);background:rgba(197,165,114,.06);border:1px solid rgba(197,165,114,.3);padding:4px 10px;border-radius:5px;cursor:pointer">✨ Transcrever com Whisper</button></div>':'';
+return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+voiceBadge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div>'+photoHtml+audioHtml+aiHtml+'<div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
 var kanbanHtml=buildKanbanBoard(items);
 var pendingLogs=await getAllPendingLogs();var pendingHtml=pendingLogs.filter(function(l){return l.property_id===pid}).map(function(l){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];var pPhoto=l._photoBase64?'<img class="photo-thumb" src="'+l._photoBase64+'" alt="Foto pendente">':'';return'<div class="timeline-item pending" data-local-id="'+l.localId+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(l.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(l.content)+'</div>'+pPhoto+'<div class="timeline-time">'+formatarDataHora(l.created_at)+'</div></div></div>'}).join('');
 el.innerHTML=kanbanHtml+pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
 
 function renderFieldLogsOnly(pid){return'<div class="timeline-empty">Timeline indisponível. Execute o SQL de field_logs no Supabase.</div>'}
 
-async function enviarLog(){if(isListening)stopListening();trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content&&!State.pendingPhoto)return;if(!content)content='[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}if(!State.user){toast('Sessão expirada. Faça login novamente.','erro');navegarPara('login');return}
+function audioUrlToStoragePath(url){
+  // https://xxx.supabase.co/storage/v1/object/public/field-media/{uid}/field-logs/x.webm
+  var m=String(url||'').match(/\/storage\/v1\/object\/public\/field-media\/(.+)$/);
+  return m?m[1]:null;
+}
+
+async function reTranscribeLog(btn,logId,audioUrl){
+  var path=audioUrlToStoragePath(audioUrl);
+  if(!path){toast('URL de áudio inválida','erro');return}
+  btn.disabled=true;var orig=btn.textContent;btn.textContent='✨ Transcrevendo...';
+  try{
+    var res=await callTranscribeAudio(path,logId);
+    if(res&&res.transcription){
+      toast(res.log_updated?'Transcrição atualizada':'Transcrição pronta — '+res.transcription.slice(0,50)+'...','ok');
+      if(res.log_updated&&State.selectedProperty)loadTimeline(State.selectedProperty);
+      else btn.textContent='✓ '+res.transcription.slice(0,30)+(res.transcription.length>30?'...':'');
+    }else{btn.disabled=false;btn.textContent=orig;toast('Whisper retornou vazio','erro')}
+  }catch(e){btn.disabled=false;btn.textContent=orig;toast('Erro Whisper: '+(e.message||''),'erro')}
+}
+
+async function uploadFieldLogAudio(blob){
+  if(!blob||!State.user)return null;
+  var type=blob.type||'audio/webm';
+  var ext=type.indexOf('mp4')>=0?'m4a':(type.indexOf('ogg')>=0?'ogg':(type.indexOf('mpeg')>=0?'mp3':'webm'));
+  var name=State.user.id+'/field-logs/audio-'+Date.now()+'-'+Math.random().toString(36).substr(2,6)+'.'+ext;
+  var r=await sb.storage.from('field-media').upload(name,blob,{contentType:type,upsert:false});
+  if(r.error)throw r.error;
+  var pub=sb.storage.from('field-media').getPublicUrl(name);
+  return{url:pub.data.publicUrl,path:name};
+}
+
+async function enviarLog(){if(isListening)stopListening();trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();var hasAudio=!!State.diarioAudio;if(!content&&!State.pendingPhoto&&!hasAudio)return;if(!content)content=hasAudio?'🎙️ [áudio aguardando transcrição]':'[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}if(!State.user){toast('Sessão expirada. Faça login novamente.','erro');navegarPara('login');return}
 var photoAppend=getPhotoAppend();content+=photoAppend.text;
 var photoBase64=State.pendingPhoto?State.pendingPhoto.base64:null;
+var audioBlob=State.diarioAudio;
 var btn=document.getElementById('btnDiarioSend');btn.disabled=true;
 var sectorSel=document.getElementById('diarioSector');var sector=sectorSel?sectorSel.value:'operacional';
 var invItem=State.selectedInvItem;var invQty=invItem?parseFloat(document.getElementById('invQtyInput').value)||0:0;
@@ -1058,14 +1091,19 @@ if(invItem){logData.inventory_item_id=invItem.id;logData.inventory_qty_used=invQ
 if(navigator.onLine){
 try{
 if(photoBase64){try{var up=await uploadFieldLogPhoto(photoBase64);if(up&&up.url)logData.photo_url=up.url}catch(upErr){console.warn('Photo upload failed:',upErr);toast('Foto não pôde ser enviada — log salvo sem foto','info')}}
-var r=await sb.from('field_logs').insert(logData);if(r.error)throw r.error;
+var audioPath=null;
+if(audioBlob){try{var aup=await uploadFieldLogAudio(audioBlob);if(aup&&aup.url){logData.audio_url=aup.url;audioPath=aup.path}}catch(aErr){console.warn('Audio upload failed:',aErr);toast('Áudio não pôde ser enviado — log salvo sem áudio','info')}}
+var r=await sb.from('field_logs').insert(logData).select('id').single();if(r.error)throw r.error;
+var insertedLogId=r.data&&r.data.id;
 if(invItem&&invQty>0){await sb.rpc('use_inventory_item',{p_item_id:invItem.id,p_qty:invQty});loadInvPickerData(State.selectedProperty)}
-checkEmergencyNotification(content);checkDieselAnomaly(content);input.value='';clearInvSelection();clearPhoto();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty)}catch(e){
-logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;logData._photoBase64=photoBase64;
-await addPendingLog(logData);input.value='';clearInvSelection();clearPhoto();toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
+checkEmergencyNotification(content);checkDieselAnomaly(content);input.value='';clearInvSelection();clearPhoto();clearDiarioAudio();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty);
+// Fire-and-forget: se tem audio e o log foi inserido, tenta Whisper em background pra enriquecer o texto
+if(audioPath&&insertedLogId){try{callTranscribeAudio(audioPath,insertedLogId).then(function(t){if(t&&t.log_updated)loadTimeline(State.selectedProperty)}).catch(function(){})}catch(_){}}}catch(e){
+logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;logData._photoBase64=photoBase64;logData._audioBlob=audioBlob;
+await addPendingLog(logData);input.value='';clearInvSelection();clearPhoto();clearDiarioAudio();toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
 }else{
-logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;logData._photoBase64=photoBase64;
-await addPendingLog(logData);input.value='';clearInvSelection();clearPhoto();toast('Salvo offline — será enviado quando conectar','info');renderPendingInTimeline(logData)}
+logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;logData._photoBase64=photoBase64;logData._audioBlob=audioBlob;
+await addPendingLog(logData);input.value='';clearInvSelection();clearPhoto();clearDiarioAudio();toast('Salvo offline — será enviado quando conectar','info');renderPendingInTimeline(logData)}
 btn.disabled=false}
 
 function renderPendingInTimeline(log){var el=document.getElementById('timelineContainer');if(!el)return;
@@ -1477,12 +1515,13 @@ function stopGestorRec(){
   if(btn){btn.classList.remove('rec');btn.innerHTML='🎤 Gravar'}
 }
 
-async function callTranscribeAudio(storagePath){
+async function callTranscribeAudio(storagePath,logId){
   var sess=await sb.auth.getSession();var token=sess&&sess.data&&sess.data.session&&sess.data.session.access_token;
   if(!token)throw new Error('sem sessao');
   var ctrl=new AbortController();var to=setTimeout(function(){ctrl.abort()},35000);
   try{
-    var r=await fetch(SUPA_URL+'/functions/v1/transcribe-audio',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'apikey':SUPA_KEY},body:JSON.stringify({storage_path:storagePath,language:'pt'}),signal:ctrl.signal});
+    var payload={storage_path:storagePath,language:'pt'};if(logId)payload.log_id=logId;
+    var r=await fetch(SUPA_URL+'/functions/v1/transcribe-audio',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'apikey':SUPA_KEY},body:JSON.stringify(payload),signal:ctrl.signal});
     var body=await r.json().catch(function(){return{}});
     if(!r.ok)throw new Error(body.error||('HTTP '+r.status));
     return body;
@@ -1957,17 +1996,68 @@ for(var i=0;i<logs.length;i++){var l=logs[i];
 var insertData={property_id:l.property_id,author_id:l.author_id,content:l.content,sector:l.sector};
 if(l.inventory_item_id){insertData.inventory_item_id=l.inventory_item_id;insertData.inventory_qty_used=l.inventory_qty_used}
 if(l.photo_url){insertData.photo_url=l.photo_url}
+if(l.audio_url){insertData.audio_url=l.audio_url}
+var audioPath=null;
 try{
 if(l._photoBase64&&!insertData.photo_url){try{var up=await uploadFieldLogPhoto(l._photoBase64);if(up&&up.url)insertData.photo_url=up.url}catch(upErr){console.warn('Sync photo upload failed:',upErr)}}
-var r=await sb.from('field_logs').insert(insertData);
+if(l._audioBlob&&!insertData.audio_url){try{var aup=await uploadFieldLogAudio(l._audioBlob);if(aup&&aup.url){insertData.audio_url=aup.url;audioPath=aup.path}}catch(aErr){console.warn('Sync audio upload failed:',aErr)}}
+var r=await sb.from('field_logs').insert(insertData).select('id').single();
 if(r.error)throw r.error;
+var syncedLogId=r.data&&r.data.id;
+if(audioPath&&syncedLogId){try{callTranscribeAudio(audioPath,syncedLogId).catch(function(){})}catch(_){}}
 if(l._invDeduct&&l._invDeduct.id){await sb.rpc('use_inventory_item',{p_item_id:l._invDeduct.id,p_qty:l._invDeduct.qty})}
 await removePendingLog(l.localId);
 var el=document.querySelector('[data-local-id="'+l.localId+'"]');if(el){el.classList.remove('pending');var badge=el.querySelector('.sync-status');if(badge){badge.className='sync-status synced';badge.textContent='Sincronizado'}}}catch(e){console.error('Sync failed for log',l.localId,e);break}}
 if(State.selectedProperty)loadTimeline(State.selectedProperty)}catch(e){console.error('syncPendingLogs error',e)}}
 
 /* ========== VOICE-TO-TEXT (ADR-006 v2 — Web Speech API, custo zero) ========== */
+/* Alem da transcricao ao vivo, grava o audio original via MediaRecorder
+   pra subir pro Storage e poder rodar Whisper (Groq) quando quiser. */
 var speechRec=null;var isListening=false;
+State.diarioAudio=null;State.diarioAudioRec=null;State.diarioAudioChunks=[];State.diarioAudioStream=null;
+
+async function startDiarioAudioCapture(){
+  try{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return;
+    var stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    State.diarioAudioStream=stream;
+    State.diarioAudioChunks=[];
+    var mime='audio/webm';
+    if(window.MediaRecorder&&!MediaRecorder.isTypeSupported(mime)){
+      if(MediaRecorder.isTypeSupported('audio/mp4'))mime='audio/mp4';else mime='';
+    }
+    var rec=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
+    rec.ondataavailable=function(e){if(e.data&&e.data.size>0)State.diarioAudioChunks.push(e.data)};
+    rec.onstop=function(){
+      try{stream.getTracks().forEach(function(t){t.stop()})}catch(_){}
+      State.diarioAudioStream=null;
+      var type=rec.mimeType||'audio/webm';
+      if(State.diarioAudioChunks.length===0){State.diarioAudio=null;return}
+      State.diarioAudio=new Blob(State.diarioAudioChunks,{type:type});
+      State.diarioAudioChunks=[];
+      var input=document.getElementById('diarioInput');
+      if(input){input.setAttribute('data-has-audio','1')}
+      toast('Áudio gravado — vai junto com o log','info');
+    };
+    State.diarioAudioRec=rec;
+    rec.start();
+  }catch(e){
+    console.warn('[diario] audio capture failed:',e.message||e);
+    // Se o mic ja foi concedido pro Web Speech, nao bloqueia; so nao grava blob
+  }
+}
+
+function stopDiarioAudioCapture(){
+  try{if(State.diarioAudioRec&&State.diarioAudioRec.state!=='inactive')State.diarioAudioRec.stop()}catch(_){}
+  State.diarioAudioRec=null;
+}
+
+function clearDiarioAudio(){
+  State.diarioAudio=null;
+  try{if(State.diarioAudioStream)State.diarioAudioStream.getTracks().forEach(function(t){t.stop()})}catch(_){}
+  State.diarioAudioStream=null;State.diarioAudioChunks=[];
+  var input=document.getElementById('diarioInput');if(input)input.removeAttribute('data-has-audio');
+}
 
 function initSpeechRecognition(){
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -1997,8 +2087,12 @@ return rec}
 function toggleRecording(){
 trackEvent('mic_toggle',{listening:!isListening});
 if(isListening){stopListening();return}
-if(!speechRec){speechRec=initSpeechRecognition()}
-if(!speechRec){toast('Reconhecimento de voz não disponível neste navegador','erro');return}
+if(!speechRec)speechRec=initSpeechRecognition();
+// Grava audio bruto em paralelo (mesmo que Web Speech nao exista: Firefox/iOS velho ficam com o blob)
+clearDiarioAudio();startDiarioAudioCapture();
+if(!speechRec){toast('Gravando áudio... (sem transcrição ao vivo neste browser)','info');isListening=true;
+var btn=document.getElementById('btnRec');if(btn)btn.classList.add('recording');
+var status=document.getElementById('recStatus');if(status)status.classList.add('visivel');return}
 var existing=document.getElementById('diarioInput');
 if(existing&&existing.value.trim()){speechRec._prefix=existing.value.trim()+' '}else{speechRec._prefix=''}
 try{speechRec.start();toast('Fale agora...','info')}catch(e){
@@ -2007,6 +2101,7 @@ else{toast('Erro ao iniciar microfone: '+e.message,'erro')}}}
 
 function stopListening(){isListening=false;
 try{if(speechRec)speechRec.stop()}catch(e){}
+stopDiarioAudioCapture();
 var btn=document.getElementById('btnRec');if(btn)btn.classList.remove('recording');
 var status=document.getElementById('recStatus');if(status)status.classList.remove('visivel');
 var input=document.getElementById('diarioInput');
@@ -2184,7 +2279,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.updateKanban=updateKanban;window.nextTourStep=nextTourStep;window.endTour=endTour;window.abrirModalPerfil=abrirModalPerfil;window.fecharModalPerfil=fecharModalPerfil;window.salvarPerfil=salvarPerfil;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.onGestorPhoto=onGestorPhoto;window.clearGestor=clearGestor;window.toggleGestorRec=toggleGestorRec;window.testarIA=testarIA;window.testarGemini=testarGemini;window.deepenWithGemini=deepenWithGemini;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.updateKanban=updateKanban;window.nextTourStep=nextTourStep;window.endTour=endTour;window.abrirModalPerfil=abrirModalPerfil;window.fecharModalPerfil=fecharModalPerfil;window.salvarPerfil=salvarPerfil;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.onGestorPhoto=onGestorPhoto;window.clearGestor=clearGestor;window.toggleGestorRec=toggleGestorRec;window.testarIA=testarIA;window.testarGemini=testarGemini;window.deepenWithGemini=deepenWithGemini;window.reTranscribeLog=reTranscribeLog;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
 var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();
