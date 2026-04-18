@@ -1032,17 +1032,19 @@ async function loadTimeline(pid){var el=document.getElementById('timelineContain
 try{var r=await sb.rpc('get_property_timeline',{p_property_id:pid,p_limit:30});
 if(r.error){el.innerHTML=renderFieldLogsOnly(pid);return}
 var items=r.data||[];if(items.length===0){el.innerHTML='<div class="timeline-empty">Nenhum registro ainda.<br>Use o campo acima para registrar o que aconteceu na fazenda.</div>';return}
-var remoteHtml=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var isVoice=isLog&&item.content&&item.content.indexOf('🎙️')===0;var icon=isVoice?'&#127908;':isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var voiceBadge=isVoice?'<span class="voice-badge">&#127908; Ditado por voz</span>':'';var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
+var remoteHtml=items.map(function(item){var isLog=item.entry_type==='log';var iconClass=isLog?'log':'alert-sat';var isVoice=isLog&&item.content&&item.content.indexOf('🎙️')===0;var hasPhoto=isLog&&item.photo_url;var icon=hasPhoto?'&#128247;':isVoice?'&#127908;':isLog?'&#9998;':item.severity==='critical'?'&#128308;':'&#9888;';var authorLabel=isLog?item.author_name:'&#128752; '+item.author_name;var badge=isLog?sectorBadgeHtml(item.sector):sectorBadgeHtml('satelite');var voiceBadge=isVoice?'<span class="voice-badge">&#127908; Ditado por voz</span>':'';var deleteBtn=isLog&&item.author_name?'<button class="timeline-delete" onclick="deletarLog(\''+item.id+'\')">excluir</button>':'';
 var aiHtml=isLog&&!item.content.match(/^\[IA\]/)?renderAISuggestions(item.id,item.content):'';
-return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+voiceBadge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div>'+aiHtml+'<div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
+var photoHtml=hasPhoto?'<a href="'+escapeHtml(item.photo_url)+'" target="_blank" rel="noopener"><img class="photo-thumb" src="'+escapeHtml(item.photo_url)+'" alt="Foto do registro" loading="lazy"></a>':'';
+return'<div class="timeline-item"><div class="timeline-icon '+iconClass+'">'+icon+'</div><div class="timeline-body"><div class="timeline-author">'+authorLabel+badge+voiceBadge+'</div><div class="timeline-text">'+escapeHtml(item.content)+'</div>'+photoHtml+aiHtml+'<div class="timeline-time">'+formatarDataHora(item.created_at)+'</div></div>'+deleteBtn+'</div>'}).join('');
 var kanbanHtml=buildKanbanBoard(items);
-var pendingLogs=await getAllPendingLogs();var pendingHtml=pendingLogs.filter(function(l){return l.property_id===pid}).map(function(l){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];return'<div class="timeline-item pending" data-local-id="'+l.localId+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(l.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(l.content)+'</div><div class="timeline-time">'+formatarDataHora(l.created_at)+'</div></div></div>'}).join('');
+var pendingLogs=await getAllPendingLogs();var pendingHtml=pendingLogs.filter(function(l){return l.property_id===pid}).map(function(l){var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];var pPhoto=l._photoBase64?'<img class="photo-thumb" src="'+l._photoBase64+'" alt="Foto pendente">':'';return'<div class="timeline-item pending" data-local-id="'+l.localId+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(l.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(l.content)+'</div>'+pPhoto+'<div class="timeline-time">'+formatarDataHora(l.created_at)+'</div></div></div>'}).join('');
 el.innerHTML=kanbanHtml+pendingHtml+remoteHtml}catch(e){el.innerHTML=renderFieldLogsOnly(pid)}}
 
 function renderFieldLogsOnly(pid){return'<div class="timeline-empty">Timeline indisponível. Execute o SQL de field_logs no Supabase.</div>'}
 
 async function enviarLog(){if(isListening)stopListening();trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();if(!content&&!State.pendingPhoto)return;if(!content)content='[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}if(!State.user){toast('Sessão expirada. Faça login novamente.','erro');navegarPara('login');return}
 var photoAppend=getPhotoAppend();content+=photoAppend.text;
+var photoBase64=State.pendingPhoto?State.pendingPhoto.base64:null;
 var btn=document.getElementById('btnDiarioSend');btn.disabled=true;
 var sectorSel=document.getElementById('diarioSector');var sector=sectorSel?sectorSel.value:'operacional';
 var invItem=State.selectedInvItem;var invQty=invItem?parseFloat(document.getElementById('invQtyInput').value)||0:0;
@@ -1050,19 +1052,22 @@ if(invItem&&invQty<=0){toast('Informe a quantidade usada do insumo','erro');btn.
 var logData={property_id:State.selectedProperty,author_id:State.user.id,content:content,sector:sector};
 if(invItem){logData.inventory_item_id=invItem.id;logData.inventory_qty_used=invQty;logData.content=content+' ['+invItem.nome+': '+invQty+' '+invItem.unidade+']'}
 if(navigator.onLine){
-try{var r=await sb.from('field_logs').insert(logData);if(r.error)throw r.error;
+try{
+if(photoBase64){try{var up=await uploadFieldLogPhoto(photoBase64);if(up&&up.url)logData.photo_url=up.url}catch(upErr){console.warn('Photo upload failed:',upErr);toast('Foto não pôde ser enviada — log salvo sem foto','info')}}
+var r=await sb.from('field_logs').insert(logData);if(r.error)throw r.error;
 if(invItem&&invQty>0){await sb.rpc('use_inventory_item',{p_item_id:invItem.id,p_qty:invQty});loadInvPickerData(State.selectedProperty)}
 checkEmergencyNotification(content);checkDieselAnomaly(content);input.value='';clearInvSelection();clearPhoto();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty)}catch(e){
-logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;
-await addPendingLog(logData);input.value='';clearInvSelection();toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
+logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;logData._photoBase64=photoBase64;
+await addPendingLog(logData);input.value='';clearInvSelection();clearPhoto();toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
 }else{
-logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;
-await addPendingLog(logData);input.value='';clearInvSelection();toast('Salvo offline — será enviado quando conectar','info');renderPendingInTimeline(logData)}
+logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;logData._photoBase64=photoBase64;
+await addPendingLog(logData);input.value='';clearInvSelection();clearPhoto();toast('Salvo offline — será enviado quando conectar','info');renderPendingInTimeline(logData)}
 btn.disabled=false}
 
 function renderPendingInTimeline(log){var el=document.getElementById('timelineContainer');if(!el)return;
 var nome=State.user.user_metadata&&State.user.user_metadata.nome?State.user.user_metadata.nome:State.user.email.split('@')[0];
-var html='<div class="timeline-item pending" data-local-id="'+(log.localId||'')+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(log.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(log.content)+'</div><div class="timeline-time">agora</div></div></div>';
+var pPhoto=log._photoBase64?'<img class="photo-thumb" src="'+log._photoBase64+'" alt="Foto pendente">':'';
+var html='<div class="timeline-item pending" data-local-id="'+(log.localId||'')+'"><div class="timeline-icon log">&#9998;</div><div class="timeline-body"><div class="timeline-author">'+escapeHtml(nome)+sectorBadgeHtml(log.sector)+'<span class="sync-status pending">Aguardando conexão</span></div><div class="timeline-text">'+escapeHtml(log.content)+'</div>'+pPhoto+'<div class="timeline-time">agora</div></div></div>';
 var empty=el.querySelector('.timeline-empty');if(empty)el.innerHTML='';el.insertAdjacentHTML('afterbegin',html)}
 
 async function deletarLog(id){try{var r=await sb.from('field_logs').delete().eq('id',id).eq('author_id',State.user.id);if(r.error)throw r.error;toast('Registro excluído','ok');if(State.selectedProperty)loadTimeline(State.selectedProperty)}catch(e){toast('Erro ao excluir','erro')}}
@@ -1287,12 +1292,23 @@ img.src=url}catch(e){toast('Erro ao capturar foto: '+e.message,'erro')}}
 
 function getPhotoAppend(){
 if(!State.pendingPhoto)return{text:'',html:''};
-var geo=State.pendingPhoto.lat?' [📍 '+State.pendingPhoto.lat+', '+State.pendingPhoto.lng+']':'';
-var text=' [Foto anexada'+geo+']';
+var text=State.pendingPhoto.lat?' [📍 '+State.pendingPhoto.lat+', '+State.pendingPhoto.lng+']':'';
 var html='<img class="photo-thumb" src="'+State.pendingPhoto.base64+'">'+(State.pendingPhoto.lat?'<div class="geo-stamp">📍 Coordenada Blindada: '+State.pendingPhoto.lat+', '+State.pendingPhoto.lng+'</div>':'');
 return{text:text,html:html}}
 
 function clearPhoto(){State.pendingPhoto=null;document.getElementById('photoPreviewWrap').style.display='none';document.getElementById('photoGeoStamp').style.display='none';var inp=document.getElementById('diarioPhoto');if(inp)inp.value=''}
+
+function dataURLtoBlob(dataURL){var parts=dataURL.split(',');var mime=(parts[0].match(/:(.*?);/)||[])[1]||'image/jpeg';var bin=atob(parts[1]);var len=bin.length;var u8=new Uint8Array(len);for(var i=0;i<len;i++)u8[i]=bin.charCodeAt(i);return new Blob([u8],{type:mime})}
+
+async function uploadFieldLogPhoto(base64){
+  if(!base64||!State.user)return null;
+  var blob=dataURLtoBlob(base64);
+  var name=State.user.id+'/field-logs/'+Date.now()+'-'+Math.random().toString(36).substr(2,6)+'.jpg';
+  var r=await sb.storage.from('field-media').upload(name,blob,{contentType:blob.type||'image/jpeg',upsert:false});
+  if(r.error)throw r.error;
+  var pub=sb.storage.from('field-media').getPublicUrl(name);
+  return{url:pub.data.publicUrl,path:name};
+}
 
 /* ========== ÁREA DO GESTOR — SANDBOX ========== */
 var Gestor={mediaRec:null,audioChunks:[],audioBlob:null,isRec:false,transcript:'',interim:''};
@@ -1867,7 +1883,10 @@ async function syncPendingLogs(){try{var logs=await getAllPendingLogs();if(logs.
 for(var i=0;i<logs.length;i++){var l=logs[i];
 var insertData={property_id:l.property_id,author_id:l.author_id,content:l.content,sector:l.sector};
 if(l.inventory_item_id){insertData.inventory_item_id=l.inventory_item_id;insertData.inventory_qty_used=l.inventory_qty_used}
-try{var r=await sb.from('field_logs').insert(insertData);
+if(l.photo_url){insertData.photo_url=l.photo_url}
+try{
+if(l._photoBase64&&!insertData.photo_url){try{var up=await uploadFieldLogPhoto(l._photoBase64);if(up&&up.url)insertData.photo_url=up.url}catch(upErr){console.warn('Sync photo upload failed:',upErr)}}
+var r=await sb.from('field_logs').insert(insertData);
 if(r.error)throw r.error;
 if(l._invDeduct&&l._invDeduct.id){await sb.rpc('use_inventory_item',{p_item_id:l._invDeduct.id,p_qty:l._invDeduct.qty})}
 await removePendingLog(l.localId);
