@@ -64,6 +64,10 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 
 - `fetch-satellite-data` — busca dados Copernicus para propriedades ativas, grava em satellite_readings, gera alertas. Agendada via pg_cron diariamente às 10:00 UTC (07:00 BRT).
 
+### Storage
+
+- `field-media` (public) — mídia do diário de campo e sandbox de testes. Limite 10 MB, MIME whitelist (jpeg/png/webp + webm/mp4/mpeg/ogg). Policies: INSERT e DELETE só na pasta `{auth.uid()}/*`; SELECT público. Caminhos usados: `{user_id}/sandbox/...` (Área do Gestor), previsto `{user_id}/field-logs/...` quando o diário for migrado para upload real.
+
 ### RLS
 
 Todas as tabelas têm Row Level Security. Propriedades e leituras filtradas por `auth.uid() = owner_id`.
@@ -73,9 +77,8 @@ Todas as tabelas têm Row Level Security. Propriedades e leituras filtradas por 
 | Arquivo | Função | Status |
 |---------|--------|--------|
 | `landing.html` | Landing page com captura de leads | Produção |
-| `painel.html` | App com auth, dashboard, cadastro de propriedades, mapa | Produção (URL secreta) |
+| `painel.html` | App com auth, dashboard, cadastro de propriedades, mapa, Área do Gestor (sandbox de foto/áudio/IA) | Produção (URL secreta) |
 | `app.html` | Protótipo visual (103KB) com dados mockados | Referência de design apenas |
-| `index.html` | Redirect para landing | Produção |
 | `manifest.json` | PWA manifest | Produção |
 | `preview-obrigado.html` | Preview da tela de confirmação pós-lead | Referência |
 | `landing-en.html` | Landing page em inglês (US) | Produção |
