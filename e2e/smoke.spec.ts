@@ -99,16 +99,15 @@ test.describe('Área do Gestor (sandbox)', () => {
     await expect(page.getByText(/Sugestões da IA/)).toBeVisible();
   });
 
-  test('IA: exemplo "fogo perto da sede" dispara match (não fallback)', async ({ page }) => {
+  test('IA rule-based: exemplo "fogo" dispara match (não fallback)', async ({ page }) => {
     await loginComoGestor(page);
     await page.locator('#btnUser').click();
     await page.getByRole('button', { name: /Área do Gestor/i }).click();
     await expect(page.locator('#tela-gestor.ativo')).toBeVisible();
 
-    await page.getByRole('button', { name: 'Exemplo 3' }).click();
-    // Badge de IA deve virar "Match" (não "Fallback")
+    await page.getByRole('button', { name: 'Exemplo fogo' }).click();
+    await page.getByRole('button', { name: /Rule-based/i }).click();
     await expect(page.locator('#gAIBadge')).toHaveText(/Match/i);
-    // Pelo menos um chip de ação (Brigada/Bombeiros/Isolar)
     await expect(page.locator('.gestor-ai-chip').first()).toBeVisible();
   });
 });

@@ -703,10 +703,14 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
       <div class="gestor-section-desc">Hoje é rule-based (keyword matching). 6 categorias: trator/máquina, gado, cerca, praga, seca, fogo. Digita algo e veja o que ela sugere.</div>
       <textarea class="gestor-ai-input" id="gAIInput" placeholder="Ex: a colheitadeira quebrou o pneu no talhão 3..."></textarea>
       <div class="gestor-row" style="margin-top:10px">
-        <button class="gestor-btn primary" onclick="testarIA()">🧠 Analisar</button>
-        <button class="gestor-btn" onclick="document.getElementById('gAIInput').value='trator quebrou no talhão 3';testarIA()">Exemplo 1</button>
-        <button class="gestor-btn" onclick="document.getElementById('gAIInput').value='boi mancando na porteira norte';testarIA()">Exemplo 2</button>
-        <button class="gestor-btn" onclick="document.getElementById('gAIInput').value='fogo perto da sede';testarIA()">Exemplo 3</button>
+        <button class="gestor-btn primary" onclick="testarIA()">🧠 Rule-based (rápido)</button>
+        <button class="gestor-btn" style="border-color:var(--gold);color:var(--gold)" onclick="testarGemini()">✨ Gemini (IA real, grátis)</button>
+      </div>
+      <div class="gestor-row" style="margin-top:8px">
+        <button class="gestor-btn" onclick="document.getElementById('gAIInput').value='trator quebrou no talhão 3';">Exemplo trator</button>
+        <button class="gestor-btn" onclick="document.getElementById('gAIInput').value='boi mancando na porteira norte';">Exemplo gado</button>
+        <button class="gestor-btn" onclick="document.getElementById('gAIInput').value='fogo perto da sede';">Exemplo fogo</button>
+        <button class="gestor-btn" onclick="document.getElementById('gAIInput').value='Talhão 3 de soja com folhas amareladas, caule fino, crescimento travado. Última chuva há 18 dias.';">Exemplo soja (aberto)</button>
       </div>
       <div class="gestor-ai-result" id="gAIResult"></div>
     </div>
@@ -1497,9 +1501,27 @@ function testarIA(){
   var actions=detectAISuggestions(text);
   if(!actions||actions.length===0){out.innerHTML='<div class="gestor-cap-hint">Nenhuma sugestão disparada.</div>';setGestorBadge('gAIBadge','Sem match','warn');return}
   var isFallback=JSON.stringify(actions)===JSON.stringify(AI_FALLBACK);
-  out.innerHTML='<div style="font-size:.75rem;color:var(--muted);margin-bottom:6px">'+(isFallback?'Fallback (nenhuma categoria casou):':'Categoria detectada:')+'</div>'+
+  out.innerHTML='<div style="font-size:.75rem;color:var(--muted);margin-bottom:6px"><strong>Rule-based</strong> — '+(isFallback?'Fallback (nenhuma categoria casou):':'Categoria detectada:')+'</div>'+
     actions.map(function(a){return'<span class="gestor-ai-chip">'+escapeHtml(a)+'</span>'}).join('');
   setGestorBadge('gAIBadge',isFallback?'Fallback':'Match','ok');
+}
+
+async function testarGemini(){
+  var input=document.getElementById('gAIInput');var text=input?input.value.trim():'';
+  var out=document.getElementById('gAIResult');
+  if(!text){out.innerHTML='<div class="gestor-cap-hint">Digite algo pra testar.</div>';setGestorBadge('gAIBadge','Aguardando','warn');return}
+  setGestorBadge('gAIBadge','Chamando Gemini...','warn');
+  out.innerHTML='<div class="gestor-cap-hint">✨ Gerando análise...</div>';
+  try{
+    var res=await callAISuggest(text,State.selectedProperty);
+    if(!res||!res.suggestions||res.suggestions.length===0)throw new Error('resposta vazia');
+    out.innerHTML='<div style="font-size:.75rem;color:var(--gold);margin-bottom:6px"><strong>✨ Gemini 2.5 Flash</strong> — '+(res.context_used?'com contexto da fazenda':'sem contexto')+' · '+res.latency_ms+'ms</div>'+
+      res.suggestions.map(function(a){return'<span class="gestor-ai-chip" style="border-color:var(--gold);color:var(--gold);background:rgba(197,165,114,.1)">'+escapeHtml(a)+'</span>'}).join('');
+    setGestorBadge('gAIBadge','OK','ok');
+  }catch(e){
+    out.innerHTML='<div class="gestor-cap-hint" style="color:var(--red)">Erro: '+escapeHtml(e.message||String(e))+'</div>';
+    setGestorBadge('gAIBadge','Erro','err');
+  }
 }
 
 /* ========== LIVESTOCK SATELLITE (EPIC 14) ========== */
@@ -1607,10 +1629,36 @@ for(var j=0;j<rule.keys.length;j++){
 if(lower.indexOf(rule.keys[j])>=0)return rule.actions}}
 return AI_FALLBACK}
 
+async function callAISuggest(logText,propertyId){
+var sess=await sb.auth.getSession();var token=sess&&sess.data&&sess.data.session&&sess.data.session.access_token;
+if(!token)throw new Error('sem sessao');
+var ctrl=new AbortController();var to=setTimeout(function(){ctrl.abort()},12000);
+try{var r=await fetch(SUPA_URL+'/functions/v1/ai-suggest',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'apikey':SUPA_KEY},body:JSON.stringify({log_text:logText,property_id:propertyId||undefined}),signal:ctrl.signal});
+var body=await r.json().catch(function(){return{}});
+if(!r.ok)throw new Error(body.error||('HTTP '+r.status));
+return body}finally{clearTimeout(to)}}
+
 function renderAISuggestions(logId,text){
 var actions=detectAISuggestions(text);if(!actions)return'';
-return'<div class="ai-suggest"><div class="ai-suggest-title">&#10024; Resoluções da IA AgrUAI</div><div class="ai-suggest-actions">'+
-actions.map(function(a,i){return'<button class="ai-action" onclick="executeAIAction(this,\''+escapeHtml(a)+'\',\''+logId+'\')">'+(i+1)+'. '+escapeHtml(a)+'</button>'}).join('')+'</div><div style="font-size:.55rem;color:rgba(168,158,144,.5);margin-top:8px;line-height:1.4">Aviso: Sugestões logísticas baseadas em processamento algorítmico interno. Não substitui e não atua como laudo técnico oficial Zootécnico, Agronômico ou Veterinário (Lei n° 5.194/66).</div></div>'}
+var safeText=escapeHtml(text).replace(/'/g,'&#39;');
+return'<div class="ai-suggest" id="ai-'+logId+'"><div class="ai-suggest-title">&#10024; Resoluções da IA AgrUAI <span style="font-size:.55rem;color:var(--muted);font-weight:400;margin-left:6px">rápido (offline)</span></div><div class="ai-suggest-actions">'+
+actions.map(function(a,i){return'<button class="ai-action" onclick="executeAIAction(this,\''+escapeHtml(a)+'\',\''+logId+'\')">'+(i+1)+'. '+escapeHtml(a)+'</button>'}).join('')+
+'</div><button class="ai-deepen" onclick="deepenWithGemini(this,\''+logId+'\',\''+safeText+'\')" style="margin-top:10px;font-size:.7rem;color:var(--gold);background:rgba(197,165,114,.06);border:1px solid rgba(197,165,114,.3);padding:6px 12px;border-radius:6px;cursor:pointer">✨ Aprofundar com Gemini (IA real)</button>'+
+'<div style="font-size:.55rem;color:rgba(168,158,144,.5);margin-top:8px;line-height:1.4">Aviso: Sugestões logísticas baseadas em processamento algorítmico interno. Não substitui e não atua como laudo técnico oficial Zootécnico, Agronômico ou Veterinário (Lei n° 5.194/66).</div></div>'}
+
+async function deepenWithGemini(btn,logId,escapedText){
+var container=document.getElementById('ai-'+logId);if(!container)return;
+btn.disabled=true;btn.textContent='✨ Consultando Gemini...';
+var text=(new DOMParser()).parseFromString(escapedText,'text/html').body.textContent||escapedText;
+try{
+var res=await callAISuggest(text,State.selectedProperty);
+if(!res||!res.suggestions||res.suggestions.length===0)throw new Error('resposta vazia');
+var sugsHtml=res.suggestions.map(function(a,i){return'<button class="ai-action" onclick="executeAIAction(this,\''+escapeHtml(a).replace(/'/g,'&#39;')+'\',\''+logId+'\')">'+(i+1)+'. '+escapeHtml(a)+'</button>'}).join('');
+var title=container.querySelector('.ai-suggest-title');if(title)title.innerHTML='&#10024; Análise Gemini <span style="font-size:.55rem;color:var(--gold);font-weight:400;margin-left:6px">'+(res.context_used?'com contexto da fazenda':'genérica')+' · '+res.latency_ms+'ms</span>';
+var act=container.querySelector('.ai-suggest-actions');if(act)act.innerHTML=sugsHtml;
+btn.remove();
+trackEvent('ai_gemini_used',{context_used:!!res.context_used,latency:res.latency_ms})}
+catch(e){btn.disabled=false;btn.textContent='✨ Aprofundar com Gemini (IA real)';toast('IA indisponível — usando sugestões rápidas. '+(e.message||''),'info')}}
 
 function executeAIAction(btn,action,logId){
 trackEvent('ai_action',{action:action});
@@ -2111,7 +2159,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.updateKanban=updateKanban;window.nextTourStep=nextTourStep;window.endTour=endTour;window.abrirModalPerfil=abrirModalPerfil;window.fecharModalPerfil=fecharModalPerfil;window.salvarPerfil=salvarPerfil;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.onGestorPhoto=onGestorPhoto;window.clearGestor=clearGestor;window.toggleGestorRec=toggleGestorRec;window.testarIA=testarIA;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.updateKanban=updateKanban;window.nextTourStep=nextTourStep;window.endTour=endTour;window.abrirModalPerfil=abrirModalPerfil;window.fecharModalPerfil=fecharModalPerfil;window.salvarPerfil=salvarPerfil;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.onGestorPhoto=onGestorPhoto;window.clearGestor=clearGestor;window.toggleGestorRec=toggleGestorRec;window.testarIA=testarIA;window.testarGemini=testarGemini;window.deepenWithGemini=deepenWithGemini;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
 var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();
