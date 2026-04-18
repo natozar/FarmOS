@@ -510,6 +510,37 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
   .login-tabs-3 .login-tab{font-size:.68rem;padding:9px 4px}
   .install-popup{border-radius:20px 20px 0 0;max-width:100%}
 }
+
+/* ÁREA DO GESTOR — SANDBOX DE TESTES */
+.gestor-hint{font-size:.75rem;color:var(--muted);background:rgba(197,165,114,.05);border:1px dashed rgba(197,165,114,.3);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:20px;line-height:1.5}
+.gestor-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+.gestor-section-title{font-size:.95rem;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.gestor-section-desc{font-size:.72rem;color:var(--muted);margin-bottom:12px;line-height:1.4}
+.gestor-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.gestor-btn{padding:10px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:rgba(15,31,15,.4);color:var(--text);font-size:.82rem;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all var(--transition)}
+.gestor-btn:hover{border-color:var(--gold);color:var(--gold)}
+.gestor-btn.primary{background:var(--gold);color:var(--dark);border-color:var(--gold);font-weight:600}
+.gestor-btn.danger{border-color:rgba(196,90,74,.4);color:var(--red)}
+.gestor-btn:disabled{opacity:.4;cursor:not-allowed}
+.gestor-btn.rec{background:var(--red);color:var(--white);border-color:var(--red);animation:pulseRec 1.2s infinite}
+@keyframes pulseRec{0%,100%{box-shadow:0 0 0 0 rgba(196,90,74,.5)}50%{box-shadow:0 0 0 8px rgba(196,90,74,0)}}
+.gestor-preview{width:100%;max-height:280px;object-fit:cover;border-radius:var(--radius-sm);margin-top:10px;border:1px solid var(--border);background:#000}
+.gestor-audio{width:100%;margin-top:10px}
+.gestor-log{background:#0A150A;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.68rem;line-height:1.6;color:var(--muted);max-height:160px;overflow:auto;word-break:break-all}
+.gestor-log .ok{color:var(--green)}
+.gestor-log .err{color:var(--red)}
+.gestor-log .url{color:var(--gold)}
+.gestor-transcript{min-height:64px;background:#0A150A;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;font-size:.85rem;line-height:1.5}
+.gestor-transcript .interim{color:var(--muted);font-style:italic}
+.gestor-ai-input{width:100%;min-height:80px;background:#0A150A;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-size:.88rem;resize:vertical;font-family:inherit}
+.gestor-ai-result{margin-top:12px}
+.gestor-ai-chip{display:inline-flex;align-items:center;padding:6px 12px;margin:3px;background:rgba(74,140,92,.12);border:1px solid var(--green);border-radius:16px;color:var(--green);font-size:.72rem;font-weight:500}
+.gestor-back{display:inline-flex;align-items:center;gap:4px;font-size:.78rem;color:var(--muted);margin-bottom:12px}
+.gestor-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:.6rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.gestor-badge.ok{background:rgba(74,140,92,.15);color:var(--green)}
+.gestor-badge.warn{background:rgba(212,160,64,.15);color:var(--amber)}
+.gestor-badge.err{background:rgba(196,90,74,.15);color:var(--red)}
+.gestor-cap-hint{font-size:.65rem;color:var(--muted);margin-top:8px;line-height:1.4}
 </style>
 </head>
 <body>
@@ -570,6 +601,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         <button class="header-user" id="btnUser" onclick="toggleUserMenu()"><span id="userName">Usuário</span> ▾</button>
         <div class="user-menu" id="userMenu">
           <button class="user-menu-item" onclick="navegarPara('perfil')">👤 Meu perfil</button>
+          <button class="user-menu-item" onclick="navegarPara('gestor')">🧪 Área do Gestor (Testes)</button>
           <div class="user-menu-item" style="display:flex;align-items:center;gap:6px;cursor:default">🌐 <select id="langSelect" style="background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:.78rem;padding:3px 6px;font-family:inherit;cursor:pointer" onchange="setLang(this.value)"><option value="pt-BR">Português</option><option value="en-US">English</option><option value="es-MX">Español</option></select></div>
           <button class="user-menu-item" onclick="toggleWarRoom()">📺 Sala de Guerra</button>
           <button class="user-menu-item" onclick="forcarAtualizacao()">🔄 Atualizar app</button>
@@ -611,6 +643,72 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
       <input type="range" class="timelapse-slider" id="timelapseSlider" min="0" max="11" value="11" oninput="onTimelapseChange(this.value)">
       <span class="timelapse-label" id="timelapseLabel">Atual</span>
       <span class="timelapse-legend">Hoje</span>
+    </div>
+  </div>
+</div>
+
+<!-- ÁREA DO GESTOR (SANDBOX) -->
+<div class="screen" id="tela-gestor">
+  <div class="app-header">
+    <div class="header-logo"><span class="l1">Agr</span><span class="l2">UAI</span></div>
+    <div class="header-right"><button class="header-user" onclick="navegarPara('propriedades')" style="font-size:.78rem;color:var(--muted)">← Propriedades</button></div>
+  </div>
+  <div class="content">
+    <h2 class="page-title" style="margin-bottom:4px">🧪 Área do Gestor</h2>
+    <div class="gestor-hint">Sandbox para testar foto (câmera), imagem (galeria), áudio (gravação + transcrição) e sugestões da IA. Tudo aqui é salvo no bucket <code>field-media</code> do Supabase sob <code>{seu_user_id}/sandbox/</code>. Nada vai para o diário de campo.</div>
+
+    <!-- FOTO -->
+    <div class="gestor-section">
+      <div class="gestor-section-title">📷 Foto (câmera) <span class="gestor-badge warn" id="gPhotoBadge">Aguardando</span></div>
+      <div class="gestor-section-desc">Captura pela câmera traseira do celular com compressão + carimbo de GPS. Upload real pro Supabase Storage.</div>
+      <div class="gestor-row">
+        <label class="gestor-btn primary" for="gPhotoInput">📸 Tirar foto</label>
+        <input type="file" id="gPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="onGestorPhoto(this,'photo')">
+        <button class="gestor-btn danger" onclick="clearGestor('photo')">Limpar</button>
+      </div>
+      <div id="gPhotoPreviewWrap" style="display:none"><img id="gPhotoPreview" class="gestor-preview"></div>
+      <div class="gestor-log" id="gPhotoLog">— Nenhum teste ainda —</div>
+    </div>
+
+    <!-- IMAGEM (GALERIA) -->
+    <div class="gestor-section">
+      <div class="gestor-section-title">🖼️ Imagem (galeria) <span class="gestor-badge warn" id="gImgBadge">Aguardando</span></div>
+      <div class="gestor-section-desc">Selecionar foto existente do dispositivo. Mesmo fluxo de upload, sem geo-stamp automático.</div>
+      <div class="gestor-row">
+        <label class="gestor-btn primary" for="gImgInput">🗂️ Escolher imagem</label>
+        <input type="file" id="gImgInput" accept="image/*" style="display:none" onchange="onGestorPhoto(this,'image')">
+        <button class="gestor-btn danger" onclick="clearGestor('image')">Limpar</button>
+      </div>
+      <div id="gImgPreviewWrap" style="display:none"><img id="gImgPreview" class="gestor-preview"></div>
+      <div class="gestor-log" id="gImgLog">— Nenhum teste ainda —</div>
+    </div>
+
+    <!-- ÁUDIO -->
+    <div class="gestor-section">
+      <div class="gestor-section-title">🎙️ Áudio + Transcrição <span class="gestor-badge warn" id="gAudioBadge">Aguardando</span></div>
+      <div class="gestor-section-desc">Grava áudio real (MediaRecorder) e transcreve ao vivo (Web Speech API). Upload do blob de áudio pro Storage.</div>
+      <div class="gestor-row">
+        <button class="gestor-btn primary" id="gRecBtn" onclick="toggleGestorRec()">🎤 Gravar</button>
+        <button class="gestor-btn danger" onclick="clearGestor('audio')">Limpar</button>
+      </div>
+      <div class="gestor-cap-hint">Requer Chrome, Edge ou Safari ≥14. Firefox não tem Web Speech API — aí só o áudio grava, sem transcrição.</div>
+      <div class="gestor-transcript" id="gTranscript">— Nada transcrito ainda —</div>
+      <audio id="gAudioPlayer" class="gestor-audio" controls style="display:none"></audio>
+      <div class="gestor-log" id="gAudioLog">— Nenhum teste ainda —</div>
+    </div>
+
+    <!-- IA -->
+    <div class="gestor-section">
+      <div class="gestor-section-title">✨ Sugestões da IA <span class="gestor-badge warn" id="gAIBadge">Aguardando</span></div>
+      <div class="gestor-section-desc">Hoje é rule-based (keyword matching). 6 categorias: trator/máquina, gado, cerca, praga, seca, fogo. Digita algo e veja o que ela sugere.</div>
+      <textarea class="gestor-ai-input" id="gAIInput" placeholder="Ex: a colheitadeira quebrou o pneu no talhão 3..."></textarea>
+      <div class="gestor-row" style="margin-top:10px">
+        <button class="gestor-btn primary" onclick="testarIA()">🧠 Analisar</button>
+        <button class="gestor-btn" onclick="document.getElementById('gAIInput').value='trator quebrou no talhão 3';testarIA()">Exemplo 1</button>
+        <button class="gestor-btn" onclick="document.getElementById('gAIInput').value='boi mancando na porteira norte';testarIA()">Exemplo 2</button>
+        <button class="gestor-btn" onclick="document.getElementById('gAIInput').value='fogo perto da sede';testarIA()">Exemplo 3</button>
+      </div>
+      <div class="gestor-ai-result" id="gAIResult"></div>
     </div>
   </div>
 </div>
@@ -781,7 +879,8 @@ var active=document.querySelector('.bnav[href="#'+tela+'"]');if(active)active.cl
 if(tela==='propriedades')renderPropriedades();
 if(tela==='mapa')renderMapaGeral();
 if(tela==='detalhe')renderDetalhe(State.selectedProperty);
-if(tela==='cadastro'){State.cadStep=1;State.cadData={};State.drawnGeoJSON=null;renderCadastro()}}
+if(tela==='cadastro'){State.cadStep=1;State.cadData={};State.drawnGeoJSON=null;renderCadastro()}
+if(tela==='gestor')renderGestor()}
 
 /* ========== AUTH ========== */
 function trocarTab(modo){State.authMode=modo;
@@ -1194,6 +1293,198 @@ var html='<img class="photo-thumb" src="'+State.pendingPhoto.base64+'">'+(State.
 return{text:text,html:html}}
 
 function clearPhoto(){State.pendingPhoto=null;document.getElementById('photoPreviewWrap').style.display='none';document.getElementById('photoGeoStamp').style.display='none';var inp=document.getElementById('diarioPhoto');if(inp)inp.value=''}
+
+/* ========== ÁREA DO GESTOR — SANDBOX ========== */
+var Gestor={mediaRec:null,audioChunks:[],audioBlob:null,isRec:false,transcript:'',interim:''};
+
+function renderGestor(){
+  if(!State.user){navegarPara('login');return}
+  clearGestor('photo');clearGestor('image');clearGestor('audio');
+  var el=document.getElementById('gAIResult');if(el)el.innerHTML='';
+  var ai=document.getElementById('gAIInput');if(ai)ai.value='';
+}
+
+function gLog(id,msg,cls){
+  var el=document.getElementById(id);if(!el)return;
+  var time=new Date().toLocaleTimeString('pt-BR');
+  var line='<div class="'+(cls||'')+'">['+time+'] '+msg+'</div>';
+  if(el.textContent.indexOf('Nenhum teste')>=0)el.innerHTML=line;
+  else el.innerHTML+=line;
+  el.scrollTop=el.scrollHeight;
+}
+
+function setGestorBadge(id,label,kind){
+  var el=document.getElementById(id);if(!el)return;
+  el.textContent=label;el.className='gestor-badge '+(kind||'warn');
+}
+
+async function uploadGestorBlob(blob,ext,kind){
+  if(!State.user){throw new Error('Sem sessão')}
+  var uid=State.user.id;
+  var name=uid+'/sandbox/'+kind+'-'+Date.now()+'.'+ext;
+  var r=await sb.storage.from('field-media').upload(name,blob,{contentType:blob.type,upsert:false});
+  if(r.error)throw r.error;
+  var pub=sb.storage.from('field-media').getPublicUrl(name);
+  return{path:name,url:pub.data.publicUrl,size:blob.size};
+}
+
+function compressImageToBlob(file,maxDim,quality){
+  return new Promise(function(resolve,reject){
+    var img=new Image();var url=URL.createObjectURL(file);
+    img.onload=function(){
+      var w=img.width,h=img.height;
+      if(w>maxDim||h>maxDim){if(w>h){h=Math.round(h*(maxDim/w));w=maxDim}else{w=Math.round(w*(maxDim/h));h=maxDim}}
+      var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      canvas.toBlob(function(blob){URL.revokeObjectURL(url);blob?resolve(blob):reject(new Error('toBlob falhou'))},'image/jpeg',quality||0.75);
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);reject(new Error('Imagem inválida'))};
+    img.src=url;
+  });
+}
+
+async function onGestorPhoto(input,kind){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var logId=kind==='photo'?'gPhotoLog':'gImgLog';
+  var badgeId=kind==='photo'?'gPhotoBadge':'gImgBadge';
+  var previewId=kind==='photo'?'gPhotoPreview':'gImgPreview';
+  var wrapId=kind==='photo'?'gPhotoPreviewWrap':'gImgPreviewWrap';
+  setGestorBadge(badgeId,'Processando...','warn');
+  gLog(logId,'Arquivo: '+file.name+' ('+Math.round(file.size/1024)+' KB, '+file.type+')');
+  try{
+    var blob=await compressImageToBlob(file,1200,0.75);
+    gLog(logId,'Comprimido: '+Math.round(blob.size/1024)+' KB');
+    var reader=new FileReader();
+    reader.onload=function(e){document.getElementById(previewId).src=e.target.result;document.getElementById(wrapId).style.display='block'};
+    reader.readAsDataURL(blob);
+    if(kind==='photo'&&navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(function(pos){
+        gLog(logId,'📍 GPS: '+pos.coords.latitude.toFixed(5)+', '+pos.coords.longitude.toFixed(5),'ok');
+      },function(err){gLog(logId,'GPS: '+(err.code===1?'permissão negada':'indisponível'),'err')},{enableHighAccuracy:true,timeout:8000});
+    }
+    setGestorBadge(badgeId,'Enviando...','warn');
+    var res=await uploadGestorBlob(blob,'jpg',kind);
+    gLog(logId,'✓ Upload OK — '+Math.round(res.size/1024)+' KB','ok');
+    gLog(logId,'URL: <a href="'+res.url+'" target="_blank" class="url">'+res.url+'</a>','url');
+    setGestorBadge(badgeId,'OK','ok');
+  }catch(e){
+    gLog(logId,'✗ Erro: '+(e.message||e),'err');
+    setGestorBadge(badgeId,'Erro','err');
+  }
+}
+
+function clearGestor(kind){
+  if(kind==='photo'){var i=document.getElementById('gPhotoInput');if(i)i.value='';var w=document.getElementById('gPhotoPreviewWrap');if(w)w.style.display='none';var l=document.getElementById('gPhotoLog');if(l)l.innerHTML='— Nenhum teste ainda —';setGestorBadge('gPhotoBadge','Aguardando','warn')}
+  if(kind==='image'){var i=document.getElementById('gImgInput');if(i)i.value='';var w=document.getElementById('gImgPreviewWrap');if(w)w.style.display='none';var l=document.getElementById('gImgLog');if(l)l.innerHTML='— Nenhum teste ainda —';setGestorBadge('gImgBadge','Aguardando','warn')}
+  if(kind==='audio'){
+    if(Gestor.isRec)stopGestorRec();
+    Gestor.audioBlob=null;Gestor.transcript='';Gestor.interim='';
+    var p=document.getElementById('gAudioPlayer');if(p){p.pause();p.src='';p.style.display='none'}
+    var t=document.getElementById('gTranscript');if(t)t.textContent='— Nada transcrito ainda —';
+    var l=document.getElementById('gAudioLog');if(l)l.innerHTML='— Nenhum teste ainda —';
+    setGestorBadge('gAudioBadge','Aguardando','warn');
+  }
+}
+
+function renderTranscript(){
+  var el=document.getElementById('gTranscript');if(!el)return;
+  var final=Gestor.transcript||'';var inter=Gestor.interim||'';
+  if(!final&&!inter){el.textContent='— Falando... aguardando reconhecimento —';return}
+  el.innerHTML=escapeHtml(final)+(inter?' <span class="interim">'+escapeHtml(inter)+'</span>':'');
+}
+
+var gSpeechRec=null;
+function initGestorSpeech(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR)return null;
+  var rec=new SR();
+  rec.lang='pt-BR';rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
+  rec.onresult=function(e){
+    var interim='',final='';
+    for(var i=e.resultIndex;i<e.results.length;i++){var t=e.results[i][0].transcript;if(e.results[i].isFinal)final+=t;else interim+=t}
+    if(final)Gestor.transcript+=final;
+    Gestor.interim=interim;
+    renderTranscript();
+  };
+  rec.onerror=function(e){if(e.error!=='aborted')gLog('gAudioLog','Speech: '+e.error,'err')};
+  rec.onend=function(){if(Gestor.isRec){try{rec.start()}catch(_){}}};
+  return rec;
+}
+
+async function toggleGestorRec(){
+  if(Gestor.isRec){stopGestorRec();return}
+  var logId='gAudioLog';
+  try{
+    setGestorBadge('gAudioBadge','Gravando...','warn');
+    Gestor.transcript='';Gestor.interim='';Gestor.audioChunks=[];Gestor.audioBlob=null;
+    var stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    var mime='audio/webm';
+    if(window.MediaRecorder&&!MediaRecorder.isTypeSupported(mime)){
+      if(MediaRecorder.isTypeSupported('audio/mp4'))mime='audio/mp4';else mime='';
+    }
+    Gestor.mediaRec=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
+    Gestor.mediaRec.ondataavailable=function(e){if(e.data&&e.data.size>0)Gestor.audioChunks.push(e.data)};
+    Gestor.mediaRec.onstop=function(){
+      stream.getTracks().forEach(function(tr){tr.stop()});
+      Gestor.audioBlob=new Blob(Gestor.audioChunks,{type:Gestor.mediaRec.mimeType||'audio/webm'});
+      var url=URL.createObjectURL(Gestor.audioBlob);
+      var p=document.getElementById('gAudioPlayer');p.src=url;p.style.display='block';
+      gLog(logId,'Gravação: '+Math.round(Gestor.audioBlob.size/1024)+' KB — '+Gestor.audioBlob.type,'ok');
+      uploadGestorAudio();
+    };
+    Gestor.mediaRec.start();
+    Gestor.isRec=true;
+    document.getElementById('gRecBtn').classList.add('rec');
+    document.getElementById('gRecBtn').innerHTML='⏹ Parar';
+    renderTranscript();
+    gSpeechRec=initGestorSpeech();
+    if(gSpeechRec){try{gSpeechRec.start()}catch(_){}}
+    else gLog(logId,'Web Speech API não disponível neste navegador — só o áudio será gravado','err');
+    gLog(logId,'Gravando... fale agora');
+  }catch(e){
+    gLog(logId,'✗ Erro mic: '+(e.message||e),'err');
+    setGestorBadge('gAudioBadge','Erro','err');
+  }
+}
+
+function stopGestorRec(){
+  Gestor.isRec=false;
+  try{if(Gestor.mediaRec&&Gestor.mediaRec.state!=='inactive')Gestor.mediaRec.stop()}catch(_){}
+  try{if(gSpeechRec)gSpeechRec.stop()}catch(_){}
+  gSpeechRec=null;
+  var btn=document.getElementById('gRecBtn');
+  if(btn){btn.classList.remove('rec');btn.innerHTML='🎤 Gravar'}
+}
+
+async function uploadGestorAudio(){
+  if(!Gestor.audioBlob)return;
+  var logId='gAudioLog';
+  setGestorBadge('gAudioBadge','Enviando...','warn');
+  try{
+    var ext=(Gestor.audioBlob.type.indexOf('mp4')>=0)?'m4a':(Gestor.audioBlob.type.indexOf('ogg')>=0?'ogg':'webm');
+    var res=await uploadGestorBlob(Gestor.audioBlob,ext,'audio');
+    gLog(logId,'✓ Upload áudio OK','ok');
+    gLog(logId,'URL: <a href="'+res.url+'" target="_blank" class="url">'+res.url+'</a>','url');
+    if(Gestor.transcript)gLog(logId,'Transcrição final: "'+Gestor.transcript.trim()+'"','ok');
+    setGestorBadge('gAudioBadge','OK','ok');
+  }catch(e){
+    gLog(logId,'✗ Erro upload: '+(e.message||e),'err');
+    setGestorBadge('gAudioBadge','Erro','err');
+  }
+}
+
+function testarIA(){
+  var input=document.getElementById('gAIInput');var text=input?input.value.trim():'';
+  var out=document.getElementById('gAIResult');
+  if(!text){out.innerHTML='<div class="gestor-cap-hint">Digite algo pra testar.</div>';setGestorBadge('gAIBadge','Aguardando','warn');return}
+  var actions=detectAISuggestions(text);
+  if(!actions||actions.length===0){out.innerHTML='<div class="gestor-cap-hint">Nenhuma sugestão disparada.</div>';setGestorBadge('gAIBadge','Sem match','warn');return}
+  var isFallback=JSON.stringify(actions)===JSON.stringify(AI_FALLBACK);
+  out.innerHTML='<div style="font-size:.75rem;color:var(--muted);margin-bottom:6px">'+(isFallback?'Fallback (nenhuma categoria casou):':'Categoria detectada:')+'</div>'+
+    actions.map(function(a){return'<span class="gestor-ai-chip">'+escapeHtml(a)+'</span>'}).join('');
+  setGestorBadge('gAIBadge',isFallback?'Fallback':'Match','ok');
+}
 
 /* ========== LIVESTOCK SATELLITE (EPIC 14) ========== */
 function buildLivestockCard(p){
@@ -1796,7 +2087,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.updateKanban=updateKanban;window.nextTourStep=nextTourStep;window.endTour=endTour;window.abrirModalPerfil=abrirModalPerfil;window.fecharModalPerfil=fecharModalPerfil;window.salvarPerfil=salvarPerfil;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.updateKanban=updateKanban;window.nextTourStep=nextTourStep;window.endTour=endTour;window.abrirModalPerfil=abrirModalPerfil;window.fecharModalPerfil=fecharModalPerfil;window.salvarPerfil=salvarPerfil;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.onGestorPhoto=onGestorPhoto;window.clearGestor=clearGestor;window.toggleGestorRec=toggleGestorRec;window.testarIA=testarIA;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
 var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();
