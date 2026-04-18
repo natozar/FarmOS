@@ -1078,7 +1078,12 @@ async function uploadFieldLogAudio(blob){
   return{url:pub.data.publicUrl,path:name};
 }
 
-async function enviarLog(){if(isListening){stopListening();if(State.diarioAudioReady){try{await State.diarioAudioReady}catch(_){}}}trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();var hasAudio=!!State.diarioAudio;if(!content&&!State.pendingPhoto&&!hasAudio)return;if(!content)content=hasAudio?'🎙️ [áudio aguardando transcrição]':'[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}if(!State.user){toast('Sessão expirada. Faça login novamente.','erro');navegarPara('login');return}
+async function enviarLog(){
+// Se ainda estava gravando, encerra
+if(isListening)stopListening();
+// MediaRecorder.stop() e async — espera o blob finalizar SEMPRE (sem isto race condition)
+if(State.diarioAudioReady){try{await State.diarioAudioReady}catch(_){}}
+trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();var hasAudio=!!State.diarioAudio;if(!content&&!State.pendingPhoto&&!hasAudio)return;if(!content)content=hasAudio?'🎙️ [áudio aguardando transcrição]':'[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}if(!State.user){toast('Sessão expirada. Faça login novamente.','erro');navegarPara('login');return}
 var photoAppend=getPhotoAppend();content+=photoAppend.text;
 var photoBase64=State.pendingPhoto?State.pendingPhoto.base64:null;
 var audioBlob=State.diarioAudio;
@@ -2072,16 +2077,15 @@ var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(!SR){return null}
 var rec=new SR();
 rec.lang=t('speechLang');rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
-var inputEl=null;
 rec.onstart=function(){
 var btn=document.getElementById('btnRec');if(btn)btn.classList.add('recording');
-var status=document.getElementById('recStatus');if(status)status.classList.add('visivel');
-inputEl=document.getElementById('diarioInput')};
+var status=document.getElementById('recStatus');if(status)status.classList.add('visivel')};
 
 rec.onresult=function(e){var interim='';var final='';
 for(var i=e.resultIndex;i<e.results.length;i++){var t=e.results[i][0].transcript;if(e.results[i].isFinal){final+=t}else{interim+=t}}
 if(final)speechRec._finalText=(speechRec._finalText||'')+final;
-if(inputEl){inputEl.value=(speechRec._prefix||'')+(speechRec._finalText||'')+(interim?' '+interim:'');inputEl.style.height='auto';inputEl.style.height=Math.min(inputEl.scrollHeight,120)+'px'}};
+var el=document.getElementById('diarioInput');
+if(el){el.value=(speechRec._prefix||'')+(speechRec._finalText||'')+(interim?' '+interim:'');el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px'}};
 
 // Speech API (Chrome/Safari) expira sozinho apos silencio (~20s).
 // Fatais param tudo; transientes so reiniciam o reconhecimento (audio continua).
