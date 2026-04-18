@@ -1078,7 +1078,7 @@ async function uploadFieldLogAudio(blob){
   return{url:pub.data.publicUrl,path:name};
 }
 
-async function enviarLog(){if(isListening)stopListening();trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();var hasAudio=!!State.diarioAudio;if(!content&&!State.pendingPhoto&&!hasAudio)return;if(!content)content=hasAudio?'🎙️ [áudio aguardando transcrição]':'[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}if(!State.user){toast('Sessão expirada. Faça login novamente.','erro');navegarPara('login');return}
+async function enviarLog(){if(isListening){stopListening();if(State.diarioAudioReady){try{await State.diarioAudioReady}catch(_){}}}trackEvent('log_submit');var input=document.getElementById('diarioInput');var content=input.value.trim();var hasAudio=!!State.diarioAudio;if(!content&&!State.pendingPhoto&&!hasAudio)return;if(!content)content=hasAudio?'🎙️ [áudio aguardando transcrição]':'[Foto sem descrição]';if(!State.selectedProperty){toast('Propriedade não selecionada','erro');return}if(!State.user){toast('Sessão expirada. Faça login novamente.','erro');navegarPara('login');return}
 var photoAppend=getPhotoAppend();content+=photoAppend.text;
 var photoBase64=State.pendingPhoto?State.pendingPhoto.base64:null;
 var audioBlob=State.diarioAudio;
@@ -1098,7 +1098,7 @@ var insertedLogId=r.data&&r.data.id;
 if(invItem&&invQty>0){await sb.rpc('use_inventory_item',{p_item_id:invItem.id,p_qty:invQty});loadInvPickerData(State.selectedProperty)}
 checkEmergencyNotification(content);checkDieselAnomaly(content);input.value='';clearInvSelection();clearPhoto();clearDiarioAudio();var p=document.getElementById('invPicker');if(p)p.classList.remove('visivel');document.getElementById('btnInvToggle').classList.remove('ativo');toast('Registro salvo'+(invItem?' — estoque atualizado':''),'ok');loadTimeline(State.selectedProperty);
 // Fire-and-forget: se tem audio e o log foi inserido, tenta Whisper em background pra enriquecer o texto
-if(audioPath&&insertedLogId){try{callTranscribeAudio(audioPath,insertedLogId).then(function(t){if(t&&t.log_updated)loadTimeline(State.selectedProperty)}).catch(function(){})}catch(_){}}}catch(e){
+if(audioPath&&insertedLogId){toast('✨ Transcrevendo áudio com Whisper...','info');callTranscribeAudio(audioPath,insertedLogId).then(function(t){if(t&&t.transcription){toast('✨ Transcrito: "'+t.transcription.slice(0,50)+(t.transcription.length>50?'...':'')+'"','ok');if(t.log_updated)loadTimeline(State.selectedProperty)}else{toast('Whisper retornou vazio','info')}}).catch(function(e){console.error('[diario] whisper failed:',e);toast('Whisper falhou: '+(e.message||e),'erro')})}}catch(e){
 logData.localId='off_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);logData.created_at=new Date().toISOString();logData._invDeduct=invItem?{id:invItem.id,qty:invQty}:null;logData._photoBase64=photoBase64;logData._audioBlob=audioBlob;
 await addPendingLog(logData);input.value='';clearInvSelection();clearPhoto();clearDiarioAudio();toast('Sem conexão — salvo localmente','info');renderPendingInTimeline(logData)}
 }else{
@@ -2018,7 +2018,7 @@ State.diarioAudio=null;State.diarioAudioRec=null;State.diarioAudioChunks=[];Stat
 
 async function startDiarioAudioCapture(){
   try{
-    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return;
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){console.warn('[diario] no getUserMedia');return}
     var stream=await navigator.mediaDevices.getUserMedia({audio:true});
     State.diarioAudioStream=stream;
     State.diarioAudioChunks=[];
@@ -2027,29 +2027,37 @@ async function startDiarioAudioCapture(){
       if(MediaRecorder.isTypeSupported('audio/mp4'))mime='audio/mp4';else mime='';
     }
     var rec=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
-    rec.ondataavailable=function(e){if(e.data&&e.data.size>0)State.diarioAudioChunks.push(e.data)};
-    rec.onstop=function(){
-      try{stream.getTracks().forEach(function(t){t.stop()})}catch(_){}
-      State.diarioAudioStream=null;
-      var type=rec.mimeType||'audio/webm';
-      if(State.diarioAudioChunks.length===0){State.diarioAudio=null;return}
-      State.diarioAudio=new Blob(State.diarioAudioChunks,{type:type});
-      State.diarioAudioChunks=[];
-      var input=document.getElementById('diarioInput');
-      if(input){input.setAttribute('data-has-audio','1')}
-      toast('Áudio gravado — vai junto com o log','info');
-    };
+    // Promise que resolve quando onstop roda e o Blob esta montado
+    State.diarioAudioReady=new Promise(function(resolve){
+      rec.ondataavailable=function(e){if(e.data&&e.data.size>0)State.diarioAudioChunks.push(e.data)};
+      rec.onstop=function(){
+        try{stream.getTracks().forEach(function(t){t.stop()})}catch(_){}
+        State.diarioAudioStream=null;
+        var type=rec.mimeType||'audio/webm';
+        if(State.diarioAudioChunks.length===0){State.diarioAudio=null;resolve(null);return}
+        var blob=new Blob(State.diarioAudioChunks,{type:type});
+        State.diarioAudio=blob;
+        State.diarioAudioChunks=[];
+        var input=document.getElementById('diarioInput');
+        if(input)input.setAttribute('data-has-audio','1');
+        toast('🎙️ Áudio gravado ('+(blob.size/1024).toFixed(0)+' KB) — será transcrito no envio','info');
+        resolve(blob);
+      };
+      rec.onerror=function(e){console.warn('[diario] MediaRecorder error:',e.error);resolve(null)};
+    });
     State.diarioAudioRec=rec;
     rec.start();
   }catch(e){
     console.warn('[diario] audio capture failed:',e.message||e);
-    // Se o mic ja foi concedido pro Web Speech, nao bloqueia; so nao grava blob
+    toast('Gravação de áudio não disponível: '+(e.message||e.name),'info');
   }
 }
 
 function stopDiarioAudioCapture(){
-  try{if(State.diarioAudioRec&&State.diarioAudioRec.state!=='inactive')State.diarioAudioRec.stop()}catch(_){}
-  State.diarioAudioRec=null;
+  var rec=State.diarioAudioRec;State.diarioAudioRec=null;
+  if(!rec||rec.state==='inactive'){State.diarioAudioReady=Promise.resolve(State.diarioAudio);return State.diarioAudioReady}
+  try{rec.stop()}catch(_){}
+  return State.diarioAudioReady||Promise.resolve(null);
 }
 
 function clearDiarioAudio(){
