@@ -686,7 +686,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <!-- ÁUDIO -->
     <div class="gestor-section">
       <div class="gestor-section-title">🎙️ Áudio + Transcrição <span class="gestor-badge warn" id="gAudioBadge">Aguardando</span></div>
-      <div class="gestor-section-desc">Grava áudio real (MediaRecorder) e transcreve ao vivo (Web Speech API). Upload do blob de áudio pro Storage.</div>
+      <div class="gestor-section-desc">Grava áudio (MediaRecorder), transcreve ao vivo (Web Speech API) e envia o arquivo pro Whisper Large v3 no Groq (grátis) pra transcrição definitiva. Compara as duas.</div>
       <div class="gestor-row">
         <button class="gestor-btn primary" id="gRecBtn" onclick="toggleGestorRec()">🎤 Gravar</button>
         <button class="gestor-btn danger" onclick="clearGestor('audio')">Limpar</button>
@@ -1477,6 +1477,18 @@ function stopGestorRec(){
   if(btn){btn.classList.remove('rec');btn.innerHTML='🎤 Gravar'}
 }
 
+async function callTranscribeAudio(storagePath){
+  var sess=await sb.auth.getSession();var token=sess&&sess.data&&sess.data.session&&sess.data.session.access_token;
+  if(!token)throw new Error('sem sessao');
+  var ctrl=new AbortController();var to=setTimeout(function(){ctrl.abort()},35000);
+  try{
+    var r=await fetch(SUPA_URL+'/functions/v1/transcribe-audio',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'apikey':SUPA_KEY},body:JSON.stringify({storage_path:storagePath,language:'pt'}),signal:ctrl.signal});
+    var body=await r.json().catch(function(){return{}});
+    if(!r.ok)throw new Error(body.error||('HTTP '+r.status));
+    return body;
+  }finally{clearTimeout(to)}
+}
+
 async function uploadGestorAudio(){
   if(!Gestor.audioBlob)return;
   var logId='gAudioLog';
@@ -1486,8 +1498,21 @@ async function uploadGestorAudio(){
     var res=await uploadGestorBlob(Gestor.audioBlob,ext,'audio');
     gLog(logId,'✓ Upload áudio OK','ok');
     gLog(logId,'URL: <a href="'+res.url+'" target="_blank" class="url">'+res.url+'</a>','url');
-    if(Gestor.transcript)gLog(logId,'Transcrição final: "'+Gestor.transcript.trim()+'"','ok');
-    setGestorBadge('gAudioBadge','OK','ok');
+    if(Gestor.transcript)gLog(logId,'Web Speech (ao vivo): "'+Gestor.transcript.trim()+'"','ok');
+    setGestorBadge('gAudioBadge','Transcrevendo com Whisper...','warn');
+    try{
+      var t=await callTranscribeAudio(res.path);
+      if(t&&t.transcription){
+        gLog(logId,'✨ Whisper Large v3 ('+t.latency_ms+'ms, '+(t.duration_s||'?')+'s de áudio): "'+t.transcription+'"','ok');
+        setGestorBadge('gAudioBadge','OK','ok');
+      }else{
+        gLog(logId,'Whisper: resposta vazia','err');
+        setGestorBadge('gAudioBadge','Whisper falhou','err');
+      }
+    }catch(te){
+      gLog(logId,'✗ Whisper erro: '+(te.message||te),'err');
+      setGestorBadge('gAudioBadge','Whisper erro','err');
+    }
   }catch(e){
     gLog(logId,'✗ Erro upload: '+(e.message||e),'err');
     setGestorBadge('gAudioBadge','Erro','err');
