@@ -2072,42 +2072,52 @@ var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(!SR){return null}
 var rec=new SR();
 rec.lang=t('speechLang');rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
-var finalText='';var inputEl=null;
-rec.onstart=function(){isListening=true;finalText='';
+var inputEl=null;
+rec.onstart=function(){
 var btn=document.getElementById('btnRec');if(btn)btn.classList.add('recording');
 var status=document.getElementById('recStatus');if(status)status.classList.add('visivel');
 inputEl=document.getElementById('diarioInput')};
 
 rec.onresult=function(e){var interim='';var final='';
 for(var i=e.resultIndex;i<e.results.length;i++){var t=e.results[i][0].transcript;if(e.results[i].isFinal){final+=t}else{interim+=t}}
-if(final)finalText+=final;
-if(inputEl){inputEl.value=finalText+(interim?' '+interim:'');inputEl.style.height='auto';inputEl.style.height=Math.min(inputEl.scrollHeight,120)+'px'}};
+if(final)speechRec._finalText=(speechRec._finalText||'')+final;
+if(inputEl){inputEl.value=(speechRec._prefix||'')+(speechRec._finalText||'')+(interim?' '+interim:'');inputEl.style.height='auto';inputEl.style.height=Math.min(inputEl.scrollHeight,120)+'px'}};
 
+// Speech API (Chrome/Safari) expira sozinho apos silencio (~20s).
+// Fatais param tudo; transientes so reiniciam o reconhecimento (audio continua).
 rec.onerror=function(e){
-if(e.error==='not-allowed'){toast('Permissão de microfone negada','erro')}
-else if(e.error==='no-speech'){toast('Nenhuma fala detectada — tente novamente','info')}
-else if(e.error!=='aborted'){toast('Erro de reconhecimento: '+e.error,'erro')}
-stopListening()};
+if(e.error==='not-allowed'||e.error==='service-not-allowed'){toast('Permissão de microfone negada','erro');stopListening()}
+// 'no-speech', 'aborted', 'network' sao transientes — onend restart abaixo cuida disso
+};
 
-rec.onend=function(){if(isListening){stopListening()}};
+rec.onend=function(){
+// Se usuario ainda quer gravar, religa o reconhecimento; MediaRecorder continua intocado.
+if(isListening){try{rec.start()}catch(_){}}
+else{var btn=document.getElementById('btnRec');if(btn)btn.classList.remove('recording');
+var status=document.getElementById('recStatus');if(status)status.classList.remove('visivel')}};
 return rec}
 
 function toggleRecording(){
 trackEvent('mic_toggle',{listening:!isListening});
 if(isListening){stopListening();return}
-if(!speechRec)speechRec=initSpeechRecognition();
-// Grava audio bruto em paralelo (mesmo que Web Speech nao exista: Firefox/iOS velho ficam com o blob)
-clearDiarioAudio();startDiarioAudioCapture();
-if(!speechRec){toast('Gravando áudio... (sem transcrição ao vivo neste browser)','info');isListening=true;
+// Marca estado ANTES de iniciar — o onend do Web Speech depende disso pra religar.
+isListening=true;
 var btn=document.getElementById('btnRec');if(btn)btn.classList.add('recording');
-var status=document.getElementById('recStatus');if(status)status.classList.add('visivel');return}
+var status=document.getElementById('recStatus');if(status)status.classList.add('visivel');
+// Audio bruto em paralelo — continua gravando mesmo se Web Speech der timeout ou nao existir.
+clearDiarioAudio();startDiarioAudioCapture();
+if(!speechRec)speechRec=initSpeechRecognition();
+if(!speechRec){toast('Gravando áudio... (sem transcrição ao vivo)','info');return}
 var existing=document.getElementById('diarioInput');
-if(existing&&existing.value.trim()){speechRec._prefix=existing.value.trim()+' '}else{speechRec._prefix=''}
-try{speechRec.start();toast('Fale agora...','info')}catch(e){
-if(e.message&&e.message.indexOf('already started')>=0){speechRec.stop();setTimeout(function(){try{speechRec.start()}catch(x){}},200)}
+speechRec._prefix=(existing&&existing.value.trim())?existing.value.trim()+' ':'';
+speechRec._finalText='';
+try{speechRec.start();toast('Fale agora — aperte o mic de novo pra parar','info')}catch(e){
+if(e.message&&e.message.indexOf('already started')>=0){try{speechRec.stop()}catch(_){}setTimeout(function(){try{speechRec.start()}catch(x){}},200)}
 else{toast('Erro ao iniciar microfone: '+e.message,'erro')}}}
 
-function stopListening(){isListening=false;
+function stopListening(){
+// Usuario pediu pra parar — desmarca o flag ANTES de stop pra bloquear auto-restart do onend.
+isListening=false;
 try{if(speechRec)speechRec.stop()}catch(e){}
 stopDiarioAudioCapture();
 var btn=document.getElementById('btnRec');if(btn)btn.classList.remove('recording');
