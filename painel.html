@@ -999,7 +999,7 @@ riskHTML+buildWeatherCard()+buildLivestockCard(p)+buildCarbonCard(p)+buildCFOCar
 '<div class="rec-status" id="recStatus"><span>&#127908; Ouvindo... fale agora</span></div>'+
 '<div class="inv-picker" id="invPicker"><div class="inv-picker-title">Vincular insumo utilizado</div><div class="inv-list" id="invPickerList"><span style="color:var(--muted);font-size:.8rem">Carregando...</span></div><div class="inv-qty-row" id="invQtyRow" style="display:none"><label class="inv-qty-label">Quantidade usada:</label><input class="inv-qty-input" type="number" id="invQtyInput" min="0.1" step="0.1" placeholder="0"><span class="inv-qty-label" id="invQtyUnit">un</span><button class="btn-secondary" style="padding:8px 12px;font-size:.75rem" onclick="clearInvSelection()">Limpar</button></div></div>'+
 '<div id="timelineContainer"><div style="text-align:center;padding:20px"><div class="spinner"></div></div></div></div>'+
-'<div class="tab-panel" id="panelInsumos"><div class="gestores-title"><span>Estoque / Galpão</span><button class="btn-convidar" onclick="abrirModalInsumo()">+ Cadastrar Insumo</button></div><button class="btn-scan" onclick="iniciarScanner()">&#128248; Escanear Defensivo / Vacina</button><div id="scannerContainer"></div><div class="scan-result" id="scanResult"></div><div id="insumosList" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>'+
+'<div class="tab-panel" id="panelInsumos"><div class="gestores-title"><span>Estoque / Galpão</span>'+(p._managed?'<span style="font-size:.68rem;color:var(--muted)">&#128065;&#65039; leitura · reporte pelo diário</span>':'<button class="btn-convidar" onclick="abrirModalInsumo()">+ Cadastrar Insumo</button>')+'</div><button class="btn-scan" onclick="iniciarScanner()">&#128248; Escanear Defensivo / Vacina</button><div id="scannerContainer"></div><div class="scan-result" id="scanResult"></div><div id="insumosList" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>'+
 (p._managed?'':'<div class="tab-panel" id="panelEquipe"><div class="gestores-title"><span>Gestores e Equipe</span><button class="btn-convidar" onclick="abrirModalConvite()">+ Convidar</button></div><div id="gestoresLista" style="color:var(--muted);font-size:.85rem"><div class="spinner"></div></div></div>');
 loadHistory(pid);loadAlerts(pid);loadTimeline(pid);loadInvPickerData(pid);if(!p._managed)loadGestores(pid);
 loadWeather(p).then(function(){var wc=document.querySelector('.weather-card');if(!wc){var panel=document.getElementById('panelSatelite');if(panel){var riskEl=panel.querySelector('.risk-card');if(riskEl)riskEl.insertAdjacentHTML('afterend',buildWeatherCard())}}})}
@@ -1700,10 +1700,33 @@ var INV_CATS=[{v:'semente',l:'Semente'},{v:'fertilizante',l:'Fertilizante'},{v:'
 State.invItems=[];State.selectedInvItem=null;
 
 async function loadInsumos(pid){var el=document.getElementById('insumosList');if(!el)return;
+var curProp=State.propriedades.find(function(x){return(x.property_id||x.id)===pid});
+var isManaged=curProp&&curProp._managed;
 try{var r=await sb.from('inventory_items').select('*').eq('property_id',pid).order('nome');if(r.error)throw r.error;
 var items=r.data||[];State.invItems=items;
-if(items.length===0){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:.85rem">Nenhum insumo cadastrado.<br>Clique em "+ Cadastrar Insumo" para adicionar.</div>';return}
-el.innerHTML=items.map(function(it){var low=it.quantidade<=0?'inv-low':'';return'<div class="inv-card"><div class="inv-card-info"><div class="inv-card-nome">'+escapeHtml(it.nome)+'</div><div class="inv-card-meta">'+(it.categoria||'—')+(it.custo_unitario?' · R$ '+formatarNumero(it.custo_unitario)+'/'+it.unidade:'')+'</div></div><div class="inv-card-qty '+low+'">'+formatarNumero(it.quantidade)+'<div class="inv-card-unit">'+it.unidade+'</div></div></div>'}).join('')}catch(e){el.innerHTML='<span style="font-size:.8rem;color:var(--muted)">Execute o SQL de inventory_items no Supabase.</span>'}}
+if(items.length===0){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:.85rem">'+(isManaged?'Nenhum insumo cadastrado pelo dono da fazenda ainda.':'Nenhum insumo cadastrado.<br>Clique em "+ Cadastrar Insumo" para adicionar.')+'</div>';return}
+el.innerHTML=items.map(function(it){
+var low=it.quantidade<=0?'inv-low':'';
+var reportBtn=isManaged?'<button class="btn-secondary" style="font-size:.68rem;padding:6px 10px;margin-top:6px;white-space:nowrap" onclick="informarContagem(\''+it.id+'\')">📋 Informar contagem</button>':'';
+return'<div class="inv-card"><div class="inv-card-info"><div class="inv-card-nome">'+escapeHtml(it.nome)+'</div><div class="inv-card-meta">'+(it.categoria||'—')+(it.custo_unitario?' · R$ '+formatarNumero(it.custo_unitario)+'/'+it.unidade:'')+'</div>'+reportBtn+'</div><div class="inv-card-qty '+low+'">'+formatarNumero(it.quantidade)+'<div class="inv-card-unit">'+it.unidade+'</div></div></div>'}).join('')}catch(e){el.innerHTML='<span style="font-size:.8rem;color:var(--muted)">Execute o SQL de inventory_items no Supabase.</span>'}}
+
+async function informarContagem(itemId){
+var it=(State.invItems||[]).find(function(x){return x.id===itemId});
+if(!it){toast('Insumo não encontrado','erro');return}
+var v=prompt('Quantas unidades ('+it.unidade+') você contou agora no galpão de "'+it.nome+'"?\n\n(Sistema registrado: '+formatarNumero(it.quantidade)+' '+it.unidade+')');
+if(v===null)return;
+var n=parseFloat(String(v).replace(',','.'));
+if(isNaN(n)||n<0){toast('Quantidade inválida','erro');return}
+var diff=n-it.quantidade;
+var sinal=diff>0?'+':'';
+var content='[ESTOQUE] '+it.nome+': contagem atual '+formatarNumero(n)+' '+it.unidade+
+' (sistema tinha '+formatarNumero(it.quantidade)+' '+it.unidade+', diferença '+sinal+formatarNumero(diff)+' '+it.unidade+')';
+try{
+var r=await sb.from('field_logs').insert({property_id:State.selectedProperty,author_id:State.user.id,content:content,sector:'operacional'});
+if(r.error)throw r.error;
+toast('Contagem reportada no diário','ok');
+if(State.selectedProperty)loadTimeline(State.selectedProperty);
+}catch(e){toast('Erro: '+(e.message||e),'erro')}}
 
 async function loadInvPickerData(pid){try{var r=await sb.from('inventory_items').select('id,nome,quantidade,unidade').eq('property_id',pid).order('nome');if(!r.error)State.invItems=r.data||[]}catch(e){}}
 
@@ -2288,7 +2311,7 @@ function instalarApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt
 function fecharInstall(){document.getElementById('installPopup').style.display='none'}
 function adiarInstall(){localStorage.setItem('agruai_install_later',Date.now().toString());fecharInstall()}
 // Expose to onclick handlers
-window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.updateKanban=updateKanban;window.nextTourStep=nextTourStep;window.endTour=endTour;window.abrirModalPerfil=abrirModalPerfil;window.fecharModalPerfil=fecharModalPerfil;window.salvarPerfil=salvarPerfil;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.onGestorPhoto=onGestorPhoto;window.clearGestor=clearGestor;window.toggleGestorRec=toggleGestorRec;window.deepenWithGemini=deepenWithGemini;window.reTranscribeLog=reTranscribeLog;window.State=State;
+window.trocarTab=trocarTab;window.handleAuth=handleAuth;window.loginGoogle=loginGoogle;window.forcarAtualizacao=forcarAtualizacao;window.fazerLogout=fazerLogout;window.toggleUserMenu=toggleUserMenu;window.navegarPara=navegarPara;window.cadProximo=cadProximo;window.salvarPropriedade=salvarPropriedade;window.toast=toast;window.resolverAlerta=resolverAlerta;window.switchDetalheTab=switchDetalheTab;window.enviarLog=enviarLog;window.deletarLog=deletarLog;window.enviarMagicLink=enviarMagicLink;window.abrirModalConvite=abrirModalConvite;window.fecharModalConvite=fecharModalConvite;window.salvarConvite=salvarConvite;window.removerGestor=removerGestor;window.executeAIAction=executeAIAction;window.updateKanban=updateKanban;window.nextTourStep=nextTourStep;window.endTour=endTour;window.abrirModalPerfil=abrirModalPerfil;window.fecharModalPerfil=fecharModalPerfil;window.salvarPerfil=salvarPerfil;window.onPhotoSelected=onPhotoSelected;window.toggleWarRoom=toggleWarRoom;window.iniciarScanner=iniciarScanner;window.onTimelapseChange=onTimelapseChange;window.gerarLaudoESG=gerarLaudoESG;window.toggleRecording=toggleRecording;window.setLang=setLang;window.toggleInvPicker=toggleInvPicker;window.selectInvItem=selectInvItem;window.clearInvSelection=clearInvSelection;window.abrirModalInsumo=abrirModalInsumo;window.fecharModalInsumo=fecharModalInsumo;window.salvarInsumo=salvarInsumo;window.instalarApp=instalarApp;window.fecharInstall=fecharInstall;window.adiarInstall=adiarInstall;window.onGestorPhoto=onGestorPhoto;window.clearGestor=clearGestor;window.toggleGestorRec=toggleGestorRec;window.deepenWithGemini=deepenWithGemini;window.reTranscribeLog=reTranscribeLog;window.informarContagem=informarContagem;window.State=State;
 }catch(e){console.error('AgrUAI init error:',e);document.getElementById('loadingOverlay').style.display='none';
 var tw=document.getElementById('toastWrap');if(tw){var t=document.createElement('div');t.className='toast erro visivel';t.textContent='Erro ao iniciar o app. Recarregue a página.';tw.appendChild(t)}}
 })();
