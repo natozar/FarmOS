@@ -214,7 +214,7 @@ Deno.serve(async (req) => {
 
     const svc = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-    // Rate limit por usuario antes de gastar quota do Gemini
+    // Rate limit em camadas: feature_flag + burst(60s) + daily-user + daily-global.
     const { data: bumped, error: bumpErr } = await svc.rpc("bump_ai_usage", {
       p_user_id: userId,
       p_kind: "ai_suggest",
@@ -223,12 +223,14 @@ Deno.serve(async (req) => {
     if (bumpErr) {
       console.error("[ai-suggest] bump_ai_usage error", bumpErr.message);
     } else if (bumped && bumped.allowed === false) {
-      return json(429, {
-        error: "rate_limit_exceeded",
-        detail: `limite diario de ${MAX_AI_SUGGEST_PER_DAY} sugestoes atingido — tenta amanha`,
-        count: bumped.count,
-        max: bumped.max,
-      });
+      const reason = (bumped.reason as string) || "rate_limit_exceeded";
+      const detail =
+        reason === "feature_disabled" ? "sugestoes de IA estao temporariamente desativadas" :
+        reason === "burst" ? "muitas chamadas em poucos segundos — espera um pouco" :
+        reason === "global_ceiling" ? "sistema atingiu o teto diario global — tenta amanha" :
+        reason === "daily_user" ? `voce atingiu ${MAX_AI_SUGGEST_PER_DAY} sugestoes hoje — tenta amanha` :
+        "limite atingido";
+      return json(429, { error: reason, detail, ...bumped });
     }
 
     let ctx: PropertyContext = {};

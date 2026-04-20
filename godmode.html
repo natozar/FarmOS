@@ -211,6 +211,17 @@ tr:hover td{background:rgba(197,165,114,.02)}
     </div>
   </div>
 
+  <!-- AI DEFENSE PANEL -->
+  <div class="section" style="margin-bottom:16px">
+    <div class="section-header">
+      <h2>Defesa IA (tokens)</h2>
+      <span class="count" id="aiDefenseStatus" style="font-size:11px;color:var(--dim)">carregando...</span>
+    </div>
+    <div class="section-body" id="aiDefensePanel" style="padding:14px 16px">
+      <div class="empty-row" style="padding:12px">Carregando...</div>
+    </div>
+  </div>
+
   <!-- LEADS PENDENTES DE APROVACAO -->
   <div class="section" style="margin-bottom:16px">
     <div class="section-header">
@@ -280,7 +291,79 @@ async function initDash(user){
   document.getElementById('authGate').style.display='none';
   document.getElementById('dashboard').classList.add('ativo');
   document.getElementById('gmUser').textContent=user.email;
-  loadStats();loadTable();loadRecentUsers();loadAlertFeed();loadTelemetry();loadHolding();loadLeadsPendentes()}
+  loadStats();loadTable();loadRecentUsers();loadAlertFeed();loadTelemetry();loadHolding();loadLeadsPendentes();loadAIDefense()}
+
+async function loadAIDefense(){
+  var el=document.getElementById('aiDefensePanel');
+  var statusEl=document.getElementById('aiDefenseStatus');
+  try{
+    var r=await sb.rpc('ai_usage_overview');if(r.error)throw r.error;
+    var d=r.data||{};
+    var flags=d.flags||{};
+    var aiOn=flags.ai_suggest!==false;
+    var trOn=flags.transcribe!==false;
+    var aiCount=d.ai_suggest_today||0;
+    var trCount=d.transcribe_today||0;
+    var top=d.top_users_today||[];
+    statusEl.textContent='hoje: '+(aiCount+trCount)+' chamadas';
+    statusEl.style.color=(aiCount+trCount)>300?'var(--red)':'var(--gold)';
+    var flagsHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'+
+      '<div style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:10px 12px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+          '<div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em">ai_suggest (Gemini)</div>'+
+          '<button class="kill-btn'+(aiOn?'':' killed')+'" onclick="toggleFlag(\'ai_suggest\','+(!aiOn)+',this)">'+(aiOn?'DESLIGAR':'LIGAR')+'</button>'+
+        '</div>'+
+        '<div style="font-size:18px;font-weight:700;color:'+(aiOn?'var(--green)':'var(--red)')+'">'+(aiOn?'ON':'OFF')+'</div>'+
+        '<div style="font-size:11px;color:var(--text);margin-top:4px">'+aiCount+' chamadas hoje</div>'+
+      '</div>'+
+      '<div style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:10px 12px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+          '<div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em">transcribe (Groq)</div>'+
+          '<button class="kill-btn'+(trOn?'':' killed')+'" onclick="toggleFlag(\'transcribe\','+(!trOn)+',this)">'+(trOn?'DESLIGAR':'LIGAR')+'</button>'+
+        '</div>'+
+        '<div style="font-size:18px;font-weight:700;color:'+(trOn?'var(--green)':'var(--red)')+'">'+(trOn?'ON':'OFF')+'</div>'+
+        '<div style="font-size:11px;color:var(--text);margin-top:4px">'+trCount+' chamadas hoje</div>'+
+      '</div>'+
+    '</div>';
+    var topHtml='';
+    if(top.length){
+      topHtml='<div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Top users hoje</div>';
+      topHtml+=top.slice(0,10).map(function(u){
+        var uid=(u.user_id||'').slice(0,8);
+        var kind=u.kind||'?';
+        var n=u.n||0;
+        var barW=Math.min(100,n*3);
+        var color=n>=20?'var(--red)':n>=10?'var(--gold)':'var(--green)';
+        return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px">'+
+          '<span style="width:90px;font-variant-numeric:tabular-nums;color:var(--dim)">'+esc(uid)+'</span>'+
+          '<span style="width:80px;color:var(--gold);font-size:10px">'+esc(kind)+'</span>'+
+          '<div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+barW+'%;background:'+color+';border-radius:3px"></div></div>'+
+          '<span style="min-width:40px;text-align:right;color:'+color+';font-variant-numeric:tabular-nums">'+n+'</span>'+
+        '</div>';
+      }).join('');
+    }else{
+      topHtml='<div style="font-size:11px;color:var(--dim);padding:6px 0">Nenhuma chamada hoje.</div>';
+    }
+    el.innerHTML=flagsHtml+topHtml;
+  }catch(e){
+    statusEl.textContent='erro';
+    el.innerHTML='<div class="empty-row" style="padding:16px;color:var(--red);font-size:11px">Erro: '+esc(e.message||e)+'. Verifique se a migration 0031 foi aplicada.</div>';
+  }
+}
+
+window.toggleFlag=async function(key,newVal,btn){
+  var action=newVal?'LIGAR':'DESLIGAR';
+  if(!confirm(action+' '+key+'?\n\nTodos os usuários '+(newVal?'voltarão a ter acesso':'verão erro feature_disabled imediatamente')+'.'))return;
+  btn.disabled=true;var oldText=btn.textContent;btn.textContent='...';
+  try{
+    var r=await sb.from('feature_flags').update({enabled:newVal,updated_at:new Date().toISOString()}).eq('key',key);
+    if(r.error)throw r.error;
+    setTimeout(function(){loadAIDefense()},300);
+  }catch(e){
+    btn.disabled=false;btn.textContent=oldText;
+    alert('Erro ao alternar: '+(e.message||e));
+  }
+}
 
 async function loadLeadsPendentes(){
   var el=document.getElementById('leadsPendentes');var countEl=document.getElementById('leadsPendCount');

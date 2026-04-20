@@ -31,7 +31,9 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 - `field_logs` — diário de campo (ADR-002): registros textuais por propriedade com author_id, photo_url, audio_url (migration 0025), sector (ADR-005)
 - `property_managers` — relação proprietário→profissional (ADR-003/005): manager_email, manager_user_id, role, sector (agronomia/zootecnia/veterinaria/mecanica/operacional/financeiro)
 - `admin_users` (migration 0030) — fonte da verdade de quem é admin/CEO. Substitui o email hard-coded nas edge functions e RLS policies. Seed inicial: chatsagrado@gmail.com.
-- `ai_usage` (migration 0030) — rate-limit por (user, kind, day) nas edge functions de custo (ai-suggest, transcribe-audio).
+- `ai_usage` (migration 0030) — rate-limit agregado por (user, kind, day) nas edge functions de custo (ai-suggest, transcribe-audio).
+- `ai_request_log` (migration 0031) — uma linha por chamada IA aprovada. Base do burst-check (60s) e auditoria. Limpeza via `cleanup_ai_request_log()` (>7d).
+- `feature_flags` (migration 0031) — kill switch admin-toggleable por feature (ai_suggest, transcribe). `enabled=false` faz bump_ai_usage retornar `feature_disabled` sem redeploy.
 
 ### Colunas adicionadas (PROMPT-16)
 
@@ -56,7 +58,9 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 - `get_managed_properties(p_user_email)` — propriedades onde o email é gestor (SECURITY DEFINER)
 - `link_manager_on_login()` — trigger: vincula manager_user_id quando gestor cria conta (SECURITY DEFINER)
 - `is_admin()` — retorna true se auth.uid() está em admin_users (SECURITY DEFINER). Usada em RLS policies no lugar de comparar email literal.
-- `bump_ai_usage(p_user_id, p_kind, p_max_per_day)` — increment atomico + enforcement. Retorna `{allowed, count, max, remaining}`. Só `service_role` executa. Usa fuso `America/Sao_Paulo` pra o dia resetar à meia-noite BRT.
+- `bump_ai_usage(p_user_id, p_kind, p_max_per_day, p_max_global_per_day=500, p_max_per_minute=5)` — enforcement em 4 camadas em uma transação: feature_flag → burst(60s) → daily-user → daily-global. Retorna `{allowed, reason?, count_user, remaining_user, count_global, remaining_global}`. Razões: `feature_disabled | burst | daily_user | global_ceiling`. Só `service_role` executa.
+- `cleanup_ai_request_log()` — remove entradas de `ai_request_log` com mais de 7 dias. Executável por admin (ou via pg_cron).
+- `ai_usage_overview()` — dashboard admin (JSON com counts de hoje + top users + flags). Checa `is_admin()`.
 
 ### Extensões PostgreSQL
 
@@ -96,7 +100,7 @@ Todas as tabelas têm Row Level Security. Propriedades e leituras filtradas por 
 
 ## SQL
 
-- `supabase/migrations/` — histórico de SQLs já executados no banco (30 migrations numeradas, NÃO re-executar). Ver README da pasta.
+- `supabase/migrations/` — histórico de SQLs já executados no banco (32 migrations numeradas, NÃO re-executar). Ver README da pasta.
 - `supabase/seeds/demo_fazenda.sql` — seed de dados de demonstração.
 - Novos SQLs devem entrar como próxima migration numerada e ser aplicados manualmente no SQL Editor (ou via MCP `apply_migration`).
 
