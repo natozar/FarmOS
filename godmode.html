@@ -116,6 +116,24 @@ tr:hover td{background:rgba(197,165,114,.02)}
 .kill-btn:hover{border-color:var(--red);color:var(--red);background:rgba(196,90,74,.06)}
 .kill-btn.killed{border-color:var(--red);color:var(--red);cursor:default;opacity:.5}
 
+/* LEADS APPROVAL */
+.lead-row{display:grid;grid-template-columns:1.5fr 1.2fr 1fr 1fr 1fr auto;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(26,29,34,.4);font-size:11px}
+.lead-row:last-child{border-bottom:none}
+.lead-row:hover{background:rgba(197,165,114,.02)}
+.lead-nome{color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lead-email{color:var(--gold);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lead-meta{color:var(--dim);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lead-date{color:var(--dim);font-size:10px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.approve-btn{font-size:10px;font-family:var(--mono);padding:5px 10px;border:1px solid var(--green);border-radius:3px;color:var(--green);background:none;cursor:pointer;transition:all .15s;white-space:nowrap}
+.approve-btn:hover{background:rgba(74,140,92,.1);box-shadow:0 0 0 1px rgba(74,140,92,.3)}
+.approve-btn:disabled{opacity:.5;cursor:not-allowed}
+.approve-btn.done{color:var(--dim);border-color:var(--border);cursor:default}
+.lead-warn{color:var(--red);font-size:10px}
+@media(max-width:768px){
+  .lead-row{grid-template-columns:1fr auto;gap:4px}
+  .lead-row>*:nth-child(n+3):nth-child(-n+4){display:none}
+}
+
 @media(max-width:768px){
   .stats{grid-template-columns:1fr 1fr}
   #securityGrid{grid-template-columns:1fr!important}
@@ -193,6 +211,15 @@ tr:hover td{background:rgba(197,165,114,.02)}
     </div>
   </div>
 
+  <!-- LEADS PENDENTES DE APROVACAO -->
+  <div class="section" style="margin-bottom:16px">
+    <div class="section-header">
+      <h2>Leads Aguardando Aprovação</h2>
+      <span class="count" id="leadsPendCount" style="font-size:11px;color:var(--gold);font-variant-numeric:tabular-nums">—</span>
+    </div>
+    <div class="section-body" id="leadsPendentes"><div class="empty-row" style="padding:20px">Carregando...</div></div>
+  </div>
+
   <div class="tbl-wrap">
     <div class="tbl-header">
       <h2>Propriedades por Produtor</h2>
@@ -253,7 +280,52 @@ async function initDash(user){
   document.getElementById('authGate').style.display='none';
   document.getElementById('dashboard').classList.add('ativo');
   document.getElementById('gmUser').textContent=user.email;
-  loadStats();loadTable();loadRecentUsers();loadAlertFeed();loadTelemetry();loadHolding()}
+  loadStats();loadTable();loadRecentUsers();loadAlertFeed();loadTelemetry();loadHolding();loadLeadsPendentes()}
+
+async function loadLeadsPendentes(){
+  var el=document.getElementById('leadsPendentes');var countEl=document.getElementById('leadsPendCount');
+  try{
+    var r=await sb.from('participantes').select('id,nome,email,contato,propriedades,regiao,atividade,created_at').is('aprovado_at',null).order('created_at',{ascending:false}).limit(100);
+    if(r.error)throw r.error;
+    var leads=r.data||[];
+    countEl.textContent=leads.length+' pendente'+(leads.length===1?'':'s');
+    if(leads.length===0){el.innerHTML='<div class="empty-row" style="padding:20px">Nenhum lead pendente. 🎉</div>';return}
+    el.innerHTML=leads.map(function(l){
+      var email=l.email||'';
+      var emailCell=email?'<div class="lead-email">'+esc(email)+'</div>':'<div class="lead-warn">sem email — impossível convidar</div>';
+      var btn=email?'<button class="approve-btn" onclick="approveLead(\''+l.id+'\',this)">✓ Aprovar &amp; convidar</button>':'<button class="approve-btn" disabled>sem email</button>';
+      var data=new Date(l.created_at);
+      var dStr=data.toLocaleDateString('pt-BR')+' '+data.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      return'<div class="lead-row">'+
+        '<div class="lead-nome">'+esc(l.nome||'—')+'</div>'+
+        emailCell+
+        '<div class="lead-meta">'+esc(l.propriedades||'—')+' prop</div>'+
+        '<div class="lead-meta">'+esc(l.regiao||'—')+'</div>'+
+        '<div class="lead-date">'+dStr+'</div>'+
+        btn+
+      '</div>';
+    }).join('');
+  }catch(e){el.innerHTML='<div class="empty-row" style="padding:20px;color:var(--red)">Erro: '+esc(e.message||e)+'</div>'}
+}
+
+function esc(s){var d=document.createElement('div');d.textContent=String(s==null?'':s);return d.innerHTML}
+
+window.approveLead=async function(leadId,btn){
+  if(!confirm('Enviar convite por email pro lead?\n\nUm magic-link vai pro email cadastrado. Ele clica, entra direto no painel.'))return;
+  btn.disabled=true;btn.textContent='enviando...';
+  try{
+    var sess=await sb.auth.getSession();var token=sess&&sess.data&&sess.data.session&&sess.data.session.access_token;
+    if(!token)throw new Error('sem sessão');
+    var res=await fetch(SUPA_URL+'/functions/v1/invite-lead',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'apikey':SUPA_KEY},body:JSON.stringify({lead_id:leadId})});
+    var data=await res.json();
+    if(!res.ok){
+      if(data.error==='user_already_exists'){btn.className='approve-btn done';btn.textContent='já existe';alert('Esse email já tem conta no AgrUAI. Marcado como resolvido.');return}
+      throw new Error(data.error+(data.detail?' — '+data.detail:''));
+    }
+    btn.className='approve-btn done';btn.textContent='✓ convidado';
+    setTimeout(function(){loadLeadsPendentes()},1500);
+  }catch(e){btn.disabled=false;btn.textContent='✓ Aprovar & convidar';alert('Erro: '+(e.message||e))}
+}
 
 async function loadStats(){
   try{var r=await sb.rpc('admin_stats');if(r.error)throw r.error;var d=r.data[0]||{};
