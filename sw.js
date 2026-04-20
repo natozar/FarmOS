@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agruai-v7';
+const CACHE_NAME = 'agruai-v8';
 const STATIC_ASSETS = [
   './',
   './painel.html',

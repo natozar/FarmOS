@@ -16,6 +16,7 @@ const GROQ_URL = "https://api.groq.com/openai/v1/audio/transcriptions";
 const GROQ_MODEL = "whisper-large-v3-turbo";
 const BUCKET = "field-media";
 const MAX_AUDIO_BYTES = 25 * 1024 * 1024; // 25 MB (limite padrao do Whisper)
+const MAX_TRANSCRIBE_PER_DAY = 30;
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -58,6 +59,24 @@ Deno.serve(async (req) => {
     }
 
     const svc = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+    // Rate limit por usuario antes de gastar quota do Groq
+    const { data: bumped, error: bumpErr } = await svc.rpc("bump_ai_usage", {
+      p_user_id: userId,
+      p_kind: "transcribe",
+      p_max_per_day: MAX_TRANSCRIBE_PER_DAY,
+    });
+    if (bumpErr) {
+      console.error("[transcribe-audio] bump_ai_usage error", bumpErr.message);
+    } else if (bumped && bumped.allowed === false) {
+      return json(429, {
+        error: "rate_limit_exceeded",
+        detail: `limite diario de ${MAX_TRANSCRIBE_PER_DAY} transcricoes atingido — tenta amanha`,
+        count: bumped.count,
+        max: bumped.max,
+      });
+    }
+
     const { data: fileData, error: dlErr } = await svc.storage.from(BUCKET).download(storagePath);
     if (dlErr || !fileData) {
       return json(404, { error: "download_failed", detail: dlErr?.message?.slice(0, 120) });

@@ -1,7 +1,7 @@
 // Edge Function: invite-lead
-// Admin-only (chatsagrado@gmail.com). Dado um participantes.id, chama
-// auth.admin.inviteUserByEmail pro email do lead, redireciona pro painel
-// e marca o lead como aprovado.
+// Admin-only (membros da tabela admin_users). Dado um participantes.id,
+// chama auth.admin.inviteUserByEmail pro email do lead, redireciona pro
+// painel e marca o lead como aprovado.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -9,7 +9,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ADMIN_EMAIL = "chatsagrado@gmail.com";
 const REDIRECT_URL = "https://agruai.com/painel.html";
 
 const corsHeaders: Record<string, string> = {
@@ -38,14 +37,21 @@ Deno.serve(async (req) => {
     const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { data: userData, error: userErr } = await authClient.auth.getUser(userJwt);
     if (userErr || !userData?.user) return json(401, { error: "invalid_jwt" });
-    if (userData.user.email !== ADMIN_EMAIL) return json(403, { error: "admin_only" });
+
+    const svc = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+    // Autorizacao via tabela admin_users (troca do email hard-coded).
+    const { data: adminRow } = await svc
+      .from("admin_users")
+      .select("user_id")
+      .eq("user_id", userData.user.id)
+      .maybeSingle();
+    if (!adminRow) return json(403, { error: "admin_only" });
 
     const body = await req.json().catch(() => ({}));
     const leadId: string | undefined = body.lead_id;
     const emailOverride: string | undefined = body.email;
     if (!leadId && !emailOverride) return json(400, { error: "lead_id_or_email_required" });
-
-    const svc = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
     // Carrega o lead (se foi passado id)
     let targetEmail = emailOverride || "";

@@ -1,3 +1,36 @@
+# Node / Playwright
 node_modules
 test-results
 playwright-report
+playwright/.cache
+blob-report
+
+# Supabase CLI
+supabase/.temp
+supabase/.branches
+
+# Vercel
+.vercel
+
+# Scratch / paralelo repos (snapshots antigos, nao versionar)
+FarmOS
+FarmOS-latest
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.local
+.env.*.local

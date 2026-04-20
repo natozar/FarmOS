@@ -14,6 +14,10 @@ const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
+// Rate limit: Gemini free tier e 1500 req/dia compartilhados. 30/user/dia
+// deixa 50 usuarios ativos caberem com folga.
+const MAX_AI_SUGGEST_PER_DAY = 30;
+
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -209,6 +213,24 @@ Deno.serve(async (req) => {
     if (logText.length > 2000) return json(400, { error: "log_text too long (max 2000 chars)" });
 
     const svc = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+    // Rate limit por usuario antes de gastar quota do Gemini
+    const { data: bumped, error: bumpErr } = await svc.rpc("bump_ai_usage", {
+      p_user_id: userId,
+      p_kind: "ai_suggest",
+      p_max_per_day: MAX_AI_SUGGEST_PER_DAY,
+    });
+    if (bumpErr) {
+      console.error("[ai-suggest] bump_ai_usage error", bumpErr.message);
+    } else if (bumped && bumped.allowed === false) {
+      return json(429, {
+        error: "rate_limit_exceeded",
+        detail: `limite diario de ${MAX_AI_SUGGEST_PER_DAY} sugestoes atingido — tenta amanha`,
+        count: bumped.count,
+        max: bumped.max,
+      });
+    }
+
     let ctx: PropertyContext = {};
     if (propertyId) {
       const allowed = await userHasAccess(propertyId, userId, userEmail, svc);

@@ -23,13 +23,15 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 
 ### Schema principal
 
-- `participantes` — leads da landing page (nome, email, telefone, desafio, origem)
+- `participantes` — leads da landing page (nome, email, telefone, desafio, origem). `aprovado_at` / `aprovado_por` marcam leads já convidados via godmode (migration 0029).
 - `profiles` — extensão de auth.users (trigger auto-cria no signup)
 - `properties` — propriedades rurais com geometria PostGIS (MultiPolygon), CAR code, centroide, área, crop_type (ADR-004)
 - `satellite_readings` — leituras de satélite (NDVI, EVI, NDWI) por propriedade
 - `alerts` — alertas automáticos baseados em leituras
-- `field_logs` — diário de campo (ADR-002): registros textuais por propriedade com author_id, photo_url, sector (ADR-005)
+- `field_logs` — diário de campo (ADR-002): registros textuais por propriedade com author_id, photo_url, audio_url (migration 0025), sector (ADR-005)
 - `property_managers` — relação proprietário→profissional (ADR-003/005): manager_email, manager_user_id, role, sector (agronomia/zootecnia/veterinaria/mecanica/operacional/financeiro)
+- `admin_users` (migration 0030) — fonte da verdade de quem é admin/CEO. Substitui o email hard-coded nas edge functions e RLS policies. Seed inicial: chatsagrado@gmail.com.
+- `ai_usage` (migration 0030) — rate-limit por (user, kind, day) nas edge functions de custo (ai-suggest, transcribe-audio).
 
 ### Colunas adicionadas (PROMPT-16)
 
@@ -53,6 +55,8 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 - `get_property_managers(p_property_id)` — lista gestores convidados de uma propriedade (SECURITY DEFINER)
 - `get_managed_properties(p_user_email)` — propriedades onde o email é gestor (SECURITY DEFINER)
 - `link_manager_on_login()` — trigger: vincula manager_user_id quando gestor cria conta (SECURITY DEFINER)
+- `is_admin()` — retorna true se auth.uid() está em admin_users (SECURITY DEFINER). Usada em RLS policies no lugar de comparar email literal.
+- `bump_ai_usage(p_user_id, p_kind, p_max_per_day)` — increment atomico + enforcement. Retorna `{allowed, count, max, remaining}`. Só `service_role` executa. Usa fuso `America/Sao_Paulo` pra o dia resetar à meia-noite BRT.
 
 ### Extensões PostgreSQL
 
@@ -63,6 +67,10 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 ### Edge Functions
 
 - `fetch-satellite-data` — busca dados Copernicus para propriedades ativas, grava em satellite_readings, gera alertas. Agendada via pg_cron diariamente às 10:00 UTC (07:00 BRT).
+- `generate-daily-article` — gera artigo do blog diariamente via Gemini.
+- `ai-suggest` — 3 ações práticas no diário de campo via Gemini 2.5 Flash (free tier, `thinkingBudget=0`). JWT ES256 validado manualmente (`verify_jwt: false` no deploy + `getUser()` no código). Rate-limit 30/user/dia. Owner-only na UI (stripped em views de gestor).
+- `transcribe-audio` — transcreve áudio do bucket `field-media` via Groq Whisper Large v3 Turbo (free tier). Valida prefixo `{user_id}/` no storage_path. Rate-limit 30/user/dia.
+- `invite-lead` — admin-only (checa `admin_users`). Chama `auth.admin.inviteUserByEmail`, redireciona pro painel, marca `aprovado_at` em participantes.
 
 ### Storage
 
@@ -88,9 +96,9 @@ Todas as tabelas têm Row Level Security. Propriedades e leituras filtradas por 
 
 ## SQL
 
-- `supabase/migrations/` — histórico de SQLs já executados no banco (21 migrations numeradas, NÃO re-executar). Ver README da pasta.
+- `supabase/migrations/` — histórico de SQLs já executados no banco (30 migrations numeradas, NÃO re-executar). Ver README da pasta.
 - `supabase/seeds/demo_fazenda.sql` — seed de dados de demonstração.
-- Novos SQLs devem entrar como próxima migration numerada e ser aplicados manualmente no SQL Editor.
+- Novos SQLs devem entrar como próxima migration numerada e ser aplicados manualmente no SQL Editor (ou via MCP `apply_migration`).
 
 ## Design tokens
 
@@ -116,6 +124,8 @@ Fontes: Space Grotesk (headings), Inter (body). Tema escuro.
 - `painel.html` é secreto: sem links de nenhuma página, com `noindex, nofollow`
 - PROMPTs são instruções para Claude Code executar (não são código ativo)
 - Landing page NÃO deve conter screenshots do produto real — apenas ilustrações conceituais (SVG/CSS)
+- **Service worker:** bumpar `CACHE_NAME` em `sw.js` sempre que `painel.html` mudar. Clientes PWA antigos caem em versões velhas se o cache não invalidar, o que já causou dois 404s em produção.
+- **Autorização:** nunca hard-codar email admin em RLS/edge function. Fonte única da verdade é `admin_users` + `public.is_admin()`.
 
 ## Mapbox
 
@@ -137,6 +147,9 @@ código ativo — o trabalho deles está refletido nos 15 épicos entregues.
 
 - **API key com typo:** A anon key do Supabase tinha 1 caractere errado (posição 80 do JWT: `2` em vez de `v`), herdado de extração via Chrome que bloqueava JWTs. Corrigido no PROMPT-11. A versão deployada do painel.html nunca teve o erro — o Code gerou a key correta independentemente.
 - **Signup 500 (trigger sem SECURITY DEFINER):** O trigger `handle_new_user` falhava ao inserir em `profiles` porque o RLS bloqueava o INSERT feito pelo contexto de auth. Corrigido no PROMPT-18 adicionando `SECURITY DEFINER` e `SET search_path = public`. Policies de profiles: `users_own_profile` (ALL) + `allow_trigger_insert` (INSERT).
+- **RLS 403 no SELECT de properties/field_logs:** Múltiplas policies liam `(SELECT email FROM auth.users WHERE id = auth.uid())`, mas o role `authenticated` não tem SELECT em `auth.users`. Qualquer gestor logava mas não via nada. Corrigido nas migrations 0026–0028 substituindo por `auth.jwt() ->> 'email'`.
+- **Gemini 2.5 Flash truncando:** `thinkingBudget` consumia todo `maxOutputTokens` antes de gerar saída. Resolvido com `thinkingConfig: { thinkingBudget: 0 }` no generationConfig.
+- **JWT ES256 rejeitado pelo verify_jwt builtin:** Nova Supabase assina com ES256; o verify automático das Edge Functions espera HS256. Solução: `verify_jwt: false` no deploy + validação manual via `authClient.auth.getUser(jwt)` no código.
 
 ## Estado atual
 
