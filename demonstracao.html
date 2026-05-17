@@ -3,9 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="robots" content="noindex, nofollow">
-<title>AgrUAI — Demonstração para Investidores</title>
-<meta name="description" content="Demonstração interativa do AgrUAI — inteligência rural por satélite. Tour guiado para investidores.">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot" content="noindex, nofollow">
+<title>AgrUAI — Demonstração privada</title>
+<meta name="description" content="Inteligência rural por satélite. Preview interativo da plataforma AgrUAI sobre fazenda real em Sorriso/MT.">
+<meta name="theme-color" content="#0F1F0F">
+
+<!-- ============ OpenGraph (WhatsApp / iMessage / LinkedIn / Discord) ============ -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AgrUAI">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="AgrUAI — Inteligência rural por satélite">
+<meta property="og:description" content="Demonstração interativa da plataforma sobre fazenda real em Sorriso/MT — NDVI Sentinel-2, diário de campo com IA e gestão de equipe.">
+<meta property="og:image" content="https://agruai.com/og.jpg">
+<meta property="og:image:secure_url" content="https://agruai.com/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Vista de satélite de Sorriso/MT com marcador da fazenda de demonstração AgrUAI">
+
+<!-- ============ Twitter / X ============ -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AgrUAI — Inteligência rural por satélite">
+<meta name="twitter:description" content="Demonstração interativa da plataforma sobre fazenda real em Sorriso/MT.">
+<meta name="twitter:image" content="https://agruai.com/og.jpg">
+<meta name="twitter:image:alt" content="Vista de satélite de Sorriso/MT — Fazenda demonstração AgrUAI">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://api.mapbox.com">
@@ -419,15 +442,13 @@ input,select,textarea{font-family:inherit;color:inherit;background:none;border:n
     <h1 class="page-h">Sua equipe</h1>
     <p class="page-sub">Convide profissionais por e-mail. Cada papel (Agronomia, Veterinária, Operacional, etc.) tem permissões específicas e enxerga apenas o que precisa.</p>
     <div id="memberList"></div>
-    <div class="card" style="margin-top:18px">
-      <div class="card-h"><h3>➕ Convidar profissional</h3></div>
-      <div class="invite-row">
-        <input type="email" placeholder="email@profissional.com" id="inviteEmail">
-        <select id="inviteRole">
-          <option>Agronomia</option><option>Veterinária</option><option>Zootecnia</option>
-          <option>Operacional</option><option>Mecânica</option><option>Financeiro</option>
-        </select>
-        <button onclick="fakeInvite()">Enviar convite</button>
+    <div class="card" style="margin-top:18px;background:linear-gradient(135deg,rgba(74,140,92,.06),rgba(197,165,114,.04));border-color:rgba(74,140,92,.2)">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div style="font-size:1.6rem">🔐</div>
+        <div>
+          <h3 style="font-size:.95rem;margin-bottom:6px">Convites por e-mail com setores granulares</h3>
+          <p style="font-size:.84rem;color:var(--muted);line-height:1.55">No produto, o proprietário convida profissionais escolhendo o setor (Agronomia, Veterinária, Zootecnia, Operacional, Mecânica, Financeiro). Cada papel tem RLS própria e vê só o que precisa. <span class="gold">Fluxo desabilitado nesta demonstração.</span></p>
+        </div>
       </div>
     </div>
   </section>
@@ -762,13 +783,6 @@ function renderEquipe(){
     </div>
     <span class="member-tag ${m.status}">${m.status==='ativo'?'Ativo':'Convite pendente'}</span>
   </div>`).join('');
-}
-
-function fakeInvite(){
-  const email = document.getElementById('inviteEmail').value.trim();
-  if(!email || !email.includes('@')) return showToast('Informe um e-mail válido');
-  showToast(`✉️ Convite enviado para ${email}`);
-  document.getElementById('inviteEmail').value = '';
 }
 
 /* ===================================================================
