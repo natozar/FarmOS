@@ -10,6 +10,9 @@
     { "source": "/painel", "destination": "/painel.html" },
     { "source": "/entrar", "destination": "/painel.html" },
     { "source": "/fazenda", "destination": "/painel.html" },
+    { "source": "/demonstracao", "destination": "/demonstracao.html" },
+    { "source": "/demostracao", "destination": "/demonstracao.html" },
+    { "source": "/demo", "destination": "/demonstracao.html" },
     { "source": "/index.html", "destination": "/painel.html" }
   ],
   "headers": [
@@ -27,6 +30,12 @@
     },
     {
       "source": "/godmode.html",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
+      "source": "/demonstracao.html",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
       ]

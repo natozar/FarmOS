@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>AgrUAI — Demonstração para Investidores</title>
+<meta name="description" content="Demonstração interativa do AgrUAI — inteligência rural por satélite. Tour guiado para investidores.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://api.mapbox.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+<style>
+:root{
+  --dark:#0F1F0F;--surface:#1A2E1A;--surface-2:#15281A;--border:#2E4A2E;
+  --green:#4A8C5C;--green-glow:rgba(74,140,92,.18);
+  --amber:#D4A040;--red:#C45A4A;--gold:#C5A572;
+  --text:#F5F0E8;--muted:#A89E90;--white:#FAFAF7;
+  --radius:12px;--radius-sm:8px;--radius-lg:18px;
+  --t:.22s cubic-bezier(.2,.7,.2,1);
+  --shadow:0 12px 36px rgba(0,0,0,.45);
+  --shadow-card:0 4px 16px rgba(0,0,0,.28);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--dark);color:var(--text);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+button{cursor:pointer;font-family:inherit;color:inherit;border:none;background:none}
+input,select,textarea{font-family:inherit;color:inherit;background:none;border:none;outline:none;font-size:.9rem}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+
+/* ===== HEADER ===== */
+.demo-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;background:linear-gradient(90deg,rgba(197,165,114,.08),rgba(74,140,92,.08),rgba(197,165,114,.08));border-bottom:1px solid var(--border);font-size:.72rem;color:var(--gold);text-align:center;font-weight:600;letter-spacing:.04em}
+.demo-bar .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40;backdrop-filter:blur(8px)}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:-.02em}
+.brand .leaf{width:22px;height:22px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 30% 30%,var(--gold),#8a7148);box-shadow:0 0 12px rgba(197,165,114,.4)}
+.brand .leaf::before{content:'🛰';font-size:.7rem;filter:saturate(0) brightness(2)}
+.brand .l2{color:var(--gold)}
+.header-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.role-switch{display:inline-flex;background:rgba(15,31,15,.7);border:1px solid var(--border);border-radius:999px;padding:3px;gap:2px}
+.role-switch button{padding:8px 14px;font-size:.74rem;font-weight:600;border-radius:999px;color:var(--muted);transition:all var(--t);letter-spacing:.02em;white-space:nowrap}
+.role-switch button.on{background:var(--gold);color:var(--dark);box-shadow:0 2px 12px rgba(197,165,114,.35)}
+.role-switch button:not(.on):hover{color:var(--text)}
+.icon-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;font-size:.74rem;font-weight:600;border:1px solid var(--border);border-radius:999px;color:var(--muted);transition:all var(--t)}
+.icon-btn:hover{border-color:var(--gold);color:var(--gold)}
+.role-pill{font-size:.62rem;font-weight:700;color:var(--gold);padding:4px 10px;border-radius:999px;background:rgba(197,165,114,.1);border:1px solid rgba(197,165,114,.25);letter-spacing:.08em;text-transform:uppercase}
+.role-pill.gestor{color:var(--green);background:rgba(74,140,92,.1);border-color:rgba(74,140,92,.3)}
+
+/* ===== TABS ===== */
+.tabs{display:flex;gap:4px;padding:10px 16px;background:var(--surface-2);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:64px;z-index:35;backdrop-filter:blur(8px)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:9px 18px;font-size:.78rem;font-weight:600;color:var(--muted);border-radius:8px;white-space:nowrap;transition:all var(--t);display:inline-flex;align-items:center;gap:7px;flex-shrink:0}
+.tab:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.tab.on{color:var(--gold);background:rgba(197,165,114,.08)}
+.tab .badge{font-size:.6rem;padding:2px 6px;border-radius:999px;background:var(--red);color:#fff;font-weight:700}
+.tab.hidden{display:none}
+
+/* ===== CONTENT ===== */
+.shell{max-width:1180px;margin:0 auto;padding:28px 24px 80px;min-height:calc(100dvh - 130px)}
+.screen{display:none;animation:fade .35s cubic-bezier(.2,.7,.2,1)}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.eyebrow{font-size:.68rem;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;font-weight:600;margin-bottom:6px}
+.page-h{font-size:1.7rem;margin-bottom:6px;font-weight:600}
+.page-sub{font-size:.92rem;color:var(--muted);margin-bottom:24px;max-width:680px;line-height:1.55}
+
+/* ===== KPI GRID ===== */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:28px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;transition:all var(--t);position:relative;overflow:hidden}
+.kpi:hover{border-color:rgba(197,165,114,.4);transform:translateY(-2px);box-shadow:var(--shadow-card)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:.6}
+.kpi.green::before{background:var(--green)}
+.kpi.amber::before{background:var(--amber)}
+.kpi.red::before{background:var(--red)}
+.kpi-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.kpi-value{font-family:'Space Grotesk',sans-serif;font-size:1.85rem;font-weight:700;letter-spacing:-.02em;line-height:1}
+.kpi-value .unit{font-size:.85rem;color:var(--muted);font-weight:500;margin-left:4px}
+.kpi-trend{font-size:.72rem;color:var(--green);margin-top:8px;font-weight:600;display:flex;align-items:center;gap:4px}
+.kpi-trend.down{color:var(--red)}
+.kpi-trend.neutral{color:var(--muted)}
+
+/* ===== CARDS / SECTIONS ===== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px;transition:border-color var(--t)}
+.card.hover:hover{border-color:rgba(197,165,114,.35)}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.card-h h3{font-size:1.05rem}
+.card-h .meta{font-size:.74rem;color:var(--muted)}
+
+.split{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+@media(max-width:920px){.split{grid-template-columns:1fr}}
+
+/* ===== TALHÃO LIST ===== */
+.talhao{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid rgba(46,74,46,.5)}
+.talhao:last-child{border-bottom:none}
+.talhao-id{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;color:var(--dark);flex-shrink:0}
+.talhao-info{flex:1;min-width:0}
+.talhao-nome{font-weight:600;font-size:.95rem;margin-bottom:2px}
+.talhao-meta{font-size:.74rem;color:var(--muted)}
+.talhao-ndvi{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:-.02em;text-align:right}
+.talhao-status{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;text-align:right}
+
+/* ===== MAP ===== */
+.map-wrap{position:relative;height:540px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);background:#0a1208;margin-bottom:14px}
+#mainMap{position:absolute;inset:0}
+.map-overlay-top{position:absolute;top:16px;left:16px;right:16px;display:flex;justify-content:space-between;gap:10px;pointer-events:none;flex-wrap:wrap;z-index:10}
+.map-overlay-top > *{pointer-events:auto}
+.map-pill{padding:8px 14px;background:rgba(15,31,15,.92);border:1px solid var(--border);border-radius:999px;font-size:.74rem;font-weight:600;color:var(--text);backdrop-filter:blur(8px);display:inline-flex;align-items:center;gap:6px}
+.map-pill .dot-live{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+.map-legend{display:flex;gap:14px;flex-wrap:wrap}
+.legend-i{display:inline-flex;align-items:center;gap:6px;font-size:.7rem}
+.legend-i .sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(255,255,255,.2)}
+
+.timelapse{position:absolute;bottom:0;left:0;right:0;padding:14px 18px 18px;background:linear-gradient(to top,rgba(15,31,15,.96),transparent);display:flex;align-items:center;gap:14px;z-index:10}
+.timelapse-slider{flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:linear-gradient(90deg,#7a3a2c,var(--amber),var(--green));outline:none;cursor:pointer}
+.timelapse-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--gold);border:2px solid var(--dark);box-shadow:0 0 12px rgba(197,165,114,.5);cursor:grab}
+.timelapse-slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--gold);border:2px solid var(--dark)}
+.timelapse-label{font-family:'Space Grotesk',sans-serif;font-size:.84rem;font-weight:700;color:var(--gold);min-width:90px;text-align:center;font-variant-numeric:tabular-nums}
+.timelapse-leg{font-size:.66rem;color:var(--muted);min-width:74px}
+
+/* ===== DIÁRIO ===== */
+.log{display:flex;gap:14px;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;transition:border-color var(--t)}
+.log:hover{border-color:rgba(197,165,114,.25)}
+.log-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;color:var(--dark);flex-shrink:0;background:var(--gold)}
+.log-avatar.agr{background:var(--green);color:var(--white)}
+.log-avatar.op{background:var(--amber);color:var(--dark)}
+.log-body{flex:1;min-width:0}
+.log-head{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.log-author{font-weight:600;font-size:.92rem}
+.log-role{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.log-date{font-size:.72rem;color:var(--muted);margin-left:auto}
+.log-text{font-size:.92rem;line-height:1.6;color:var(--text);margin-bottom:10px}
+.log-photo{width:100%;max-width:280px;height:160px;border-radius:8px;background:linear-gradient(135deg,#3a4a2a 0%,#5a6a3a 50%,#2a3a1a 100%) center/cover;position:relative;overflow:hidden;border:1px solid var(--border);margin-bottom:10px}
+.log-photo::after{content:'📷 Vistoria Talhão C';position:absolute;bottom:8px;left:10px;font-size:.66rem;color:#fff;background:rgba(0,0,0,.55);padding:3px 8px;border-radius:4px}
+.log-audio{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(74,140,92,.06);border:1px solid rgba(74,140,92,.18);border-radius:8px;margin-bottom:10px;font-size:.78rem}
+.log-audio .play{width:28px;height:28px;border-radius:50%;background:var(--green);display:grid;place-items:center;color:#fff;flex-shrink:0}
+.log-wave{flex:1;display:flex;align-items:center;gap:2px;height:24px}
+.log-wave i{display:block;width:3px;background:var(--green);border-radius:2px;opacity:.5}
+.log-transcript{font-size:.78rem;color:var(--muted);font-style:italic;line-height:1.5;padding:8px 0;border-top:1px dashed rgba(168,158,144,.2)}
+.ia-suggest{background:linear-gradient(135deg,rgba(197,165,114,.08),rgba(74,140,92,.06));border:1px solid rgba(197,165,114,.22);border-radius:8px;padding:14px 16px;margin-top:10px}
+.ia-suggest-h{display:flex;align-items:center;gap:8px;font-size:.74rem;font-weight:700;color:var(--gold);margin-bottom:10px;letter-spacing:.04em;text-transform:uppercase}
+.ia-suggest ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.ia-suggest li{font-size:.86rem;line-height:1.45;display:flex;gap:8px;align-items:flex-start}
+.ia-suggest li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0}
+
+/* ===== ALERTAS ===== */
+.alert{display:flex;gap:14px;padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;align-items:flex-start;transition:all var(--t)}
+.alert.critical{border-left:3px solid var(--red)}
+.alert.warning{border-left:3px solid var(--amber)}
+.alert.info{border-left:3px solid var(--green)}
+.alert-ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:1rem;flex-shrink:0}
+.alert.critical .alert-ic{background:rgba(196,90,74,.15);color:var(--red)}
+.alert.warning .alert-ic{background:rgba(212,160,64,.15);color:var(--amber)}
+.alert.info .alert-ic{background:rgba(74,140,92,.15);color:var(--green)}
+.alert-body{flex:1;min-width:0}
+.alert-title{font-weight:600;font-size:.92rem;margin-bottom:3px}
+.alert-msg{font-size:.82rem;color:var(--muted);line-height:1.55;margin-bottom:6px}
+.alert-risk{font-size:.74rem;color:var(--red);font-weight:600;letter-spacing:.02em}
+.alert-meta{font-size:.7rem;color:var(--muted);margin-top:6px}
+.alert-action{padding:7px 14px;font-size:.74rem;font-weight:600;border-radius:999px;border:1px solid var(--border);color:var(--muted);transition:all var(--t);align-self:center;flex-shrink:0}
+.alert-action:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ===== EQUIPE ===== */
+.member{display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;transition:all var(--t)}
+.member:hover{border-color:rgba(197,165,114,.3)}
+.member-av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;color:var(--dark);background:var(--gold);flex-shrink:0}
+.member-info{flex:1;min-width:0}
+.member-nome{font-weight:600;font-size:.95rem}
+.member-meta{font-size:.74rem;color:var(--muted);margin-top:2px}
+.member-tag{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px;border-radius:999px}
+.member-tag.ativo{background:rgba(74,140,92,.12);color:var(--green)}
+.member-tag.pendente{background:rgba(212,160,64,.12);color:var(--amber)}
+
+.invite-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.invite-row input,.invite-row select{flex:1;min-width:140px;padding:11px 14px;background:rgba(15,31,15,.6);border:1px solid var(--border);border-radius:var(--radius-sm)}
+.invite-row button{padding:11px 22px;background:var(--gold);color:var(--dark);font-weight:700;border-radius:var(--radius-sm);font-size:.84rem;transition:all var(--t)}
+.invite-row button:hover{background:#b8945a;transform:translateY(-1px)}
+
+/* ===== PITCH ===== */
+.pitch-hero{padding:36px 28px;background:linear-gradient(135deg,rgba(197,165,114,.08),rgba(74,140,92,.06));border:1px solid rgba(197,165,114,.2);border-radius:var(--radius-lg);margin-bottom:24px;text-align:center}
+.pitch-hero h2{font-size:2rem;margin-bottom:10px;background:linear-gradient(135deg,var(--gold),#e8d8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pitch-hero p{font-size:1rem;color:var(--text);max-width:620px;margin:0 auto;line-height:1.6;opacity:.92}
+
+.pitch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:18px}
+.pitch-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px}
+.pitch-card .ico{font-size:1.4rem;margin-bottom:10px;display:block}
+.pitch-card h4{font-size:1rem;margin-bottom:8px}
+.pitch-card p{font-size:.86rem;color:var(--muted);line-height:1.55}
+.pitch-card strong{color:var(--text);font-weight:600}
+
+.metrics-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px}
+.metric{text-align:center}
+.metric .num{font-family:'Space Grotesk',sans-serif;font-size:1.9rem;font-weight:700;color:var(--gold);letter-spacing:-.02em;line-height:1;display:block;margin-bottom:6px}
+.metric .lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+.ask{background:linear-gradient(135deg,rgba(74,140,92,.1),rgba(197,165,114,.06));border:1px solid rgba(74,140,92,.3);border-radius:var(--radius);padding:24px;text-align:center}
+.ask h3{font-size:1.15rem;margin-bottom:8px;color:var(--gold)}
+.ask p{font-size:.92rem;color:var(--text);line-height:1.6;max-width:560px;margin:0 auto 14px;opacity:.92}
+.ask a{display:inline-block;padding:12px 28px;background:var(--gold);color:var(--dark);border-radius:999px;font-weight:700;font-size:.86rem;text-decoration:none;transition:all var(--t)}
+.ask a:hover{background:#b8945a;transform:translateY(-1px);box-shadow:0 8px 22px rgba(197,165,114,.3)}
+
+/* ===== TOUR ===== */
+.tour-shroud{position:fixed;inset:0;background:rgba(8,16,8,.78);z-index:100;display:none;pointer-events:auto}
+.tour-shroud.on{display:block;animation:fade .3s}
+.tour-spot{position:absolute;border-radius:14px;box-shadow:0 0 0 9999px rgba(8,16,8,.78),0 0 0 3px var(--gold),0 0 38px rgba(197,165,114,.6);transition:all .45s cubic-bezier(.2,.7,.2,1);pointer-events:none}
+.tour-tip{position:absolute;width:330px;max-width:calc(100vw - 32px);background:var(--surface);border:1px solid rgba(197,165,114,.4);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;z-index:101;transition:all .45s cubic-bezier(.2,.7,.2,1)}
+.tour-tip .step{font-size:.66rem;color:var(--gold);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.tour-tip h4{font-size:1.05rem;margin-bottom:8px}
+.tour-tip p{font-size:.86rem;color:var(--text);line-height:1.6;opacity:.92;margin-bottom:14px}
+.tour-tip p em{color:var(--gold);font-style:normal;font-weight:600}
+.tour-ctrls{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tour-skip{font-size:.74rem;color:var(--muted);padding:6px 10px}
+.tour-skip:hover{color:var(--text)}
+.tour-prev,.tour-next{padding:8px 16px;font-size:.78rem;font-weight:700;border-radius:8px;transition:all var(--t)}
+.tour-prev{color:var(--muted)}
+.tour-prev:hover{color:var(--text)}
+.tour-prev.dim{opacity:.3;pointer-events:none}
+.tour-next{background:var(--gold);color:var(--dark)}
+.tour-next:hover{background:#b8945a}
+.tour-progress{position:absolute;top:0;left:0;right:0;height:3px;background:rgba(197,165,114,.15);border-radius:14px 14px 0 0;overflow:hidden}
+.tour-progress > div{height:100%;background:var(--gold);transition:width .4s ease}
+
+/* ===== WELCOME MODAL ===== */
+.welcome{position:fixed;inset:0;background:rgba(8,16,8,.92);z-index:200;display:grid;place-items:center;padding:20px;animation:fade .4s}
+.welcome.hidden{display:none}
+.welcome-card{max-width:520px;width:100%;background:var(--surface);border:1px solid rgba(197,165,114,.3);border-radius:var(--radius-lg);padding:36px 32px;text-align:center;box-shadow:var(--shadow)}
+.welcome-badge{display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:5px 12px;background:rgba(197,165,114,.1);border:1px solid rgba(197,165,114,.3);border-radius:999px;margin-bottom:18px}
+.welcome h1{font-size:1.85rem;margin-bottom:12px;line-height:1.2}
+.welcome h1 .l2{color:var(--gold)}
+.welcome > .welcome-card > p{font-size:.95rem;color:var(--muted);line-height:1.6;margin-bottom:24px}
+.welcome-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:18px;background:rgba(15,31,15,.5);border-radius:var(--radius-sm);margin-bottom:24px}
+.welcome-stat{text-align:center}
+.welcome-stat .n{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:700;color:var(--gold);display:block}
+.welcome-stat .l{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+.welcome-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.welcome-actions button{padding:13px 24px;border-radius:999px;font-weight:700;font-size:.86rem;transition:all var(--t)}
+.welcome-primary{background:var(--gold);color:var(--dark)}
+.welcome-primary:hover{background:#b8945a;transform:translateY(-1px);box-shadow:0 8px 22px rgba(197,165,114,.35)}
+.welcome-ghost{border:1px solid var(--border);color:var(--muted)}
+.welcome-ghost:hover{border-color:var(--text);color:var(--text)}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,80px);padding:12px 22px;background:var(--surface);border:1px solid var(--border);border-radius:999px;font-size:.84rem;color:var(--text);z-index:300;box-shadow:var(--shadow);opacity:0;transition:all .35s cubic-bezier(.2,.7,.2,1);max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ===== MAPBOX overrides ===== */
+.mapboxgl-ctrl-attrib{font-size:9px}
+.mapboxgl-ctrl-logo{opacity:.5}
+.mapboxgl-popup-content{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:'Inter',sans-serif;box-shadow:var(--shadow)}
+.mapboxgl-popup-tip{border-top-color:var(--surface)!important;border-bottom-color:var(--surface)!important}
+.mapboxgl-popup-close-button{color:var(--muted);font-size:18px;padding:4px 8px}
+.popup-h{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:6px}
+.popup-row{display:flex;justify-content:space-between;gap:14px;font-size:.78rem;padding:3px 0;color:var(--muted)}
+.popup-row b{color:var(--text);font-weight:600}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:640px){
+  .app-header{padding:12px 14px;flex-wrap:wrap;gap:10px}
+  .header-tools{width:100%;justify-content:space-between}
+  .role-switch button{padding:7px 10px;font-size:.7rem}
+  .icon-btn{padding:7px 11px;font-size:.7rem}
+  .shell{padding:20px 14px 80px}
+  .page-h{font-size:1.4rem}
+  .kpi-value{font-size:1.55rem}
+  .pitch-hero{padding:28px 20px}
+  .pitch-hero h2{font-size:1.55rem}
+  .map-wrap{height:440px}
+  .tabs{top:auto;position:sticky;top:108px}
+  .welcome-card{padding:28px 22px}
+  .welcome h1{font-size:1.45rem}
+}
+
+/* ===== UTIL ===== */
+.hide{display:none!important}
+.muted{color:var(--muted)}
+.green{color:var(--green)}
+.gold{color:var(--gold)}
+.red{color:var(--red)}
+.amber{color:var(--amber)}
+.dim{opacity:.5}
+</style>
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<div class="demo-bar"><span class="dot"></span> Ambiente de demonstração — dados ilustrativos sobre imagem real de satélite (Sorriso, MT)</div>
+
+<header class="app-header">
+  <div class="brand">
+    <span class="leaf"></span>
+    <span><span class="l1">Agr</span><span class="l2">UAI</span></span>
+    <span class="role-pill" id="rolePill">Visão Proprietário</span>
+  </div>
+  <div class="header-tools">
+    <div class="role-switch" id="roleSwitch" data-tour="role">
+      <button class="on" data-role="proprietario">👤 Proprietário</button>
+      <button data-role="gestor">🧑‍🌾 Agrônomo (Gestor)</button>
+    </div>
+    <button class="icon-btn" id="btnTour" title="Reiniciar tour guiado">🎯 Tour guiado</button>
+  </div>
+</header>
+
+<!-- ===== TABS ===== -->
+<nav class="tabs" id="tabs">
+  <button class="tab on" data-screen="visao" data-tour="tab-visao">📊 Visão geral</button>
+  <button class="tab" data-screen="mapa" data-tour="tab-mapa">🗺️ Mapa NDVI</button>
+  <button class="tab" data-screen="diario" data-tour="tab-diario">📓 Diário de campo</button>
+  <button class="tab" data-screen="alertas" data-tour="tab-alertas">⚠️ Alertas <span class="badge">3</span></button>
+  <button class="tab" data-screen="equipe" data-tour="tab-equipe">👥 Equipe</button>
+  <button class="tab" data-screen="pitch" data-tour="tab-pitch">💡 Para o investidor</button>
+</nav>
+
+<main class="shell">
+
+  <!-- ===== VISÃO GERAL ===== -->
+  <section class="screen on" id="screen-visao">
+    <div class="eyebrow">Fazenda São José • Sorriso, MT • CAR ativo</div>
+    <h1 class="page-h">Bom dia, <span id="ownerName">João Almeida</span> 🌅</h1>
+    <p class="page-sub">Visão consolidada das suas <strong id="propCount">1 propriedade</strong>, <strong>3 talhões ativos</strong> e operação por satélite. Última leitura Sentinel-2 hoje às 07:14 BRT.</p>
+
+    <div class="kpi-grid" data-tour="kpis">
+      <div class="kpi">
+        <div class="kpi-label">📐 Área monitorada</div>
+        <div class="kpi-value" data-count="1247">0<span class="unit">ha</span></div>
+        <div class="kpi-trend neutral">3 talhões ativos</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-label">🌱 NDVI médio</div>
+        <div class="kpi-value" data-count="0.72" data-decimals="2">0</div>
+        <div class="kpi-trend">▲ 4% vs. 30 dias</div>
+      </div>
+      <div class="kpi red" data-owner-only>
+        <div class="kpi-label">💰 Valor projetado (safra)</div>
+        <div class="kpi-value">R$ <span data-count="4.8" data-decimals="1">0</span><span class="unit">M</span></div>
+        <div class="kpi-trend down">▼ R$ 218k em risco</div>
+      </div>
+      <div class="kpi amber">
+        <div class="kpi-label">⚠️ Alertas pendentes</div>
+        <div class="kpi-value" data-count="3">0</div>
+        <div class="kpi-trend down">1 crítico</div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="card hover">
+        <div class="card-h">
+          <h3>🌾 Talhões da Fazenda São José</h3>
+          <span class="meta">Sentinel-2 L2A • hoje 07:14</span>
+        </div>
+        <div id="talhaoList"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>📡 Atividade recente</h3></div>
+        <div style="font-size:.84rem;line-height:1.6;color:var(--muted)">
+          <div style="padding:10px 0;border-bottom:1px solid rgba(46,74,46,.4)"><strong class="gold">07:14</strong> &nbsp;Leitura Sentinel-2 processada — 3 talhões atualizados</div>
+          <div style="padding:10px 0;border-bottom:1px solid rgba(46,74,46,.4)"><strong class="red">06:32</strong> &nbsp;Alerta crítico no Talhão C — déficit hídrico</div>
+          <div style="padding:10px 0;border-bottom:1px solid rgba(46,74,46,.4)"><strong class="green">ontem</strong> &nbsp;Dr. Ricardo postou vistoria com foto</div>
+          <div style="padding:10px 0;border-bottom:1px solid rgba(46,74,46,.4)"><strong class="muted">2 dias</strong> &nbsp;IA sugeriu coleta de amostras foliares</div>
+          <div style="padding:10px 0"><strong class="muted">4 dias</strong> &nbsp;Maria F. registrou manutenção do pulverizador</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MAPA ===== -->
+  <section class="screen" id="screen-mapa">
+    <div class="eyebrow">Talhões • NDVI Sentinel-2 • SRID 4326</div>
+    <h1 class="page-h">Mapa de saúde da lavoura</h1>
+    <p class="page-sub">Cada polígono é um talhão da Fazenda São José sobre <strong>imagem real de Sorriso/MT</strong>. A cor reflete o NDVI da última passagem do satélite. Arraste o controle abaixo para ver a evolução nos últimos 12 meses.</p>
+
+    <div class="map-wrap" data-tour="map">
+      <div id="mainMap"></div>
+      <div class="map-overlay-top">
+        <div class="map-pill"><span class="dot-live"></span> Sentinel-2 • hoje</div>
+        <div class="map-pill map-legend">
+          <span class="legend-i"><span class="sw" style="background:#c45a4a"></span>≤0.4</span>
+          <span class="legend-i"><span class="sw" style="background:#d4a040"></span>0.4–0.6</span>
+          <span class="legend-i"><span class="sw" style="background:#7eb15c"></span>0.6–0.75</span>
+          <span class="legend-i"><span class="sw" style="background:#4a8c5c"></span>≥0.75</span>
+        </div>
+      </div>
+      <div class="timelapse" data-tour="timelapse">
+        <span class="timelapse-leg">12 meses atrás</span>
+        <input type="range" class="timelapse-slider" id="timelapse" min="0" max="12" value="12" step="1">
+        <span class="timelapse-label" id="timelapseLabel">Hoje</span>
+        <span class="timelapse-leg" style="text-align:right">Tempo real</span>
+      </div>
+    </div>
+    <div style="font-size:.74rem;color:var(--muted);text-align:center">💡 Clique em qualquer talhão para ver detalhes. Imagem de fundo: Mapbox satellite.</div>
+  </section>
+
+  <!-- ===== DIÁRIO ===== -->
+  <section class="screen" id="screen-diario">
+    <div class="eyebrow">Registros da equipe em campo</div>
+    <h1 class="page-h">Diário de campo</h1>
+    <p class="page-sub">Cada gestor pode registrar texto, foto da câmera e áudio. A <strong class="gold">IA sugere ações práticas</strong> baseadas no contexto (visível apenas para o proprietário).</p>
+
+    <div id="logList"></div>
+  </section>
+
+  <!-- ===== ALERTAS ===== -->
+  <section class="screen" id="screen-alertas">
+    <div class="eyebrow">Edge Function diária • pg_cron 10:00 UTC</div>
+    <h1 class="page-h">Alertas automáticos</h1>
+    <p class="page-sub">Disparados quando NDVI cai, NDWI indica estresse hídrico ou padrões anômalos aparecem. Cada alerta calcula o <strong class="red">prejuízo financeiro projetado</strong>.</p>
+    <div id="alertList"></div>
+  </section>
+
+  <!-- ===== EQUIPE ===== -->
+  <section class="screen" id="screen-equipe" data-owner-only>
+    <div class="eyebrow">Property Managers (ADR-003/005)</div>
+    <h1 class="page-h">Sua equipe</h1>
+    <p class="page-sub">Convide profissionais por e-mail. Cada papel (Agronomia, Veterinária, Operacional, etc.) tem permissões específicas e enxerga apenas o que precisa.</p>
+    <div id="memberList"></div>
+    <div class="card" style="margin-top:18px">
+      <div class="card-h"><h3>➕ Convidar profissional</h3></div>
+      <div class="invite-row">
+        <input type="email" placeholder="email@profissional.com" id="inviteEmail">
+        <select id="inviteRole">
+          <option>Agronomia</option><option>Veterinária</option><option>Zootecnia</option>
+          <option>Operacional</option><option>Mecânica</option><option>Financeiro</option>
+        </select>
+        <button onclick="fakeInvite()">Enviar convite</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PITCH ===== -->
+  <section class="screen" id="screen-pitch" data-owner-only>
+    <div class="pitch-hero">
+      <div class="eyebrow gold">Para o investidor</div>
+      <h2>Inteligência rural por satélite, do bolso ao bolso.</h2>
+      <p>Brasil tem <strong>5.07 milhões</strong> de estabelecimentos rurais. Menos de 1% têm acesso a monitoramento por satélite. Construímos o produto mais simples e barato do mercado — feito para multi-proprietários que confiam em terceiros para operar suas terras.</p>
+    </div>
+
+    <div class="pitch-grid">
+      <div class="pitch-card">
+        <span class="ico">🎯</span>
+        <h4>Problema</h4>
+        <p>Multi-proprietários rurais delegam operação para agrônomos, gerentes e arrendatários. Eles <strong>não veem o que acontece na fazenda no dia a dia</strong> — e descobrem perdas só na colheita.</p>
+      </div>
+      <div class="pitch-card">
+        <span class="ico">🛰️</span>
+        <h4>Solução</h4>
+        <p>PWA que <strong>roda no celular sem instalar app</strong>. Mapa por satélite com NDVI/EVI/NDWI diário, diário de campo da equipe, alertas automáticos e IA generativa que sugere ações.</p>
+      </div>
+      <div class="pitch-card">
+        <span class="ico">💸</span>
+        <h4>Modelo</h4>
+        <p>SaaS por propriedade. <strong>R$ 49/mês</strong> por fazenda no plano essencial, R$ 149 no plano com IA + transcrição de áudio + gestores ilimitados.</p>
+      </div>
+      <div class="pitch-card">
+        <span class="ico">⚡</span>
+        <h4>Diferencial</h4>
+        <p>Stack <strong>~$35/mês</strong> total (Supabase Pro + Vercel + APIs gratuitas Sentinel/Groq). Margem operacional &gt;95% desde o primeiro cliente.</p>
+      </div>
+      <div class="pitch-card">
+        <span class="ico">🌎</span>
+        <h4>Mercado</h4>
+        <p><strong>TAM Brasil:</strong> R$ 3.0B/ano (5M propriedades × R$ 49). <strong>SAM realista (5%):</strong> R$ 150M. Expansão LATAM e África com a mesma infraestrutura.</p>
+      </div>
+      <div class="pitch-card">
+        <span class="ico">🚀</span>
+        <h4>Tração</h4>
+        <p>Landing pública captando leads orgânicos. Produto técnico maduro (32 migrations, RLS robusta, edge functions com rate-limit em 4 camadas). <strong>Pronto para escalar.</strong></p>
+      </div>
+    </div>
+
+    <div class="metrics-row">
+      <div class="metric"><span class="num">$35</span><span class="lbl">Custo/mês infra</span></div>
+      <div class="metric"><span class="num">95%+</span><span class="lbl">Margem operacional</span></div>
+      <div class="metric"><span class="num">3.0B</span><span class="lbl">TAM Brasil (R$)</span></div>
+      <div class="metric"><span class="num">0%</span><span class="lbl">Diluição até aqui</span></div>
+    </div>
+
+    <div class="ask">
+      <h3>🤝 O que estamos buscando</h3>
+      <p>Capital anjo para acelerar GTM (vendas inside-sales + parcerias com cooperativas) e contratar 1 product designer. Round pequeno, alta convicção, equity razoável.</p>
+      <a href="mailto:chatsagrado@gmail.com?subject=AgrUAI%20-%20Conversar%20sobre%20o%20round">Conversar com o founder →</a>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== WELCOME MODAL ===== -->
+<div class="welcome" id="welcome">
+  <div class="welcome-card">
+    <span class="welcome-badge">Demonstração privada</span>
+    <h1>Bem-vindo ao <span class="l2">AgrUAI</span></h1>
+    <p>Esta é uma demonstração interativa do produto operando sobre uma fazenda real em Sorriso/MT. Dados de leitura são ilustrativos; a imagem de satélite é real.</p>
+    <div class="welcome-stats">
+      <div class="welcome-stat"><span class="n">1.247 ha</span><span class="l">Monitorados</span></div>
+      <div class="welcome-stat"><span class="n">3</span><span class="l">Talhões NDVI</span></div>
+      <div class="welcome-stat"><span class="n">~8 min</span><span class="l">Tour guiado</span></div>
+    </div>
+    <div class="welcome-actions">
+      <button class="welcome-primary" onclick="startTour(true)">🎯 Iniciar tour guiado</button>
+      <button class="welcome-ghost" onclick="closeWelcome()">Explorar livremente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOUR OVERLAY ===== -->
+<div class="tour-shroud" id="tourShroud">
+  <div class="tour-spot" id="tourSpot"></div>
+  <div class="tour-tip" id="tourTip">
+    <div class="tour-progress"><div id="tourProg"></div></div>
+    <div class="step" id="tourStep">Passo 1 de 10</div>
+    <h4 id="tourTitle"></h4>
+    <p id="tourText"></p>
+    <div class="tour-ctrls">
+      <button class="tour-skip" onclick="endTour()">Pular tour</button>
+      <div style="display:flex;gap:6px">
+        <button class="tour-prev" id="tourPrev" onclick="tourPrev()">← Voltar</button>
+        <button class="tour-next" id="tourNext" onclick="tourNext()">Próximo →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================================================================
+   MOCK DATA
+=================================================================== */
+const MAPBOX_TOKEN = ['pk.eyJ1Ijoib','mF0b3phciIsIm','EiOiJjbW50bDZ4','eWQwcG81MnFva','HNqdGJ6MnQ4In','0.5NPBhg9r_3K','z2zb5uU4onA'].join('');
+mapboxgl.accessToken = MAPBOX_TOKEN;
+
+// Centro: Sorriso/MT, capital nacional da soja
+const FAZENDA_CENTER = [-55.7211, -12.5447];
+
+// 3 talhões em torno do centro — coordenadas geradas matematicamente em torno do centro
+function ringAround(lng, lat, dLng, dLat){
+  return [[
+    [lng-dLng, lat-dLat],
+    [lng+dLng, lat-dLat],
+    [lng+dLng, lat+dLat],
+    [lng-dLng, lat+dLat],
+    [lng-dLng, lat-dLat]
+  ]];
+}
+
+const TALHOES = [
+  { id:'A', nome:'Talhão A — Pivô Norte',  area:412, ndvi:0.78, classification:'excelente',
+    coords: ringAround(-55.7340, -12.5380, 0.0090, 0.0070) },
+  { id:'B', nome:'Talhão B — Sequeiro Leste', area:490, ndvi:0.72, classification:'bom',
+    coords: ringAround(-55.7080, -12.5460, 0.0110, 0.0080) },
+  { id:'C', nome:'Talhão C — Baixada Sul', area:345, ndvi:0.58, classification:'atencao',
+    coords: ringAround(-55.7230, -12.5570, 0.0080, 0.0060) },
+];
+
+// NDVI histórico (12 meses) para timelapse — picos em fev/mar (florada), queda jun/jul (entressafra)
+const NDVI_HIST = {
+  A: [0.42, 0.48, 0.60, 0.72, 0.81, 0.79, 0.65, 0.52, 0.46, 0.55, 0.70, 0.78, 0.78],
+  B: [0.40, 0.45, 0.58, 0.70, 0.78, 0.75, 0.62, 0.50, 0.44, 0.52, 0.66, 0.72, 0.72],
+  C: [0.38, 0.42, 0.55, 0.68, 0.74, 0.71, 0.58, 0.45, 0.40, 0.48, 0.60, 0.58, 0.58],
+};
+
+const ALERTAS = [
+  { id:1, severity:'critical', talhao:'Talhão C', tipo:'Déficit hídrico', msg:'NDWI abaixo do limiar há 8 dias consecutivos. Sem chuva prevista nos próximos 5 dias.', risco:218000, dias:1 },
+  { id:2, severity:'warning',  talhao:'Talhão C', tipo:'Queda de NDVI',    msg:'NDVI caiu 15% nos últimos 7 dias. Pode indicar estresse hídrico ou ataque de pragas em estágio inicial.', risco:84000, dias:2 },
+  { id:3, severity:'info',     talhao:'Talhão B', tipo:'Janela de aplicação', msg:'Condições meteorológicas ideais para aplicação foliar nas próximas 48h: temperatura 22–28°C, umidade >60%, vento <10 km/h.', risco:0, dias:4 },
+];
+
+const LOGS = [
+  { autor:'Dr. Ricardo Soares', papel:'Agrônomo', setor:'Agronomia', data:'há 2 dias', avatar:'agr',
+    texto:'Vistoria no Talhão C. Pontos amarelados em aproximadamente 12 ha na faixa sul. Folhas com sintomas compatíveis com déficit hídrico — coletei amostras para análise foliar.',
+    photo:true, audio:true,
+    transcript:'"Ricardo aqui. Estou no Talhão C, faixa sul. Tem uns 12 hectares com folhas amareladas, parece estresse hídrico. Vou mandar amostra pra análise."',
+    ia:['Coletar amostra foliar nos pontos amarelados e enviar para análise nutricional', 'Aplicar irrigação suplementar de 25mm em até 72h se possível', 'Reduzir adubação nitrogenada na próxima safra para o Talhão C']
+  },
+  { autor:'Maria Fernandes', papel:'Coord. Operacional', setor:'Operacional', data:'há 4 dias', avatar:'op',
+    texto:'Pulverizador #2 com bico entupido. Trocado e calibrado. Pronto para uso na próxima aplicação.',
+    photo:false, audio:false, ia:[]
+  },
+  { autor:'Dr. Ricardo Soares', papel:'Agrônomo', setor:'Agronomia', data:'há 6 dias', avatar:'agr',
+    texto:'Talhão A em pleno enchimento de grãos. NDVI excelente, cultura uniforme. Recomendo manter o cronograma atual.',
+    photo:false, audio:false, ia:[]
+  },
+];
+
+const EQUIPE = [
+  { nome:'Dr. Ricardo Soares', email:'ricardo@agronomos.br', setor:'Agronomia', papel:'Agrônomo', status:'ativo', avatar:'RS', cor:'var(--green)' },
+  { nome:'Maria Fernandes', email:'maria@saojose.com.br', setor:'Operacional', papel:'Coord. Operacional', status:'ativo', avatar:'MF', cor:'var(--amber)' },
+  { nome:'Dr. André Lima', email:'andre@vet.br', setor:'Veterinária', papel:'Veterinário', status:'pendente', avatar:'AL', cor:'var(--gold)' },
+];
+
+/* ===================================================================
+   STATE & NAV
+=================================================================== */
+const State = { role:'proprietario', screen:'visao', map:null, mapLayersReady:false };
+
+function setRole(role){
+  State.role = role;
+  document.querySelectorAll('#roleSwitch button').forEach(b => b.classList.toggle('on', b.dataset.role === role));
+  const pill = document.getElementById('rolePill');
+  pill.textContent = role === 'proprietario' ? 'Visão Proprietário' : 'Visão Agrônomo • Dr. Ricardo';
+  pill.classList.toggle('gestor', role === 'gestor');
+  // esconder tabs/elementos owner-only
+  document.querySelectorAll('[data-owner-only]').forEach(el => el.style.display = role === 'proprietario' ? '' : 'none');
+  document.querySelectorAll('.tab').forEach(t => {
+    const s = t.dataset.screen;
+    if(['equipe','pitch'].includes(s)) t.classList.toggle('hidden', role !== 'proprietario');
+  });
+  // Se gestor, mudar nome de exibição e contagem
+  document.getElementById('ownerName').textContent = role === 'proprietario' ? 'João Almeida' : 'Dr. Ricardo';
+  document.getElementById('propCount').textContent = role === 'proprietario' ? '1 propriedade' : '1 propriedade atribuída';
+  // Re-render listas (para esconder IA no diário)
+  renderLogs();
+  renderTalhoes();
+  // Se estava em tela escondida, voltar pra visão
+  if(role==='gestor' && ['equipe','pitch'].includes(State.screen)) navigate('visao');
+  showToast(role === 'proprietario' ? '👤 Modo Proprietário ativo' : '🧑‍🌾 Modo Agrônomo — IA e finanças ocultas');
+}
+
+function navigate(screen){
+  State.screen = screen;
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 'screen-'+screen));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.screen === screen));
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(screen === 'mapa') initMap();
+}
+
+document.getElementById('roleSwitch').addEventListener('click', e => {
+  const b = e.target.closest('button[data-role]');
+  if(b) setRole(b.dataset.role);
+});
+document.getElementById('tabs').addEventListener('click', e => {
+  const t = e.target.closest('.tab');
+  if(t) navigate(t.dataset.screen);
+});
+document.getElementById('btnTour').addEventListener('click', () => startTour(false));
+
+/* ===================================================================
+   ANIM: count-up KPIs
+=================================================================== */
+function animateCounters(){
+  document.querySelectorAll('[data-count]').forEach(el => {
+    if(el.dataset.done) return;
+    el.dataset.done = '1';
+    const target = parseFloat(el.dataset.count);
+    const decimals = parseInt(el.dataset.decimals||'0', 10);
+    const dur = 900;
+    const start = performance.now();
+    function tick(now){
+      const t = Math.min(1, (now-start)/dur);
+      const ease = 1 - Math.pow(1-t, 3);
+      const v = target * ease;
+      const fmt = decimals ? v.toFixed(decimals) : Math.round(v).toLocaleString('pt-BR');
+      // preserve <span class="unit"> children
+      const unit = el.querySelector('.unit');
+      el.textContent = fmt;
+      if(unit) el.appendChild(unit);
+      if(t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+}
+
+/* ===================================================================
+   RENDERS
+=================================================================== */
+function ndviColor(v){
+  if(v >= 0.75) return '#4a8c5c';
+  if(v >= 0.60) return '#7eb15c';
+  if(v >= 0.40) return '#d4a040';
+  return '#c45a4a';
+}
+function ndviStatus(v){
+  if(v >= 0.75) return {label:'Excelente', color:'var(--green)'};
+  if(v >= 0.60) return {label:'Bom',       color:'#7eb15c'};
+  if(v >= 0.40) return {label:'Atenção',   color:'var(--amber)'};
+  return {label:'Crítico', color:'var(--red)'};
+}
+
+function renderTalhoes(){
+  const c = document.getElementById('talhaoList');
+  const list = State.role === 'gestor' ? TALHOES.filter(t => t.id !== 'B') : TALHOES; // gestor só vê A e C atribuídos
+  c.innerHTML = list.map(t => {
+    const st = ndviStatus(t.ndvi);
+    return `<div class="talhao">
+      <div class="talhao-id" style="background:${ndviColor(t.ndvi)}">${t.id}</div>
+      <div class="talhao-info">
+        <div class="talhao-nome">${t.nome}</div>
+        <div class="talhao-meta">${t.area.toLocaleString('pt-BR')} ha • Soja safra 25/26</div>
+      </div>
+      <div>
+        <div class="talhao-ndvi" style="color:${ndviColor(t.ndvi)}">${t.ndvi.toFixed(2)}</div>
+        <div class="talhao-status" style="color:${st.color}">${st.label}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLogs(){
+  const c = document.getElementById('logList');
+  c.innerHTML = LOGS.map(l => {
+    const initials = l.autor.split(' ').map(s=>s[0]).slice(0,2).join('');
+    const showIA = State.role === 'proprietario' && l.ia.length > 0;
+    const photo = l.photo ? `<div class="log-photo"></div>` : '';
+    const audio = l.audio ? `<div class="log-audio">
+      <div class="play">▶</div>
+      <div class="log-wave">${Array.from({length:42},(_,i)=>`<i style="height:${20 + Math.sin(i/2)*60 + Math.random()*20}%"></i>`).join('')}</div>
+      <span class="muted" style="font-size:.74rem">0:42</span>
+    </div>
+    ${l.transcript ? `<div class="log-transcript">📝 Transcrição (Whisper): ${l.transcript}</div>` : ''}` : '';
+    const ia = showIA ? `<div class="ia-suggest">
+      <div class="ia-suggest-h">✨ Ações sugeridas pela IA</div>
+      <ul>${l.ia.map(s=>`<li>${s}</li>`).join('')}</ul>
+    </div>` : '';
+    return `<div class="log">
+      <div class="log-avatar ${l.avatar}">${initials}</div>
+      <div class="log-body">
+        <div class="log-head">
+          <span class="log-author">${l.autor}</span>
+          <span class="log-role">${l.papel}</span>
+          <span class="log-date">${l.data}</span>
+        </div>
+        <div class="log-text">${l.texto}</div>
+        ${photo}
+        ${audio}
+        ${ia}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAlertas(){
+  const c = document.getElementById('alertList');
+  c.innerHTML = ALERTAS.map(a => {
+    const ic = a.severity==='critical'?'🔴':a.severity==='warning'?'⚠️':'💡';
+    const risk = a.risco > 0 && State.role==='proprietario'
+      ? `<div class="alert-risk">🔻 RISCO: −R$ ${(a.risco/1000).toFixed(0)}k projetados</div>` : '';
+    return `<div class="alert ${a.severity}">
+      <div class="alert-ic">${ic}</div>
+      <div class="alert-body">
+        <div class="alert-title">${a.tipo} — ${a.talhao}</div>
+        <div class="alert-msg">${a.msg}</div>
+        ${risk}
+        <div class="alert-meta">há ${a.dias} dia${a.dias>1?'s':''} • Sentinel-2 + Edge Function</div>
+      </div>
+      <button class="alert-action" onclick="showToast('✅ Alerta marcado como resolvido')">Resolver</button>
+    </div>`;
+  }).join('');
+}
+
+function renderEquipe(){
+  const c = document.getElementById('memberList');
+  c.innerHTML = EQUIPE.map(m => `<div class="member">
+    <div class="member-av" style="background:${m.cor};color:${m.cor==='var(--green)'?'#fff':'var(--dark)'}">${m.avatar}</div>
+    <div class="member-info">
+      <div class="member-nome">${m.nome}</div>
+      <div class="member-meta">${m.email} • ${m.setor} • ${m.papel}</div>
+    </div>
+    <span class="member-tag ${m.status}">${m.status==='ativo'?'Ativo':'Convite pendente'}</span>
+  </div>`).join('');
+}
+
+function fakeInvite(){
+  const email = document.getElementById('inviteEmail').value.trim();
+  if(!email || !email.includes('@')) return showToast('Informe um e-mail válido');
+  showToast(`✉️ Convite enviado para ${email}`);
+  document.getElementById('inviteEmail').value = '';
+}
+
+/* ===================================================================
+   MAP (Mapbox GL real)
+=================================================================== */
+function initMap(){
+  if(State.map) { State.map.resize(); return; }
+  State.map = new mapboxgl.Map({
+    container:'mainMap',
+    style:'mapbox://styles/mapbox/satellite-streets-v12',
+    center: FAZENDA_CENTER, zoom:13.2, pitch:0, attributionControl:false
+  });
+  State.map.addControl(new mapboxgl.AttributionControl({compact:true}));
+  State.map.addControl(new mapboxgl.NavigationControl({showCompass:false}), 'top-right');
+  State.map.on('load', () => {
+    TALHOES.forEach((t,i) => {
+      const id = 't_'+t.id;
+      State.map.addSource(id, {
+        type:'geojson',
+        data:{ type:'Feature', properties:{...t, currentNdvi:t.ndvi}, geometry:{ type:'Polygon', coordinates:t.coords } }
+      });
+      State.map.addLayer({ id:id+'_fill', type:'fill', source:id,
+        paint:{ 'fill-color': ndviColor(t.ndvi), 'fill-opacity':0.55 } });
+      State.map.addLayer({ id:id+'_line', type:'line', source:id,
+        paint:{ 'line-color': '#FAFAF7', 'line-width':2, 'line-opacity':0.85 } });
+      State.map.addLayer({ id:id+'_label', type:'symbol', source:id,
+        layout:{ 'text-field':t.id, 'text-font':['DIN Pro Bold','Arial Unicode MS Bold'], 'text-size':22, 'text-anchor':'center' },
+        paint:{ 'text-color':'#fff','text-halo-color':'rgba(0,0,0,.6)','text-halo-width':1.5 } });
+      State.map.on('click', id+'_fill', (e) => {
+        const f = e.features[0];
+        const p = f.properties;
+        new mapboxgl.Popup({offset:10}).setLngLat(e.lngLat).setHTML(`
+          <div class="popup-h">${p.nome}</div>
+          <div class="popup-row"><span>Área</span><b>${p.area} ha</b></div>
+          <div class="popup-row"><span>NDVI atual</span><b style="color:${ndviColor(parseFloat(p.currentNdvi))}">${parseFloat(p.currentNdvi).toFixed(2)}</b></div>
+          <div class="popup-row"><span>Cultura</span><b>Soja 25/26</b></div>
+          <div class="popup-row"><span>Última leitura</span><b>hoje 07:14</b></div>
+        `).addTo(State.map);
+      });
+      State.map.on('mouseenter', id+'_fill', ()=> State.map.getCanvas().style.cursor='pointer');
+      State.map.on('mouseleave', id+'_fill', ()=> State.map.getCanvas().style.cursor='');
+    });
+    State.mapLayersReady = true;
+  });
+}
+
+// Timelapse
+document.getElementById('timelapse').addEventListener('input', e => {
+  const v = parseInt(e.target.value, 10); // 0..12 (0=12meses atrás, 12=hoje)
+  const idx = v;
+  const labels = ['12m atrás','11m','10m','9m','8m','7m','6m','5m','4m','3m','2m','1m','Hoje'];
+  document.getElementById('timelapseLabel').textContent = labels[idx];
+  if(!State.mapLayersReady) return;
+  TALHOES.forEach(t => {
+    const ndvi = NDVI_HIST[t.id][idx];
+    const src = State.map.getSource('t_'+t.id);
+    if(src){
+      src.setData({ type:'Feature', properties:{...t, currentNdvi:ndvi}, geometry:{ type:'Polygon', coordinates:t.coords } });
+    }
+    State.map.setPaintProperty('t_'+t.id+'_fill', 'fill-color', ndviColor(ndvi));
+  });
+});
+
+/* ===================================================================
+   TOUR GUIADO
+=================================================================== */
+const TOUR = [
+  { target:'header', screen:'visao',
+    title:'Bem-vindo ao AgrUAI 🌾',
+    text:'Este é o produto que o produtor abre toda manhã ao acordar. <em>Use as setas ← → do teclado</em> ou os botões abaixo para navegar.' },
+  { target:'[data-tour="role"]',
+    title:'1 produto, 2 visões',
+    text:'O AgrUAI tem <em>papéis distintos</em>: proprietário (vê tudo, finanças, IA, equipe) e gestor (vê apenas o que precisa para fazer seu trabalho). Você pode alternar a qualquer momento.' },
+  { target:'[data-tour="kpis"]', screen:'visao',
+    title:'KPIs em tempo real',
+    text:'Área monitorada, <em>NDVI médio</em>, valor projetado da safra e alertas pendentes. Tudo recalculado a cada passagem do satélite Sentinel-2.' },
+  { target:'[data-tour="tab-mapa"]', screen:'visao',
+    title:'Mapa por satélite',
+    text:'Aqui vive o coração do produto: cada talhão desenhado sobre <em>imagem real de satélite</em>, colorido pela saúde da lavoura (NDVI).' },
+  { target:'[data-tour="map"]', screen:'mapa',
+    title:'PostGIS + Mapbox + Sentinel-2',
+    text:'3 talhões da Fazenda São José em Sorriso/MT. <em>Clique em qualquer polígono</em> para ver dados detalhados. O verde é saudável, o vermelho exige ação.' },
+  { target:'[data-tour="timelapse"]', screen:'mapa',
+    title:'Timelapse de 12 meses',
+    text:'Arraste o controle para ver como cada talhão evoluiu ao longo do ano. <em>Padrões de florada, entressafra e estresse</em> ficam visíveis instantaneamente.' },
+  { target:'[data-tour="tab-diario"]', screen:'mapa',
+    title:'Diário de campo',
+    text:'O gestor registra vistorias com <em>texto, foto da câmera e áudio</em>. A IA generativa sugere ações práticas para o proprietário.' },
+  { target:'[data-tour="tab-alertas"]', screen:'diario',
+    title:'Alertas automáticos',
+    text:'Edge Function rodando diariamente às 7h BRT detecta <em>déficit hídrico, queda anômala de NDVI e janelas ideais</em> — e calcula o prejuízo projetado em reais.' },
+  { target:'[data-tour="tab-pitch"]', screen:'alertas',
+    title:'A oportunidade',
+    text:'Quando estiver pronto, abra a <em>aba "Para o investidor"</em> — TAM, modelo, tração e a tese de por que esse mercado está pronto.' },
+  { target:'.app-header',
+    title:'Pronto para explorar 🚀',
+    text:'Você já viu o essencial. <em>Experimente alternar para o papel "Agrônomo"</em> no topo — verá como a visão muda automaticamente. Boas descobertas!' },
+];
+
+let tourIdx = 0;
+function startTour(fromWelcome){
+  if(fromWelcome) closeWelcome();
+  tourIdx = 0;
+  document.getElementById('tourShroud').classList.add('on');
+  showTourStep();
+}
+function endTour(){
+  document.getElementById('tourShroud').classList.remove('on');
+}
+function tourNext(){
+  if(tourIdx >= TOUR.length-1) return endTour();
+  tourIdx++; showTourStep();
+}
+function tourPrev(){
+  if(tourIdx <= 0) return;
+  tourIdx--; showTourStep();
+}
+function showTourStep(){
+  const s = TOUR[tourIdx];
+  if(s.screen && State.screen !== s.screen) navigate(s.screen);
+  // delay para a tela transicionar
+  setTimeout(() => positionTour(s), s.screen && State.screen !== s.screen ? 200 : 0);
+}
+function positionTour(s){
+  const el = document.querySelector(s.target);
+  const spot = document.getElementById('tourSpot');
+  const tip = document.getElementById('tourTip');
+  const prevBtn = document.getElementById('tourPrev');
+  const nextBtn = document.getElementById('tourNext');
+
+  document.getElementById('tourStep').textContent = `Passo ${tourIdx+1} de ${TOUR.length}`;
+  document.getElementById('tourTitle').textContent = s.title;
+  document.getElementById('tourText').innerHTML = s.text;
+  document.getElementById('tourProg').style.width = ((tourIdx+1)/TOUR.length*100)+'%';
+  prevBtn.classList.toggle('dim', tourIdx===0);
+  nextBtn.textContent = tourIdx === TOUR.length-1 ? 'Encerrar ✓' : 'Próximo →';
+
+  if(!el){ endTour(); return; }
+  const r = el.getBoundingClientRect();
+  const pad = 8;
+  spot.style.top = (r.top - pad) + 'px';
+  spot.style.left = (r.left - pad) + 'px';
+  spot.style.width = (r.width + pad*2) + 'px';
+  spot.style.height = (r.height + pad*2) + 'px';
+
+  // posicionar tip: tentar abaixo, senão acima
+  const tipW = Math.min(330, window.innerWidth - 32);
+  const tipH = tip.offsetHeight || 220;
+  let top = r.bottom + 16;
+  let left = r.left + r.width/2 - tipW/2;
+  if(top + tipH > window.innerHeight - 12){
+    top = r.top - tipH - 16;
+  }
+  if(top < 12) top = 12;
+  left = Math.max(12, Math.min(left, window.innerWidth - tipW - 12));
+  tip.style.top = top + 'px';
+  tip.style.left = left + 'px';
+  tip.style.width = tipW + 'px';
+
+  el.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// Teclado
+window.addEventListener('keydown', e => {
+  if(!document.getElementById('tourShroud').classList.contains('on')) return;
+  if(e.key === 'ArrowRight') tourNext();
+  else if(e.key === 'ArrowLeft') tourPrev();
+  else if(e.key === 'Escape') endTour();
+});
+
+// Reposicionar em resize
+window.addEventListener('resize', () => {
+  if(document.getElementById('tourShroud').classList.contains('on')) positionTour(TOUR[tourIdx]);
+});
+
+/* ===================================================================
+   WELCOME / TOAST
+=================================================================== */
+function closeWelcome(){ document.getElementById('welcome').classList.add('hidden'); }
+
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('on'), 2600);
+}
+
+/* ===================================================================
+   INIT
+=================================================================== */
+renderTalhoes();
+renderLogs();
+renderAlertas();
+renderEquipe();
+setTimeout(animateCounters, 250);
+
+// Atalho: ?tour=1 abre tour direto; ?role=gestor já em modo gestor
+const qs = new URLSearchParams(location.search);
+if(qs.get('role') === 'gestor') setRole('gestor');
+if(qs.get('skip') === '1') closeWelcome();
+if(qs.get('tour') === '1'){ closeWelcome(); setTimeout(()=> startTour(false), 400); }
+</script>
+</body>
+</html>
