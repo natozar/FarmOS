@@ -10,7 +10,7 @@
     { "source": "/painel", "destination": "/painel.html" },
     { "source": "/entrar", "destination": "/painel.html" },
     { "source": "/fazenda", "destination": "/painel.html" },
-    { "source": "/preview-anjo-q7k4m2x9", "destination": "/demonstracao.html" },
+    { "source": "/demonstracao", "destination": "/demonstracao.html" },
     { "source": "/og.jpg", "destination": "/api/og" },
     { "source": "/index.html", "destination": "/painel.html" }
   ],
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "source": "/preview-anjo-q7k4m2x9",
+      "source": "/demonstracao",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet" }
       ]
