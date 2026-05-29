@@ -1,5 +1,13 @@
 # AgrUAI — Inteligência Rural por Satélite
 
+## Modo de operação (GODMODE)
+
+- **Execute, não pergunte.** Quando o CEO pede algo, entrega — não para no meio pra confirmar default razoável, escolha de cultura piloto, modelo de cobrança, ou qualquer decisão técnica que dê pra reverter depois. Documente o default escolhido no commit/resposta final.
+- **Não invente bloqueio legal/regulatório** que o cliente não pediu. Pedido "entrega dados" não vira plano de ART/laudo/SLA. Disclaimer entra no contrato, não no plano técnico.
+- **Fluxo padrão de entrega:** código → migration → commit → push → instrução de aplicar SQL no editor. Sem checkpoint intermediário.
+- **Só pergunta** se a decisão é irreversível (apaga dado, manda email pra usuário real, gasta crédito de API que cobra) ou se faltar informação que muda o produto inteiro (ex: a credora pediu API ou whitelabel? — quando nem o usuário sabe).
+- O *único* feedback explícito que invalida esse modo é o usuário dizer "para" ou "espera".
+
 ## O que é
 
 PWA de monitoramento rural via satélite para multi-proprietários de fazendas no Brasil. Produto B2B SaaS focado em NDVI, alertas e gestão de propriedades com geolocalização.
@@ -34,6 +42,13 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 - `ai_usage` (migration 0030) — rate-limit agregado por (user, kind, day) nas edge functions de custo (ai-suggest, transcribe-audio).
 - `ai_request_log` (migration 0031) — uma linha por chamada IA aprovada. Base do burst-check (60s) e auditoria. Limpeza via `cleanup_ai_request_log()` (>7d).
 - `feature_flags` (migration 0031) — kill switch admin-toggleable por feature (ai_suggest, transcribe). `enabled=false` faz bump_ai_usage retornar `feature_disabled` sem redeploy.
+- `crop_yield_curves` (migration 0033) — coeficientes NDVI→sacas/ha por cultura/região. Seed: soja BR linear v1.
+- `property_native_coverage` (migration 0033) — hectares de nativa, % da área, bioma, tCO₂ estocado e classes por propriedade. Preenchido por `compute_native_coverage()` (migration 0035).
+- `lender_clients` (migration 0034) — credoras cadastradas. Guarda `api_key_hash` (sha256) e `api_key_prefix` (visibilidade nos logs).
+- `lender_property_access` (migration 0034) — concessão dono→credora por propriedade. RLS: dono vê quem está vendo a fazenda dele.
+- `lender_audit_log` (migration 0034) — toda chamada do `lender-api` (sucesso/erro), base do billing e compliance.
+- `biome_by_uf` (migration 0035) — lookup UF→bioma dominante. Aproximação v1; v2 cruzará com shapefile IBGE.
+- `carbon_factors` (migration 0035) — tCO₂/ha por bioma e classe (forest/shrubland/grassland), valores IPCC AR6.
 
 ### Colunas adicionadas (PROMPT-16)
 
@@ -61,6 +76,12 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 - `bump_ai_usage(p_user_id, p_kind, p_max_per_day, p_max_global_per_day=500, p_max_per_minute=5)` — enforcement em 4 camadas em uma transação: feature_flag → burst(60s) → daily-user → daily-global. Retorna `{allowed, reason?, count_user, remaining_user, count_global, remaining_global}`. Razões: `feature_disabled | burst | daily_user | global_ceiling`. Só `service_role` executa.
 - `cleanup_ai_request_log()` — remove entradas de `ai_request_log` com mais de 7 dias. Executável por admin (ou via pg_cron).
 - `ai_usage_overview()` — dashboard admin (JSON com counts de hoje + top users + flags). Checa `is_admin()`.
+- `get_lender_report(p_property_id)` (migration 0033) — JSON consolidado pra entrega à credora: identificação + série NDVI/EVI/NDWI 24m + produção estimada (sacas/ha via curva da cultura) + cobertura nativa + tCO₂. Owner-only / admin / service_role.
+- `compute_native_coverage(p_property_id)` (migration 0035) — classifica % nativa por estabilidade temporal NDVI (amplitude 12 meses), grava em `property_native_coverage`. v1; v2 = overlay MapBiomas exato.
+- `compute_native_coverage_batch()` (migration 0035) — roda para todas as propriedades ativas. Agendada em pg_cron diário 10:30 UTC (após `fetch-satellite-data` às 10:00).
+- `lender_auth(p_api_key_hash)` / `lender_has_access(p_lender_id, p_property_id)` (migration 0034) — usadas pela Edge Function `lender-api`. Só `service_role`.
+- `create_lender_client(p_name, p_contact_email, p_monthly_quota, p_notes)` (migration 0034) — admin-only. Retorna `api_key` em claro UMA vez (sha256 gravado, segredo não recuperável).
+- `grant_lender_access(p_lender_id, p_property_id)` (migration 0034) — dono ou admin libera propriedade pra credora ler via API.
 
 ### Extensões PostgreSQL
 
@@ -75,6 +96,7 @@ PWA de monitoramento rural via satélite para multi-proprietários de fazendas n
 - `ai-suggest` — 3 ações práticas no diário de campo via Gemini 2.5 Flash (free tier, `thinkingBudget=0`). JWT ES256 validado manualmente (`verify_jwt: false` no deploy + `getUser()` no código). Rate-limit 30/user/dia. Owner-only na UI (stripped em views de gestor).
 - `transcribe-audio` — transcreve áudio do bucket `field-media` via Groq Whisper Large v3 Turbo (free tier). Valida prefixo `{user_id}/` no storage_path. Rate-limit 30/user/dia.
 - `invite-lead` — admin-only (checa `admin_users`). Chama `auth.admin.inviteUserByEmail`, redireciona pro painel, marca `aprovado_at` em participantes.
+- `lender-api` (migration 0034) — endpoint público pra credoras. `GET /property/{uuid}` com header `X-Lender-Key`. Hash sha256 → `lender_auth` → `lender_has_access` → `get_lender_report`. Quota mensal opcional (200 = sucesso conta). Toda chamada audita em `lender_audit_log`. Deploy com `--no-verify-jwt`.
 
 ### Storage
 
