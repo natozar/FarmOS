@@ -1,5 +1,20 @@
 # AgrUAI — Inteligência Rural por Satélite
 
+## Stealth mode (ATIVO)
+
+O site inteiro retorna 404 customizado pra qualquer visitante anônimo. Implementado em `middleware.ts` (Vercel Routing Middleware). Intenção: preservar o produto contra bisbilhoteiros até a credora bater o martelo.
+
+**Bookmark de acesso:**
+```
+https://agruai.com/?unlock=ag-stealth-2026-credora-piloto-9k4j2x7Q
+```
+
+Visitar essa URL seta cookie HttpOnly de 30 dias (`agruai_unlock`) e redireciona pra URL limpa. Visitas seguintes passam direto até o cookie expirar.
+
+**Trocar a chave:** setar `AGRUAI_UNLOCK_KEY` na Vercel (`vercel env add AGRUAI_UNLOCK_KEY production`). Sem env var, o middleware usa a FALLBACK_KEY hardcoded acima.
+
+**Desligar o stealth:** deletar `middleware.ts`, commit, push.
+
 ## Modo de operação (GODMODE)
 
 - **Execute, não pergunte.** Quando o CEO pede algo, entrega — não para no meio pra confirmar default razoável, escolha de cultura piloto, modelo de cobrança, ou qualquer decisão técnica que dê pra reverter depois. Documente o default escolhido no commit/resposta final.
